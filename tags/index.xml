@@ -6,10 +6,64 @@
     <description>Recent content in Tags on Peculiar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 06 Oct 2017 11:55:55 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 06 Oct 2017 17:03:58 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Awk</title>
+      <link>https://biexiang.github.io/tags/awk/</link>
+      <pubDate>Fri, 06 Oct 2017 17:03:58 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/awk/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Hack</title>
+      <link>https://biexiang.github.io/tags/hack/</link>
+      <pubDate>Fri, 06 Oct 2017 17:09:53 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/hack/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Linux</title>
+      <link>https://biexiang.github.io/tags/linux/</link>
+      <pubDate>Fri, 06 Oct 2017 17:03:58 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/linux/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Mac</title>
+      <link>https://biexiang.github.io/tags/mac/</link>
+      <pubDate>Fri, 06 Oct 2017 17:16:24 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/mac/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Mysql</title>
+      <link>https://biexiang.github.io/tags/mysql/</link>
+      <pubDate>Fri, 06 Oct 2017 16:58:52 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/mysql/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Nginx</title>
+      <link>https://biexiang.github.io/tags/nginx/</link>
+      <pubDate>Fri, 06 Oct 2017 17:21:12 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/nginx/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Php</title>
@@ -21,11 +75,47 @@
     </item>
     
     <item>
+      <title>Rsa</title>
+      <link>https://biexiang.github.io/tags/rsa/</link>
+      <pubDate>Fri, 06 Oct 2017 16:53:09 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/rsa/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Xhprof</title>
       <link>https://biexiang.github.io/tags/xhprof/</link>
       <pubDate>Fri, 06 Oct 2017 11:55:55 +0800</pubDate>
       
       <guid>https://biexiang.github.io/tags/xhprof/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>灰度发布</title>
+      <link>https://biexiang.github.io/tags/%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83/</link>
+      <pubDate>Fri, 06 Oct 2017 17:21:12 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>算法</title>
+      <link>https://biexiang.github.io/tags/%E7%AE%97%E6%B3%95/</link>
+      <pubDate>Fri, 06 Oct 2017 16:53:09 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/%E7%AE%97%E6%B3%95/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>翻墙</title>
+      <link>https://biexiang.github.io/tags/%E7%BF%BB%E5%A2%99/</link>
+      <pubDate>Fri, 06 Oct 2017 17:16:24 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/tags/%E7%BF%BB%E5%A2%99/</guid>
       <description></description>
     </item>
     

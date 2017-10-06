@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>认识RSA // Peculiar</title>
+
+        <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+        <meta property="og:title" content="认识RSA" />
+    <meta property="og:description" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://biexiang.github.io/post/rsa/" />
+    
+
+    <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
+    <link rel="shortcut icon" href="/favicon.png">
+
+    <link href="https://biexiang.github.io/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
+    <link href="https://biexiang.github.io/webfonts/source-code-pro/main.css" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="https://biexiang.github.io/css/style.css">
+
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    
+    <meta name="generator" content="Hugo 0.24.1" />
+</head>
+
+
+<body>
+<div id="container">
+    <header id="header">
+    <div id="header-outer" class="outer">
+        <div id="header-inner" class="inner">
+            <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
+            <a id="logo" class="logo-text" href="https://biexiang.github.io/">Peculiar</a>
+            <nav id="main-nav">
+                
+                <a class="main-nav-link" href="/archives">Archives</a>
+                
+                <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            <nav id="sub-nav">
+                <div id="search-form-wrap">
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+    <section id="main" class="outer">
+        <article class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        <header class="article-header">
+            <h1 class="article-title" itemprop="name">认识RSA</h1>
+        </header>
+        
+        <div class="article-meta">
+            <a href="/post/rsa/" class="article-date">
+                <time datetime='2017-10-06T16:53:09.000&#43;08:00' itemprop="datePublished">2017-10-06</time>
+            </a>
+            
+            
+            
+        </div>
+        <div class="article-entry" itemprop="articleBody">
+            <h2 id="我知道的">我知道的</h2>
+
+<p>加密算法有对称加密和非对称加密，对称加密是指算法用同一个秘钥进行信息的加密和解密，传输过程中需要传输秘钥，极易被截取，不安全。
+</p>
+
+<p>而RSA属于非对称加密，非对称加密采用两个秘钥，一个是公钥，一个是私钥。一般来说，创建公钥和私钥，将公钥和信息都传给客户端，客户端使用公钥对它所想传给服务端的信息进行加密，而这段密文只能由私钥解开，所以解释权只有服务端拥有。<br />
+而RSA算法采取的办法，是首先选取两个极大的质数(素数)，比如Q和P，计算它们的乘积 N = Q * P,并且计算欧拉函数 M = (Q-1)*(P-1)；并且随机选取一个比欧拉函数计算结果小并且与其互质的数e。(一般选取65537)   ；并且计算e对于M的模反元素d。最终(n,e)为公钥，(n,d)为私钥。</p>
+
+<p><strong>变量</strong>：<br />
+Q
+P
+N
+M
+e
+d</p>
+
+<h2 id="我不清楚的">我不清楚的</h2>
+
+<p>1、模反元素的计算：<br />
+　<br />
+        ed ≡ 1 (mod M)</p>
+
+<p>定义：模反元素是指 e的d倍 被 M除余1<br />
+已知e和M，求d<br />
+等价于：</p>
+
+<pre><code>    ex + My = 1         
+</code></pre>
+
+<p>使用   扩展欧几里得算法  求出x，也就是d。</p>
+
+<blockquote>
+<p>欧几里得算法 也就是 辗转相除法，表示为Gcd(a,b) = Gcd(b,a-b)；<br />
+扩展欧几里得算法是利用结论，如果a,b存在最大公约数为Gcd(a,b)，则存在 Gcd(a,b) = ax + by；<br />
+而在这里，e是比M小并且与M互质的数，所以Gcd(M,e) = 1 = ex + My；</p>
+</blockquote>
+
+<pre><code>    //a &gt; b             
+
+    //当 b ==0 时         
+    gcd(a,b) = a；x = 1,y = 0；           
+
+    //当 b != 0 时            
+    gcd(a,b) = ax1 + by1            
+    gcd(b,a%b) = bx2 + (a%b)y2          
+    //gcd的结果相同，这里互质都是1          
+    ax1 + by1  = bx2 + (a%b)y2          
+    ax1 + by1  = bx2 + (a-(a/b)*b)y2            
+    ax1 + by1  = ay2 + bx2 - (a/b)*b*y2         
+    // =&gt;
+    x1 = y2         
+    y1 = x2 - (a/b)*y2          
+</code></pre>
+
+<p>因为x1、和y1都依赖于x2和y2，可以递归求解出x1、和y1。</p>
+
+<pre><code>    //Golang实现
+    func Extend_gcd(a, b int) (int, int) {
+        if b == 0 {
+            return 1, 0
+        } else {
+            x, y := Extend_gcd(b, a%b)
+            x, y = y, x-(a/b)*y
+            return x, y
+        }
+    }
+</code></pre>
+
+<p>所以就算别人获取了公钥，知道了n和e，私钥由n和d组成，获取d需要M，而获取M需要q和p，也就是需要将质数乘积n拆分成两个乘数。大整数的因数分解的难度成就了RSA的安全。<br />
+所以如果你解决这个数学问题，那么广泛应用的RSA算法将不再安全。Ref: Shor算法</p>
+
+<p>2、传输过程：<br />
+m是密文的Int型(字符串可以转Asc或者unicode)<br />
+<strong>加密数据:</strong><br />
+m^e ≡ c (mod n)     =&gt;   GET c</p>
+
+<p><strong>解密数据:</strong><br />
+c^d = m (mod n)     =&gt;   GET m</p>
+
+<p>上述式，可由解密带入加密式中证明，但是如果大段文本都需要一个一个字符经过这种运算，计算量会有蛮大。</p>
+        </div>
+
+        
+        
+        <div class="article-toc" >
+            <h3>Contents</h3>
+            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#我知道的">我知道的</a></li>
+<li><a href="#我不清楚的">我不清楚的</a></li>
+</ul></li>
+</ul>
+</nav>
+        </div>
+        
+        
+
+        
+
+
+        
+        <footer class="article-footer">
+            <ul class="article-tag-list">
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%AE%97%E6%B3%95">算法
+                    </a>
+                </li>
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/rsa">rsa
+                    </a>
+                </li>
+                
+            </ul>
+        </footer>
+        
+    </div>
+    <nav id="article-nav">
+    
+    <a href="/post/deadlock/" id="article-nav-newer" class="article-nav-link-wrap">
+        <div class="article-nav-title"><span>&lt;</span>&nbsp;
+            Mysql死锁问题分析
+        </div>
+    </a>
+    
+    
+    <a href="/post/xhprof/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">关于PHP的性能分析&nbsp;<span>&gt;</span></div>
+    </a>
+    
+</nav>
+</article>
+
+        
+    </section>
+    <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2017 Peculiar&nbsp;
+            Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
+        </div>
+    </div>
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/tomorrow-night.min.css" integrity="sha256-2wL88NKUqvJi/ExflDzkzUumjUM73mcK2gBvBBeLvTk=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js" integrity="sha256-KbfTjB0WZ8vvXngdpJGY3Yp3xKk+tttbqClO11anCIU=" crossorigin="anonymous"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <script>
+        document.getElementById('main-nav-toggle').addEventListener('click', function () {
+            var header = document.getElementById('header');
+            if (header.classList.contains('mobile-on')) {
+                header.classList.remove('mobile-on');
+            } else {
+                header.classList.add('mobile-on');
+            }
+        });
+    </script>
+</footer>
+</div>
+</body>
+</html>

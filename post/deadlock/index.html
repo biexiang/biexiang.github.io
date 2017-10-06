@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>关于PHP的性能分析 // Peculiar</title>
+    <title>Mysql死锁问题分析 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="关于PHP的性能分析" />
+        <meta property="og:title" content="Mysql死锁问题分析" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/xhprof/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/deadlock/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,37 +56,89 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">关于PHP的性能分析</h1>
+            <h1 class="article-title" itemprop="name">Mysql死锁问题分析</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/xhprof/" class="article-date">
-                <time datetime='2017-10-06T11:55:55.000&#43;08:00' itemprop="datePublished">2017-10-06</time>
+            <a href="/post/deadlock/" class="article-date">
+                <time datetime='2017-10-06T16:58:52.000&#43;08:00' itemprop="datePublished">2017-10-06</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>如果项目上线一段时间，有时间进行性能优化，可以在灰度版本加入Xhprof。<br />
-</p>
+            <p>面试被问到，学习记录。</p>
 
-<p>支持PHP7的版本：<a href="https://github.com/longxinH/xhprof.git">https://github.com/longxinH/xhprof.git</a><br />
-克隆下来，extension下编译so扩展加载到php。并且在PHP.INI配置输出的目录。<br />
-重启PHP-FPM后，有一个示例文件，example文件夹下。<br />
-在检测代码前后有两个XHProf的函数。会获取到data。<br />
-仓库还有xhprof_html，可以以表格或者图形查看性能分析图，和从头到尾的加载函数。<br />
-<img src="/img/xhprof.jpg" alt="xhprof.jpg" /></p>
+<p></p>
 
-<p>如果要对接到自己的项目，比如laravel或者tp或者ci，这些框架都有钩子或者中间件，可以在初始化前和最终结束的点上加上xhprof的统计代码，加载xhprof_lib，输出统计数据到PHP.INI里填写的输出路径上。<br />
-xhprof_html对于分析加载框架的性能分析很有作用，可以看到函数执行时间，次数，找出优化的地方。</p>
+<h3 id="产生原因">产生原因</h3>
 
-<p>还有更加详细的GUI工具，xhgui，将内容存储到MongoDB中，更多的数据分析。找系统问题更加的方便。</p>
+<p>事务之间等待超时，或者死循环。</p>
 
-<p>测试了下，CI自动加载Database和Mail耗时为12ms，而不加载这两个耗时仅为3ms，这是框架的加载速度。路由仅仅是一个Hello World的基本路由，在性能分析图中，可以看到加载耗时的每个部分花在哪些函数的加载上，可以精准的定位。</p>
+<h3 id="如何检测">如何检测</h3>
+
+<p>设定超时时间，如果事务A超时，即回滚事务，事务B执行。<br />
+或者<br />
+通过Wait-for-gragh算法主动检测。</p>
+
+<h3 id="锁">锁</h3>
+
+<p><strong>共享锁(S):</strong> 读锁，被加共享锁对象不能再被加X锁，可读，不可修改。</p>
+
+<p><strong>排他锁(X):</strong>     写锁，被加X锁对象不能再被加任何锁，独占，其他事务不可读取和修改，直到释放。</p>
+
+<h3 id="锁和索引">锁和索引</h3>
+
+<p>因为Myisam不支持事务，也就不在讨论范围，假设cjy表为Innodb引擎，有a,b,c三列。</p>
+
+<p>a primary key<br />
+b index<br />
+c</p>
+
+<p>delete from cjy where a = 1; 直接根据主键，索引到=1的叶节点，将整条数据加行锁。<br />
+delete from cjy where b = 1; 首先根据b列的索引，找到叶节点锁住，再根据叶节点的主键值，找主键表，索引到叶节点，对行数据进行锁定。<br />
+delete from cjy where c = 1; 因为c没有索引，所以会走全表查询，表上的所有记录都会加上X锁。</p>
+
+<h3 id="锁和隔离级别">锁和隔离级别</h3>
+
+<p>脏读：可以读取未提交的数据。RC 要求解决脏读；</p>
+
+<p>不可重复读：同一个事务中多次执行同一个select, 读取到的数据发生了改变(被其它事务update并且提交)；</p>
+
+<p>可重复读：同一个事务中多次执行同一个select, 读取到的数据没有发生改变(一般使用MVCC实现)；RR各级级别要求达到可重复读的标准；</p>
+
+<p>幻读：同一个事务中多次执行同一个select, 读取到的数据行发生改变。也就是行数减少或者增加了(被其它事务delete/insert并且提交)。SERIALIZABLE要求解决幻读问题；</p>
+
+<p>READ UNCOMMITTED：可以读取未提交的数据，未提交的数据称为脏数据，所以又称脏读。此时：幻读，不可重复读和脏读均允许；</p>
+
+<p>READ COMMITTED：只能读取已经提交的数据；此时：允许幻读和不可重复读，但不允许脏读，所以RC隔离级别要求解决脏读；</p>
+
+<p>REPEATABLE READ：同一个事务中多次执行同一个select,读取到的数据没有发生改变；此时：允许幻读，但不允许不可重复读和脏读，所以RR隔离级别要求解决不可重复读；</p>
+
+<p>SERIALIZABLE: 幻读，不可重复读和脏读都不允许，所以serializable要求解决幻读；</p>
         </div>
 
         
+        
+        <div class="article-toc" >
+            <h3>Contents</h3>
+            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#产生原因">产生原因</a></li>
+<li><a href="#如何检测">如何检测</a></li>
+<li><a href="#锁">锁</a></li>
+<li><a href="#锁和索引">锁和索引</a></li>
+<li><a href="#锁和隔离级别">锁和隔离级别</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+        </div>
         
         
 
@@ -98,12 +150,7 @@ xhprof_html对于分析加载框架的性能分析很有作用，可以看到函
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/xhprof">xhprof
-                    </a>
-                </li>
-                
-                <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/php">php
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/mysql">Mysql
                     </a>
                 </li>
                 
@@ -113,15 +160,15 @@ xhprof_html对于分析加载框架的性能分析很有作用，可以看到函
     </div>
     <nav id="article-nav">
     
-    <a href="/post/rsa/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/post/awk/" id="article-nav-newer" class="article-nav-link-wrap">
         <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            认识RSA
+            Awk记录
         </div>
     </a>
     
     
-    <a href="/about/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">About&nbsp;<span>&gt;</span></div>
+    <a href="/post/rsa/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">认识RSA&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>

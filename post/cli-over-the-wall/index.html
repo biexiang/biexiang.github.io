@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>关于PHP的性能分析 // Peculiar</title>
+    <title>Mac命令行Socks5代理翻墙 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="关于PHP的性能分析" />
+        <meta property="og:title" content="Mac命令行Socks5代理翻墙" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/xhprof/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/cli-over-the-wall/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,34 +56,58 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">关于PHP的性能分析</h1>
+            <h1 class="article-title" itemprop="name">Mac命令行Socks5代理翻墙</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/xhprof/" class="article-date">
-                <time datetime='2017-10-06T11:55:55.000&#43;08:00' itemprop="datePublished">2017-10-06</time>
+            <a href="/post/cli-over-the-wall/" class="article-date">
+                <time datetime='2017-10-06T17:16:24.000&#43;08:00' itemprop="datePublished">2017-10-06</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>如果项目上线一段时间，有时间进行性能优化，可以在灰度版本加入Xhprof。<br />
-</p>
+            <p>本来是想brew install wine的，但是实在是太慢了，也配置了brew源，这个源只是加载的地址文件，下载地址还是和原来的一样，所以下载速度还是很慢。</p>
 
-<p>支持PHP7的版本：<a href="https://github.com/longxinH/xhprof.git">https://github.com/longxinH/xhprof.git</a><br />
-克隆下来，extension下编译so扩展加载到php。并且在PHP.INI配置输出的目录。<br />
-重启PHP-FPM后，有一个示例文件，example文件夹下。<br />
-在检测代码前后有两个XHProf的函数。会获取到data。<br />
-仓库还有xhprof_html，可以以表格或者图形查看性能分析图，和从头到尾的加载函数。<br />
-<img src="/img/xhprof.jpg" alt="xhprof.jpg" /></p>
+<p></p>
 
-<p>如果要对接到自己的项目，比如laravel或者tp或者ci，这些框架都有钩子或者中间件，可以在初始化前和最终结束的点上加上xhprof的统计代码，加载xhprof_lib，输出统计数据到PHP.INI里填写的输出路径上。<br />
-xhprof_html对于分析加载框架的性能分析很有作用，可以看到函数执行时间，次数，找出优化的地方。</p>
+<p>开启ss全局代理，但是命令行并没有受用。<br />
+查了下，ss有监听本地socks://127.0.0.1:8086，可以查看ss的偏好设置看看本地监听哪个端口。</p>
 
-<p>还有更加详细的GUI工具，xhgui，将内容存储到MongoDB中，更多的数据分析。找系统问题更加的方便。</p>
+<pre><code>    brew install privoxy 
+</code></pre>
 
-<p>测试了下，CI自动加载Database和Mail耗时为12ms，而不加载这两个耗时仅为3ms，这是框架的加载速度。路由仅仅是一个Hello World的基本路由，在性能分析图中，可以看到加载耗时的每个部分花在哪些函数的加载上，可以精准的定位。</p>
+<p>安装命令行代理软件，找到config文件，添加监听和转发。</p>
+
+<pre><code>    listen-address 0.0.0.0:8118
+    #forward           /               127.0.0.1:1080 .
+    #forward-socks4    /               127.0.0.1:1080 .
+    #forward-socks4a   /               127.0.0.1:1080 .
+    forward-socks5    /                127.0.0.1:1086 .
+    #forward-socks5t   /               127.0.0.1:1080 .
+
+    sudo /usr/local/sbin/privoxy /usr/local/etc/privoxy/config
+</code></pre>
+
+<p>并且设置环境变量</p>
+
+<pre><code>    function proxy_off(){
+        unset http_proxy
+        echo -e &quot;已关闭代理&quot;
+    }
+
+    function proxy_on() {
+        export http_proxy=&quot;http://127.0.0.1:8118&quot;
+        echo -e &quot;已开启代理&quot;
+    }
+</code></pre>
+
+<p>服务开启后测试：</p>
+
+<pre><code>    curl ip.cn
+    当前 IP：172.104.92.103 来自：美国 Linode
+</code></pre>
         </div>
 
         
@@ -98,12 +122,12 @@ xhprof_html对于分析加载框架的性能分析很有作用，可以看到函
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/xhprof">xhprof
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/mac">Mac
                     </a>
                 </li>
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/php">php
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%BF%BB%E5%A2%99">翻墙
                     </a>
                 </li>
                 
@@ -113,15 +137,15 @@ xhprof_html对于分析加载框架的性能分析很有作用，可以看到函
     </div>
     <nav id="article-nav">
     
-    <a href="/post/rsa/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/post/grey-pub/" id="article-nav-newer" class="article-nav-link-wrap">
         <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            认识RSA
+            Nginx 配置灰度发布
         </div>
     </a>
     
     
-    <a href="/about/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">About&nbsp;<span>&gt;</span></div>
+    <a href="/post/penetration/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Penetration&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
