@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Peculiar</title>
-    <link>http://biexiang.github.io/tags/</link>
+    <link>https://raw.githubusercontent.com/biexiang/biexiang.github.io/master/tags/</link>
     <description>Recent content in Tags on Peculiar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 06 Oct 2017 11:55:55 +0800</lastBuildDate>
     
-	<atom:link href="http://biexiang.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://raw.githubusercontent.com/biexiang/biexiang.github.io/master/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Php</title>
-      <link>http://biexiang.github.io/tags/php/</link>
+      <link>https://raw.githubusercontent.com/biexiang/biexiang.github.io/master/tags/php/</link>
       <pubDate>Fri, 06 Oct 2017 11:55:55 +0800</pubDate>
       
-      <guid>http://biexiang.github.io/tags/php/</guid>
+      <guid>https://raw.githubusercontent.com/biexiang/biexiang.github.io/master/tags/php/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Xhprof</title>
-      <link>http://biexiang.github.io/tags/xhprof/</link>
+      <link>https://raw.githubusercontent.com/biexiang/biexiang.github.io/master/tags/xhprof/</link>
       <pubDate>Fri, 06 Oct 2017 11:55:55 +0800</pubDate>
       
-      <guid>http://biexiang.github.io/tags/xhprof/</guid>
+      <guid>https://raw.githubusercontent.com/biexiang/biexiang.github.io/master/tags/xhprof/</guid>
       <description></description>
     </item>
     
