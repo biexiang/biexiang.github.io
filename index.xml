@@ -6,9 +6,33 @@
     <description>Recent content on Peculiar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <lastBuildDate>Fri, 06 Oct 2017 11:55:55 +0800</lastBuildDate>
     
 	<atom:link href="http://biexiang.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>关于PHP的性能分析</title>
+      <link>http://biexiang.github.io/post/xhprof/</link>
+      <pubDate>Fri, 06 Oct 2017 11:55:55 +0800</pubDate>
+      
+      <guid>http://biexiang.github.io/post/xhprof/</guid>
+      <description>&lt;p&gt;如果项目上线一段时间，有时间进行性能优化，可以在灰度版本加入Xhprof。&lt;br /&gt;
+&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>http://biexiang.github.io/about/</link>
+      <pubDate>Fri, 06 Oct 2017 11:53:25 +0800</pubDate>
+      
+      <guid>http://biexiang.github.io/about/</guid>
+      <description>&lt;p&gt;Mac党、使用Tab键、会剪辑视频做特效的后端程序员！&lt;br /&gt;
+开发和维护过很多网站，熟悉开发、部署、灾备处理！&lt;br /&gt;
+后端是一个纵观全局的部分，夹在数据库运维和前端、客户端中间，需要做很多底层建设和设计，是一个最好的部分！&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
     
   </channel>
 </rss>

@@ -6,9 +6,28 @@
     <description>Recent content in Tags on Peculiar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <lastBuildDate>Fri, 06 Oct 2017 11:55:55 +0800</lastBuildDate>
     
 	<atom:link href="http://biexiang.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Php</title>
+      <link>http://biexiang.github.io/tags/php/</link>
+      <pubDate>Fri, 06 Oct 2017 11:55:55 +0800</pubDate>
+      
+      <guid>http://biexiang.github.io/tags/php/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Xhprof</title>
+      <link>http://biexiang.github.io/tags/xhprof/</link>
+      <pubDate>Fri, 06 Oct 2017 11:55:55 +0800</pubDate>
+      
+      <guid>http://biexiang.github.io/tags/xhprof/</guid>
+      <description></description>
+    </item>
     
   </channel>
 </rss>

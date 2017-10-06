@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Xhprof on Peculiar</title>
+    <link>http://biexiang.github.io/tags/xhprof/</link>
+    <description>Recent content in Xhprof on Peculiar</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 06 Oct 2017 11:55:55 +0800</lastBuildDate>
+    
+	<atom:link href="http://biexiang.github.io/tags/xhprof/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>关于PHP的性能分析</title>
+      <link>http://biexiang.github.io/post/xhprof/</link>
+      <pubDate>Fri, 06 Oct 2017 11:55:55 +0800</pubDate>
+      
+      <guid>http://biexiang.github.io/post/xhprof/</guid>
+      <description>&lt;p&gt;如果项目上线一段时间，有时间进行性能优化，可以在灰度版本加入Xhprof。&lt;br /&gt;
+&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
