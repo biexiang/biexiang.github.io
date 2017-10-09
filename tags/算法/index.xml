@@ -6,10 +6,21 @@
     <description>Recent content in 算法 on Peculiar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 06 Oct 2017 16:53:09 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 07 Oct 2017 10:11:57 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/tags/%E7%AE%97%E6%B3%95/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Huffman</title>
+      <link>https://biexiang.github.io/post/huffman/</link>
+      <pubDate>Sat, 07 Oct 2017 10:11:57 +0800</pubDate>
+      
+      <guid>https://biexiang.github.io/post/huffman/</guid>
+      <description>&lt;p&gt;哈夫曼算法常用于压缩。&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>认识RSA</title>
