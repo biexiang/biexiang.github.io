@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>校招 // Peculiar</title>
+
+        <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+        <meta property="og:title" content="校招" />
+    <meta property="og:description" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://biexiang.github.io/post/xiaozhao/" />
+    
+
+    <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
+    <link rel="shortcut icon" href="/favicon.png">
+
+    <link href="https://biexiang.github.io/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
+    <link href="https://biexiang.github.io/webfonts/source-code-pro/main.css" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="https://biexiang.github.io/css/style.css">
+
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    
+    <meta name="generator" content="Hugo 0.24.1" />
+</head>
+
+
+<body>
+<div id="container">
+    <header id="header">
+    <div id="header-outer" class="outer">
+        <div id="header-inner" class="inner">
+            <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
+            <a id="logo" class="logo-text" href="https://biexiang.github.io/">Peculiar</a>
+            <nav id="main-nav">
+                
+                <a class="main-nav-link" href="/archives">Archives</a>
+                
+                <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            <nav id="sub-nav">
+                <div id="search-form-wrap">
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+    <section id="main" class="outer">
+        <article class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        <header class="article-header">
+            <h1 class="article-title" itemprop="name">校招</h1>
+        </header>
+        
+        <div class="article-meta">
+            <a href="/post/xiaozhao/" class="article-date">
+                <time datetime='2017-10-10T17:26:59.000&#43;08:00' itemprop="datePublished">2017-10-10</time>
+            </a>
+            
+            
+            
+        </div>
+        <div class="article-entry" itemprop="articleBody">
+            <p>准备基础知识</p>
+
+<p></p>
+
+<hr />
+
+<h2 id="xargs命令">xargs命令</h2>
+
+<p>如下面例子，xargs将管道前的内容作为后面命令的参数，如果有命令的话，比如cat &ndash;helps。</p>
+
+<pre><code>    echo '--help' | xargs cat
+</code></pre>
+
+<p>1、将输入内容转换为单行空格隔开输入</p>
+
+<pre><code>    cat test.txt | xargs 
+    a b c d e f g h i j k l m n o p q r s t u v w x y z
+</code></pre>
+
+<p>2、定义分界符</p>
+
+<pre><code>    echo &quot;nameXnameXnameXname&quot; | xargs -dX 
+    name name name name
+</code></pre>
+
+<p>3、删除所有图片</p>
+
+<pre><code>    find -name '*.jpg' |xargs rm -r
+</code></pre>
+
+<p>4、复制内容</p>
+
+<pre><code>    find -name '*.xml' |xargs -i cp {} /home/chaowei/data/jinin/label/
+</code></pre>
+
+<h2 id="redis中进行唯一计数">Redis中进行唯一计数</h2>
+
+<ul>
+<li><p>基于Set数据结构，不同于list，它自带排重</p>
+
+<pre><code>SADD KEY 1 2 3
+SCARD KEY
+</code></pre></li>
+
+<li><p>基于bitmap结构，位index存储序号，1代表存在，0代表不存在，1的个数代表基数数量，1MB=100w字节=800w bit，所以1MB可以存储800w个基数访问记录。如果需要统计日活登录用户，只需要建立一个BitMap的键，统计Android登录也可以建立一个BitMap等应用。</p>
+
+<pre><code>SETBIT KEY 1024 1   //设置某个键上某个偏移量上的值为0/1
+SETBIT KEY 64 1
+GETBIT KEY 64       //获取某个键上某个偏移量上的值
+BITCOUNT KEY        //获取某个键1的个数         
+</code></pre></li>
+</ul>
+
+<p>其实就是BitMap的实现，很节约资源，但是如何计算1的个数。<br />
+1、循环右移直到值为0，如果右移后最后一位为1则余1，统计之。时间复杂度依赖于BitMap最高位1的位置。<br />
+2、n&amp;(n-1)这样，主动产生1，这样就减小了无效的操作，时间复杂度为1的个数。<br />
+3、提前建立一个索引数字对应1的个数的Map，0(1)的操作效率，但是需要提前预判好，建立一个对照表。{0,1,1&hellip;8}(8位的对照表，十进制范围0-256)。<br />
+4、log2效率，二分法。</p>
+
+<ul>
+<li><p>基于HyperLoglog，这是Redis后来新增的数据结构，有误差，但是数据量大的话，可以忽略</p>
+
+<pre><code>PFADD KEY 1 2 3
+PFCOUNT KEY
+</code></pre></li>
+</ul>
+
+<h2 id="redis的各种淘汰算法">Redis的各种淘汰算法</h2>
+
+<p>Redis内存超出，配置文件中会设置Redis实例的最大内存容量，如果超出，以下处理：<br />
+1、LRU删除设置了过期时间的键。<br />
+2、LRU删除键。<br />
+3、随机删除设置了过期时间的键。<br />
+4、随机删除键。<br />
+5、删除过期时间最近的键。<br />
+LRU是后来添加到数据结构中，一共24bit，16bit记录访问时间，8bit记录访问逻辑次数。</p>
+
+<h2 id="判断链表是否有环">判断链表是否有环</h2>
+
+<p>一个快指针，一个慢指针，一起走，如果相遇则有环，如果不相遇即无环。</p>
+
+<h2 id="求树的高度">求树的高度</h2>
+
+<p>树的高度，递归求解。</p>
+
+<pre><code>    //假设定义了树结构和Create方法
+    func getHigh(Tree *Node) int {
+        if Tree == nil {
+            return 0;
+        }
+        left := getHigh(Tree.left)
+        right := getHigh(Tree.right)
+        if left &gt; right {
+            return left + 1;
+        }else{
+            return right + 1;
+        }
+    }
+</code></pre>
+
+<h2 id="拥塞控制">拥塞控制</h2>
+
+<blockquote>
+<p>慢开始、拥塞避免、快重传、快回复</p>
+</blockquote>
+
+<p><img src="http://pic002.cnblogs.com/images/2010/125788/2010101120591634.jpg" alt="http://pic002.cnblogs.com/images/2010/125788/2010101120591634.jpg" /></p>
+
+<ul>
+<li><p>慢开始：cwnd(congestion window-拥塞窗口)=1开始，主键翻倍增长，1、2、4、8、16增长，但是增长过程中受限于ssthresh门限值。<br />
+cwnd &lt; ssthresh =&gt; 继续慢开始<br />
+cwnd &gt; ssthresh =&gt; 拥塞避免算法<br />
+cwnd = ssthresh =&gt; 两者都ok</p></li>
+
+<li><p>拥塞避免算法：一旦cwnd到大ssthresh值，采取拥塞避免，增长方式改为+1线性增长。一旦出现网络拥塞(收不到ACK确认)，cwnd窗口设置为1，并且ssthresh/=2，并且执行慢开始。</p></li>
+</ul>
+
+<h2 id="apache采用php-mod模式运行">Apache采用php_mod模式运行</h2>
+
+<ul>
+<li>prefork模式 一个进程对应一个请求 线程安全<br /></li>
+<li>worker模式      多进程多线程 提高性能但是稳定性下降<br /></li>
+<li>event模式(2.4) 还是比Nginx性能差点<br /></li>
+</ul>
+
+<p>Nginx，php作为fastcgi独立运行，php挂掉了，不影响Nginx的运行，可以ip+端口运行，同机的话还可以作为socket运行。</p>
+
+<h2 id="使用upstream进行负载均衡的算法">使用Upstream进行负载均衡的算法</h2>
+
+<ul>
+<li>轮询，根据请求的时间顺序分配到应用服务器。<br /></li>
+<li>Weight，根据权重，将请求尽可能的分配到性能好的应用服务器上，适用于应用服务器配置不一样。</li>
+<li>IP_HASH，可以对IP的Hash值分配应用服务器，对于某个地区的使用某一台服务器，这样就避免了多台服务器要同步session的问题。<br /></li>
+<li>Url_HASH，对于某一类路由采用某一台服务器，增加了缓存的命中率，提升性能可以。</li>
+<li>fair，根据页面大小和加载时长分配服务器。<br /></li>
+</ul>
+
+<h2 id="php生命周期">PHP生命周期</h2>
+
+<p>PHP作为一门胶水语言，首先站在一个扩展的角度来看：</p>
+
+<blockquote>
+<p>Apache中作为模块加载进来</p>
+</blockquote>
+
+<ul>
+<li>Apache启动时，PHP加载进来执行MINIT(Module Init)，遍历php.ini中加载的扩展，对它们进行初始化，执行扩展的PHP_MINIT_FUNCTION()函数。<br /></li>
+<li>路由请求进来前，执行RINIT(Request Init)，PHP将扩展需要的一些变量准备好，再次遍历扩展，执行它们的PHP_RINIT_FUNCTION()函数。</li>
+<li>Excute php file。</li>
+<li>请求结束后，清理现场，RSHUTDOWN(Request shutdown)，PHP_RSHUTDOWN_FUNCTION函数。</li>
+<li>当模块被Apache不再加载时，执行PHP_MSHUTDOWN_FUNCTION()函数。<br /></li>
+</ul>
+
+<p>单进程的话，就是这个流程，而Apache的prefork模式下，多进程，每个进程都是这样的流程，进程间互不影响，Apache启动时创建CPU数量的进程(假设)，这些进程MINIT，开始循环进行RINIT，EXCUTE，RSHUTDOWN，直到Apache停止MSHUTDOWN。<br />
+至于Apache的worker多进程多线程模式，线程在进程下可以共用一些变量资源。减少了一些重复的操作。</p>
+
+<h2 id="缺页计算">缺页计算</h2>
+
+<p>如果CPU通过MMU获取地址，寻址时发现数据不存在，发生缺页中断，导致需要去磁盘中进行IO操作取出数据重新加载到内存。而内存的地址空间是固定的，需要动态的发生数据的变化，为了尽可能的减少缺页的次数。就有了这些算法。<br />
+* FIFO，使用队列，先进先出，缺页时替换掉队首的。<br />
+* LRU(Least Recetly use)，最近最少使用也就是替换掉长时间不使用的，其实就是替换掉前几次没有使用的元素，将其剔除内存，这个是向前看。<br />
+* OPT(Optimal Replacement)，最优替换，和LRU不同，它往后看，目前内存中的元素哪个是最靠后将被使用的被剔除。</p>
+        </div>
+
+        
+        
+        <div class="article-toc" >
+            <h3>Contents</h3>
+            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#xargs命令">xargs命令</a></li>
+<li><a href="#redis中进行唯一计数">Redis中进行唯一计数</a></li>
+<li><a href="#redis的各种淘汰算法">Redis的各种淘汰算法</a></li>
+<li><a href="#判断链表是否有环">判断链表是否有环</a></li>
+<li><a href="#求树的高度">求树的高度</a></li>
+<li><a href="#拥塞控制">拥塞控制</a></li>
+<li><a href="#apache采用php-mod模式运行">Apache采用php_mod模式运行</a></li>
+<li><a href="#使用upstream进行负载均衡的算法">使用Upstream进行负载均衡的算法</a></li>
+<li><a href="#php生命周期">PHP生命周期</a></li>
+<li><a href="#缺页计算">缺页计算</a></li>
+</ul></li>
+</ul>
+</nav>
+        </div>
+        
+        
+
+        
+
+
+        
+    </div>
+    <nav id="article-nav">
+    
+    
+    <a href="/post/huffman/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Huffman&nbsp;<span>&gt;</span></div>
+    </a>
+    
+</nav>
+</article>
+
+        
+    </section>
+    <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2017 Peculiar&nbsp;
+            Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
+        </div>
+    </div>
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/tomorrow-night.min.css" integrity="sha256-2wL88NKUqvJi/ExflDzkzUumjUM73mcK2gBvBBeLvTk=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js" integrity="sha256-KbfTjB0WZ8vvXngdpJGY3Yp3xKk+tttbqClO11anCIU=" crossorigin="anonymous"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <script>
+        document.getElementById('main-nav-toggle').addEventListener('click', function () {
+            var header = document.getElementById('header');
+            if (header.classList.contains('mobile-on')) {
+                header.classList.remove('mobile-on');
+            } else {
+                header.classList.add('mobile-on');
+            }
+        });
+    </script>
+</footer>
+</div>
+</body>
+</html>
