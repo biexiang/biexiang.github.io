@@ -74,6 +74,130 @@
 
 <hr />
 
+<h2 id="http代理实现">HTTP代理实现</h2>
+
+<p>为了方便测试，浏览器系统级别的配置代理麻烦，可以使用curl命令指定代理进行测试。</p>
+
+<pre><code>    # 指定http代理IP和端口
+    curl -x 113.185.19.192:80 http://aiezu.com/test.php
+    curl --proxy 113.185.19.192:80 http://aiezu.com/test.php
+
+    #指定为http代理
+    curl -x http_proxy://113.185.19.192:80 http://aiezu.com/test.php
+
+    #指定为https代理
+    curl -x HTTPS_PROXY://113.185.19.192:80 http://aiezu.com/test.php
+
+    #指定代理用户名和密码，basic认证方式
+    curl -x aiezu:123456@113.185.19.192:80 http://aiezu.com/test.php
+    curl -x 113.185.19.192:80 -U aiezu:123456 http://aiezu.com/test.php
+    curl -x 113.185.19.192:80 --proxy-user aiezu:123456 http://aiezu.com/test.php
+</code></pre>
+
+<p>Golang简单实现：</p>
+
+<ul>
+<li><p>监听端口请求</p>
+
+<pre><code>fd, err := net.Listen(&quot;tcp&quot;, &quot;:2048&quot;)
+if err != nil {
+    exit(err)
+}
+</code></pre></li>
+
+<li><p>分析请求头信息，得出url，路径和端口，拼接原始请求，请求并且转发结果返回</p>
+
+<pre><code>func handleReq(client net.Conn) {
+    if client == nil {
+        return
+    }
+    defer client.Close()
+
+    var pack [1024]byte
+    n, err := client.Read(pack[:])
+    if err != nil {
+        exit(err)
+    }
+
+    var method, host string
+    fmt.Sscanf(string(pack[:bytes.IndexByte(pack[:], '\n')]), &quot;%s%s&quot;, &amp;method, &amp;host)
+
+    pathinfo, err := url.Parse(host)
+    if err != nil {
+        exit(err)
+    }
+
+    //开始转发结果
+    //TODO host+端口号
+    var dialUrl string
+    if pathinfo.Opaque == &quot;443&quot; {
+        dialUrl = pathinfo.Scheme + &quot;:443&quot;
+    } else {
+        if strings.Index(pathinfo.Host, &quot;:&quot;) == -1 {
+            dialUrl = pathinfo.Host + &quot;:80&quot;
+        } else {
+            dialUrl = pathinfo.Host
+        }
+    }
+
+    //fmt.Println(dialUrl)
+    resp, err := net.Dial(&quot;tcp&quot;, dialUrl)
+    if err != nil {
+        exit(err)
+    }
+
+    //先TCP层拨号 再完成HTTP层协议的内容，握手，再转发原始Header请求
+    if method == &quot;CONNECT&quot; {
+        fmt.Println(string(pack[:]))
+        fmt.Fprint(client, &quot;HTTP/1.1 200 Connection established\r\n\r\n&quot;)
+    } else {
+        resp.Write(pack[:n])
+    }
+
+    //Todo
+    go io.Copy(resp, client)
+    io.Copy(client, resp)
+}
+</code></pre></li>
+</ul>
+
+<p>问题记录：</p>
+
+<ul>
+<li>[]byte to string<br />
+array to slice b[:]<br /></li>
+</ul>
+
+<p>总结：</p>
+
+<ul>
+<li>代理可以转发流量<br /></li>
+<li>代理可以减少请求，缓存数据<br /></li>
+<li>代理可以过滤不良请求<br /></li>
+</ul>
+
+<h2 id="行级锁-间隙锁">行级锁、间隙锁</h2>
+
+<p>Myisam，无事务，表级锁。<br />
+Innodb，事务型，行级锁(索引查询情况下)。<br />
+set autocommmit = 0<br />
+begin/rollback/commit</p>
+
+<p>事务A加锁，事务B如果遇到A加锁的行，就会报错。</p>
+
+<pre><code>    select ... for update //加x锁
+</code></pre>
+
+<ul>
+<li>WHERE条件使用主键，SELECT &hellip; FOR UPDATE为行级锁；</li>
+<li>WHERE条件使用唯一索引，SELECT &hellip; FOR UPDATE为行级锁；</li>
+<li>WHERE条件使用普通索引，SELECT &hellip; FOR UPDATE为行级锁；</li>
+<li>WHERE条件使用联合索引的前缀索引，SELECT &hellip; FOR UPDATE为行级锁；</li>
+<li>WHERE条件不使用索引，SELECT &hellip; FOR UPDATE为表级锁；</li>
+</ul>
+
+<p>间隙锁的作用是减少幻读问题，将一个区间内的行锁住。</p>
+
 <h2 id="xargs命令">xargs命令</h2>
 
 <p>如下面例子，xargs将管道前的内容作为后面命令的参数，如果有命令的话，比如cat &ndash;helps。</p>
@@ -240,6 +364,8 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
 <ul>
 <li>
 <ul>
+<li><a href="#http代理实现">HTTP代理实现</a></li>
+<li><a href="#行级锁-间隙锁">行级锁、间隙锁</a></li>
 <li><a href="#xargs命令">xargs命令</a></li>
 <li><a href="#redis中进行唯一计数">Redis中进行唯一计数</a></li>
 <li><a href="#redis的各种淘汰算法">Redis的各种淘汰算法</a></li>
