@@ -6,6 +6,8 @@
     <description>Recent content in Linux on Peculiar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <managingEditor>1547013373@qq.com (Poly)</managingEditor>
+    <webMaster>1547013373@qq.com (Poly)</webMaster>
     <lastBuildDate>Fri, 06 Oct 2017 17:03:58 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml" />
@@ -15,7 +17,7 @@
       <title>Awk记录</title>
       <link>https://biexiang.github.io/post/awk/</link>
       <pubDate>Fri, 06 Oct 2017 17:03:58 +0800</pubDate>
-      
+      <author>1547013373@qq.com (Poly)</author>
       <guid>https://biexiang.github.io/post/awk/</guid>
       <description>&lt;p&gt;分析Access_log 获取 性能瓶颈&lt;/p&gt;
 

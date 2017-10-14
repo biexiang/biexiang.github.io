@@ -6,6 +6,8 @@
     <description>Recent content in Hack on Peculiar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <managingEditor>1547013373@qq.com (Poly)</managingEditor>
+    <webMaster>1547013373@qq.com (Poly)</webMaster>
     <lastBuildDate>Fri, 06 Oct 2017 17:09:53 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/tags/hack/index.xml" rel="self" type="application/rss+xml" />
@@ -15,7 +17,7 @@
       <title>Penetration</title>
       <link>https://biexiang.github.io/post/penetration/</link>
       <pubDate>Fri, 06 Oct 2017 17:09:53 +0800</pubDate>
-      
+      <author>1547013373@qq.com (Poly)</author>
       <guid>https://biexiang.github.io/post/penetration/</guid>
       <description>&lt;p&gt;安全渗透记录，好玩的渗透记录。&lt;/p&gt;
 
