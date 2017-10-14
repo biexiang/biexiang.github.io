@@ -6,8 +6,8 @@
     <description>Recent content in Nginx on Peculiar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <managingEditor>1547013373@qq.com (Poly)</managingEditor>
-    <webMaster>1547013373@qq.com (Poly)</webMaster>
+    <managingEditor>noreply#qq.com (Poly)</managingEditor>
+    <webMaster>noreply#qq.com (Poly)</webMaster>
     <lastBuildDate>Fri, 06 Oct 2017 17:21:12 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/tags/nginx/index.xml" rel="self" type="application/rss+xml" />
@@ -17,7 +17,7 @@
       <title>Nginx 配置灰度发布</title>
       <link>https://biexiang.github.io/post/grey-pub/</link>
       <pubDate>Fri, 06 Oct 2017 17:21:12 +0800</pubDate>
-      <author>1547013373@qq.com (Poly)</author>
+      <author>noreply#qq.com (Poly)</author>
       <guid>https://biexiang.github.io/post/grey-pub/</guid>
       <description>&lt;p&gt;用户登录的时候 根据需求对某一部分的用户设置cookie=vip&lt;/p&gt;
 
