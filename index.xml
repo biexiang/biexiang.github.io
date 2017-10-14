@@ -50,10 +50,7 @@
       <pubDate>Fri, 06 Oct 2017 17:21:12 +0800</pubDate>
       <author>1547013373@qq.com (Poly)</author>
       <guid>https://biexiang.github.io/post/grey-pub/</guid>
-      <description>&lt;p&gt;用户登录的时候 根据需求对某一部分的用户设置cookie=vip&lt;br /&gt;
-Nginx接受请求的时候判断 type == 8eec1e97ac602d3228bad33b61efeaae ？&lt;br /&gt;
-是的话，转发到指定的新功能服务器。&lt;br /&gt;
-不是的话，转发到生产服务器。&lt;/p&gt;
+      <description>&lt;p&gt;用户登录的时候 根据需求对某一部分的用户设置cookie=vip&lt;/p&gt;
 
 &lt;p&gt;&lt;/p&gt;</description>
     </item>
