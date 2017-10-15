@@ -72,6 +72,8 @@
 
 <p></p>
 
+<p>zval = 值本身 + 值的类型 + 垃圾回收信息(包含引用)</p>
+
 <h2 id="php5中的zval">PHP5中的zval</h2>
 
 <pre><code>    typedef struct _zval_struct {
@@ -83,6 +85,22 @@
 </code></pre>
 
 <ul>
+<li><p>zval中type的选择有：</p>
+
+<pre><code>#define IS_NULL     0      /* Doesn't use value */
+#define IS_LONG     1      /* Uses lval */
+#define IS_DOUBLE   2      /* Uses dval */
+#define IS_BOOL     3      /* Uses lval with values 0 and 1 */
+#define IS_ARRAY    4      /* Uses ht */
+#define IS_OBJECT   5      /* Uses obj */
+#define IS_STRING   6      /* Uses str */
+#define IS_RESOURCE 7      /* Uses lval, which is the resource ID */
+
+/* Special types used for late-binding of constants */
+#define IS_CONSTANT 8
+#define IS_CONSTANT_AST 9 
+</code></pre></li>
+
 <li><p>解释上面，这个结构体由value，引用次数，zval的类型以及是否为引用&amp;变量组成。<br />
 而zval_value是一个union联合体，其中每个zval选择其中一个有效：</p>
 
@@ -99,20 +117,44 @@
 } zvalue_value;
 </code></pre></li>
 
-<li><p>zval中type的选择有：</p>
+<li><p>上面的联合体中union的大小=它最大的元素的大小，str的大小最大 = 8(指针) + 4(int)，这是在64进制的系统中，但是12bytes不够对齐(64bit=8bytes)，需要是8的整数倍，所以大小为16字节。</p></li>
 
-<pre><code>#define IS_NULL     0      /* Doesn't use value */
-#define IS_LONG     1      /* Uses lval */
-#define IS_DOUBLE   2      /* Uses dval */
-#define IS_BOOL     3      /* Uses lval with values 0 and 1 */
-#define IS_ARRAY    4      /* Uses ht */
-#define IS_OBJECT   5      /* Uses obj */
-#define IS_STRING   6      /* Uses str */
-#define IS_RESOURCE 7      /* Uses lval, which is the resource ID */
+<li><p>整个zval中，总共22bytes，考虑对齐，为24bytes：</p></li>
+</ul>
 
-/* Special types used for late-binding of constants */
-#define IS_CONSTANT 8
-#define IS_CONSTANT_AST 9
+<ol>
+<li>zvalue_value    16bytes<br /></li>
+<li>zend_uint       4bytes<br /></li>
+<li>zend_uchar      1bytes</li>
+</ol>
+
+<ul>
+<li><p>PHP5.3引入垃圾周期回收，zval结构如下：</p>
+
+<pre><code>typedef struct _zval_gc_info {
+    zval z;
+    union {
+        gc_root_buffer       *buffered;
+        struct _zval_gc_info *next;
+    } u;
+} zval_gc_info;
+</code></pre></li>
+
+<li><p>zval作为一部分放到了zval_gc_info中，联合体中都是指针，大小为8bytes。加在一起为32bytes。加上内存管理的分配头16bytes就一共=48bytes。</p></li>
+
+<li><p>但是，如果用到了数组变量，zval大小就不会只有48bytes。PHP中的数组是通过HashTable实现的，而HashTable在处理冲突时，采用的是拉链法，一个Bucket连着一个Bucket，一个数组变量初始化时大小就会等于Bucket+Zval的大小。一个Bucket的大小是96bytes，一共为144bytes。buckets的结构体为：</p>
+
+<pre><code>typedef struct bucket {
+    ulong h;                  // The hash (or for int keys the key)
+    uint nKeyLength;          // The length of the key (for string keys)
+    void *pData;              // The actual data
+    void *pDataPtr;           // ??? What's this ???
+    struct bucket *pListNext; // PHP arrays are ordered. This gives the next element in that order
+    struct bucket *pListLast; // and this gives the previous element
+    struct bucket *pNext;     // The next element in this (doubly) linked list
+    struct bucket *pLast;     // The previous element in this (doubly) linked list
+    const char *arKey;        // The key (for string keys)
+} Bucket;
 </code></pre></li>
 
 <li><p>变量普通赋值时，不产生新的zval，统一指向同一个zval，但是如果其中一个变量的值修改了，就会发生<strong>写时复制</strong>，这个值修改的变量，指向一个新的zval，从而不影响其他变量的值。</p></li>
@@ -240,6 +282,11 @@ unset($a); // $a = zval_1(type=IS_UNDEF),   zend_array_2 被销毁
 #define IS_PTR                      17
 </code></pre></li>
 </ul>
+
+<h2 id="参考如下">参考如下：</h2>
+
+<p><a href="https://crispgm.com/page/how-big-are-php-arrays.html">https://crispgm.com/page/how-big-are-php-arrays.html</a><br />
+<a href="http://0x1.im/blog/php/Internal-value-representation-in-PHP-7-part-1.html">http://0x1.im/blog/php/Internal-value-representation-in-PHP-7-part-1.html</a></p>
         </div>
 
         
@@ -252,6 +299,7 @@ unset($a); // $a = zval_1(type=IS_UNDEF),   zend_array_2 被销毁
 <ul>
 <li><a href="#php5中的zval">PHP5中的zval</a></li>
 <li><a href="#php7中的zval">PHP7中的zval</a></li>
+<li><a href="#参考如下">参考如下：</a></li>
 </ul></li>
 </ul>
 </nav>
