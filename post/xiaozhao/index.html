@@ -74,6 +74,25 @@
 
 <hr />
 
+<h2 id="依赖注入和控制反转">依赖注入和控制反转</h2>
+
+<p>依赖注入是控制反转的一种实现，依赖注入是一种设计模式，控制反转是一种思想。<br />
+控制反转，是一种由主动需要，编程被动需要，用户解耦系统的思想。<br />
+依赖注入，比如一个man类，他在实例化时，需要初始化他的恋人，可以直接写在构造函数中进行new Girl()，但是这样就表示他只能接受这个girl，不能分手。耦合度比较高，除非你修改构造函数的代码。或者可以将gril作为参数传递进来赋值，这样就可以解耦两人的关系，互不喜欢还是可以传别的Girl进来。</p>
+
+<h2 id="base64实现">Base64实现</h2>
+
+<p>原理：把3个8字节的字符的转换为4个6字节的字符。<br />
+比如meng，4个8bits，因为3*8=4*6，所以在转换前，前3个8bits的字符为一组，刚好转换为bWVu，后面只有一个g，8bits分为前6bit和2bit，后面2bit不满6位，左移4位(相当于右边补4个0)，转换为两个字符，但是Base64转换的结果应该是4的倍数，所以后面补两个=号。即，base64(&ldquo;meng&rdquo;) = &ldquo;bWVuZw==&rdquo;</p>
+
+<h2 id="用户表和登录表分开的好处">用户表和登录表分开的好处</h2>
+
+<p>用户表存储用户的基本信息和uid，登录有可能是微博、微信、QQ等第三方Oauth2登录，也有可能是手机、邮箱、用户名登录，Oauth2这就涉及到凭证和类型不同，如果不区分，一条用户数据会横向非常的长，查询一次，如果不指定字段将会很长，分表可以做垂直切分，将登录的类型作为一个字段，账号对应凭证，方便设置每个可能的登录方式的登录ip和上次这种方式登录的时间等。将复杂的设计简单化。</p>
+
+<h2 id="int-10-和int-11-的区别">int(10)和int(11)的区别</h2>
+
+<p>64位int型数据的长度默认都是4字节，存储的无符号的范围为2^32，括号里的数据是默认数字的位宽，少了就选择前面补0，超出了就正常显示，而不是存储的最大的数字的长度，如果创建字段的时候给了zerofill属性，同样一个数字100，在int(11)和int(10)中填充的0的数量就不一样。但是不加zerofill属性就看不出来区别。</p>
+
 <h2 id="http代理实现">HTTP代理实现</h2>
 
 <p>为了方便测试，浏览器系统级别的配置代理麻烦，可以使用curl命令指定代理进行测试。</p>
@@ -364,6 +383,10 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
 <ul>
 <li>
 <ul>
+<li><a href="#依赖注入和控制反转">依赖注入和控制反转</a></li>
+<li><a href="#base64实现">Base64实现</a></li>
+<li><a href="#用户表和登录表分开的好处">用户表和登录表分开的好处</a></li>
+<li><a href="#int-10-和int-11-的区别">int(10)和int(11)的区别</a></li>
 <li><a href="#http代理实现">HTTP代理实现</a></li>
 <li><a href="#行级锁-间隙锁">行级锁、间隙锁</a></li>
 <li><a href="#xargs命令">xargs命令</a></li>
@@ -468,7 +491,7 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2017 map[email:noreply#qq.com name:Poly]&nbsp;
+            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
