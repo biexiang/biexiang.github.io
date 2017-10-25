@@ -74,6 +74,44 @@
 
 <hr />
 
+<h2 id="无限极分类">无限极分类</h2>
+
+<ul>
+<li><p>毗邻目录模式<br />
+最常用的方式，每个item给定一个id和parent_id。但是递归次数多，从下往上也麻烦。</p></li>
+
+<li><p>预排序遍历树算法</p>
+
+<pre><code>                             1 Food 18
+                                 |
+                +------------------------------+
+                |                              |
+            2 Fruit 11                     12 Meat 17
+                |                              |
+        +-------------+                 +------------+
+        |             |                 |            |
+    3 Red 6      7 Yellow 10       13 Beef 14   15 Pork 16
+        |             |
+    4 Cherry 5    8 Banana 9
+</code></pre></li>
+</ul>
+
+<h2 id="memcached相关">Memcached相关</h2>
+
+<ul>
+<li><p>Hash算法<br />
+余数Hash：增减节点，导致命中率大量下降<br />
+一致性Hash：Hash环，节点多，Hash结果选择环中最近的服务器节点，增删节点影响小范围数据，而且节点多影响越小，节点少也可以使用虚拟节点。实现为二叉搜索树！！！</p></li>
+
+<li><p>Slab存储<br />
+Memcached启动时指定最大内存使用量，默认一个slab大小为1M，slab下有chunk，每个slab_class的chunk的规格不一定一样，但是总量都是Slab的大小1M。<br />
+当插入一个元素时，会根据元素的大小去寻找大小合适的chunk的slab，找到后进行插入，如果该slab的chunk数量已经使用完了，就会申请一个新的该类型的slab进行存储。</p></li>
+</ul>
+
+<h2 id="mysql百万数据分页">Mysql百万数据分页</h2>
+
+<p>如果表的数据列多，每列的数据量也大，可以分表减少压力，基本信息表专门处理查询。对于where查询或者order排序字段特殊处理，建立复合索引，提高查询速度。使用in或者between提高速度。</p>
+
 <h2 id="依赖注入和控制反转">依赖注入和控制反转</h2>
 
 <p>依赖注入是控制反转的一种实现，依赖注入是一种设计模式，控制反转是一种思想。<br />
@@ -383,6 +421,9 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
 <ul>
 <li>
 <ul>
+<li><a href="#无限极分类">无限极分类</a></li>
+<li><a href="#memcached相关">Memcached相关</a></li>
+<li><a href="#mysql百万数据分页">Mysql百万数据分页</a></li>
 <li><a href="#依赖注入和控制反转">依赖注入和控制反转</a></li>
 <li><a href="#base64实现">Base64实现</a></li>
 <li><a href="#用户表和登录表分开的好处">用户表和登录表分开的好处</a></li>
