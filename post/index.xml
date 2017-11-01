@@ -8,10 +8,32 @@
     <language>en-us</language>
     <managingEditor>noreply#qq.com (Poly)</managingEditor>
     <webMaster>noreply#qq.com (Poly)</webMaster>
-    <lastBuildDate>Sun, 15 Oct 2017 17:25:13 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 28 Oct 2017 11:55:49 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>视频剪辑</title>
+      <link>https://biexiang.github.io/post/video_clip/</link>
+      <pubDate>Sat, 28 Oct 2017 11:55:49 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/post/video_clip/</guid>
+      <description>&lt;p&gt;Mac系统有个好玩的功能——快速预览（QuickLook）——在任何文件上敲击「空格」键，可以快速预览文件内容。
+&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Sphinx初试</title>
+      <link>https://biexiang.github.io/post/sphinx/</link>
+      <pubDate>Thu, 26 Oct 2017 18:55:51 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/post/sphinx/</guid>
+      <description>&lt;p&gt;用过阿里的开放搜索，将自己的数据根据字段结构导入，直接使用阿里的api来做搜索业务。
+实现估计是elasticsearch或者sphinx。&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>PHP中变量的实现</title>

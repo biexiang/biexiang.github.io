@@ -74,13 +74,60 @@
 
 <hr />
 
+<h2 id="10亿uid去重-统计不同的uid总数">10亿uid去重，统计不同的uid总数</h2>
+
+<ul>
+<li><p>bitmap<br />
+1 billion / 8 =  0.125 billion = 125 million = 125MB<br />
+因为uid有重复，且计算机的转换是1024不是1000，使用Bitmap占用小于125MB的内存</p></li>
+
+<li><p>分治法<br />
+按照Hash分桶的思想，将10亿的数据对1000进行Hash，然后分别处理这1000个文件，统计每个文件中非重复出现的次数，因为相同的数字Hash的结果肯定是同一个桶中，所以不会跨桶。</p></li>
+</ul>
+
 <h2 id="尾递归">尾递归</h2>
+
+<p>尾递归是在函数最后一步调用自己。<br />
+* 尾调用
+不一定出现在函数尾部，只要最后一步操作即可。</p>
+
+<pre><code>    function f(x) {
+      if (x &gt; 0) {
+        return m(x)
+      }
+      return n(x);
+    }
+</code></pre>
+
+<ul>
+<li><p>尾调用优化<br />
+节省内存</p>
+
+<pre><code>function factorial(n) {
+  if (n === 1) return 1;
+  return n * factorial(n - 1);
+}
+
+factorial(5) // 120
+
+//上面递归层次高会溢出，下面尾递归不会发生
+
+function factorial(n, total) {
+  if (n === 1) return total;
+  return factorial(n - 1, n * total);
+}
+
+factorial(5, 1) // 120
+</code></pre></li>
+</ul>
 
 <h2 id="udp和tcp的区别">UDP和TCP的区别</h2>
 
-<h2 id="jquery插件扩展开发">JQuery插件扩展开发</h2>
+<ul>
+<li><p>TCP是传输控制协议，面向连接传输可靠，有拥塞控制。</p></li>
 
-<h2 id="静态库和动态库的区别">静态库和动态库的区别</h2>
+<li><p>UDP是用户数据协议，不一定提供可靠的数据传输，无连接，视频等数据流可以使用UDP传输。</p></li>
+</ul>
 
 <h2 id="php-编写支持高并发的网站">PHP 编写支持高并发的网站</h2>
 
@@ -92,9 +139,8 @@
 LVS+keepalived+Java/PHP/Python+mysql/mongodb+memcached/redis+centos+nginx/apache+sphinx/solr+Gearman+Munin+TFS</p></li>
 </ul>
 
-<p>WorkerMan / Swoole</p>
-
-<p>资源做成静态化</p>
+<p>WorkerMan / Swoole<br />
+资源做成静态化</p>
 
 <h2 id="无限极分类">无限极分类</h2>
 
@@ -443,10 +489,9 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
 <ul>
 <li>
 <ul>
+<li><a href="#10亿uid去重-统计不同的uid总数">10亿uid去重，统计不同的uid总数</a></li>
 <li><a href="#尾递归">尾递归</a></li>
 <li><a href="#udp和tcp的区别">UDP和TCP的区别</a></li>
-<li><a href="#jquery插件扩展开发">JQuery插件扩展开发</a></li>
-<li><a href="#静态库和动态库的区别">静态库和动态库的区别</a></li>
 <li><a href="#php-编写支持高并发的网站">PHP 编写支持高并发的网站</a></li>
 <li><a href="#无限极分类">无限极分类</a></li>
 <li><a href="#memcached相关">Memcached相关</a></li>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Awk记录 // Peculiar</title>
+    <title>视频剪辑 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="Awk记录" />
+        <meta property="og:title" content="视频剪辑" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/awk/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/video_clip/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,39 +56,82 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">Awk记录</h1>
+            <h1 class="article-title" itemprop="name">视频剪辑</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/awk/" class="article-date">
-                <time datetime='2017-10-06T17:03:58.000&#43;08:00' itemprop="datePublished">2017-10-06</time>
+            <a href="/post/video_clip/" class="article-date">
+                <time datetime='2017-10-28T11:55:49.000&#43;08:00' itemprop="datePublished">2017-10-28</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>分析Access_log 获取 性能瓶颈</p>
+            <p>Mac系统有个好玩的功能——快速预览（QuickLook）——在任何文件上敲击「空格」键，可以快速预览文件内容。
+</p>
 
-<p></p>
+<h2 id="基础概念">基础概念</h2>
 
-<p>如果需要对已经上线的服务进行性能上的优化，可以把当前的Access log拷贝下来进行分析。<br />
-前提是你对于某个上线的服务开启了访问日志的记录，自己设定了自己的access format。<br />
-php-fpm.cgi的分析可以根据format的参数，$upstream_response_time。<br />
-或者是整个响应的时间$request_time进行分析。</p>
+<ul>
+<li><p>分辨率<br />
+没什么好说的。</p></li>
 
-<pre><code>    //分析获取cgi消耗时间前80的排行数据
-    cat  acagrid.log  | awk '{print $8,$1,$11,$12}' | sort -nr | head -80
+<li><p>帧率
+FPS。</p></li>
 
-    &gt;17.929 &quot;200&quot; GET /dashboard/index
-    &gt;14.889 &quot;200&quot; GET /college/index/index
-    &gt;14.081 &quot;200&quot; GET /dashboard/college/api_filter?&amp;page=4
-</code></pre>
+<li><p>码率<br />
+又称为比特率，主要是保证视频在线直出的一个速率，计算方式=视频大小(单位为bit)/视频时长。<br />
+一般视频网站规定上传的视频码率为1Mbit左右，如果大于就需要转换，也就是对于画质进行压缩，导致bit减少。保证一个在线观看的速率不会卡顿，网易云音乐的上传视频就会转换。<br />
+100分钟1GB的电影的码率大概为1.4Mbit/s。<br />
+iOS 设备采集的视频码率大约在 50 Mbps，相比而言 Bilibili 弹幕网对超清视频的要求上限是 1.8 Mbps，一旦超过这个码率，视频会被官方重新压制（官方压制后的清晰度惨不忍睹）。</p></li>
 
-<p>AWK使用$0打印整行数据，而$1,$2等分别代表第一列，第二列的数据。打印出来，再进行字典序倒序排列，并且打印访问的路由，知道哪些路由需要优化。</p>
+<li><p>封装格式</p>
+
+<pre><code>常见的视频流：H264（或称AVC1）、XVID、DIVX、RV40、RV50、RV60、RM8、RM9、RM10
+常见的音频流：mp3、aac、ogg、flac
+常见封装格式可行的组合：                                  
+                                  mp4：H264+mp3/aac/ogg/alac；  XVID+mp3/aac/ogg/alac
+                                  mov：H264+mp4；H264+aac
+                                  avi:     H264+mp3;  XVID+mp3;  DIVX+mp3
+                                  rmvb：RV40~RV60+aac/mp3；RM8~RM10+aac/mp3
+                                  mkv:   万能封装，任意组合
+QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac的mov或mp4封装。
+</code></pre></li>
+</ul>
+
+<h2 id="转码">转码</h2>
+
+<h2 id="final-cut-pro">Final Cut Pro</h2>
+
+<ul>
+<li>剪片段: 目标段首尾按B，CUT出一个区域，右键新建复合，再双击该片段，进入后可以进行导出。<br /></li>
+<li>合成片段: 把素材拖到时间轴。<br /></li>
+<li>加背景音乐: 拖进来后，如果需要某一段音量调高，使用区域工具(I O)选择后，拖动音量调整。<br /></li>
+<li>加水印: 制作自己风格的Logo，调整大小放在视频上层。<br /></li>
+</ul>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="http://bbs.feng.com/read-htm-tid-6839308.html">http://bbs.feng.com/read-htm-tid-6839308.html</a></p>
         </div>
 
         
+        
+        <div class="article-toc" style="display:none;">
+            <h3>Contents</h3>
+            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#基础概念">基础概念</a></li>
+<li><a href="#转码">转码</a></li>
+<li><a href="#final-cut-pro">Final Cut Pro</a></li>
+<li><a href="#参考">参考</a></li>
+</ul></li>
+</ul>
+</nav>
+        </div>
         
         
 
@@ -138,12 +181,7 @@ php-fpm.cgi的分析可以根据format的参数，$upstream_response_time。<br 
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/linux">Linux
-                    </a>
-                </li>
-                
-                <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/awk">Awk
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E8%A7%86%E9%A2%91%E5%89%AA%E8%BE%91">视频剪辑
                     </a>
                 </li>
                 
@@ -153,15 +191,9 @@ php-fpm.cgi的分析可以根据format的参数，$upstream_response_time。<br 
     </div>
     <nav id="article-nav">
     
-    <a href="/post/penetration/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Penetration
-        </div>
-    </a>
     
-    
-    <a href="/post/deadlock/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Mysql死锁问题分析&nbsp;<span>&gt;</span></div>
+    <a href="/post/sphinx/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Sphinx初试&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
@@ -172,7 +204,7 @@ php-fpm.cgi的分析可以根据format的参数，$upstream_response_time。<br 
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2017 map[email:noreply#qq.com name:Poly]&nbsp;
+            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
