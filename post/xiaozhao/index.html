@@ -74,6 +74,34 @@
 
 <hr />
 
+<h2 id="结构体内存对齐">结构体内存对齐</h2>
+
+<p><strong>非#pragma指定对齐情况</strong></p>
+
+<ul>
+<li>原则一，普通成员的起始位置为该成员大小的整数倍。</li>
+<li>原则二，结构体作为成员时，起始位置为该结构体中最大元素的整数倍。</li>
+
+<li><p>原则三，所有元素计算完后，结构体总大小必须是结构体中最大成员的整数倍。</p>
+
+<pre><code>//所有处于非整数被情况时，前面元素补齐。
+struct A{
+    int a;
+    double b;
+    float c;
+};
+struct B{
+    char e[2];
+    int f;
+    double g;
+    short h;
+    struct A i;
+};
+sizeof(A) = 24; //这个比较好理解，int为4，double为8，float为4，总长为8的倍数，补齐，所以整个A为24。
+sizeof(B) = 48; 
+</code></pre></li>
+</ul>
+
 <h2 id="10亿uid去重-统计不同的uid总数">10亿uid去重，统计不同的uid总数</h2>
 
 <ul>
@@ -489,6 +517,7 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
 <ul>
 <li>
 <ul>
+<li><a href="#结构体内存对齐">结构体内存对齐</a></li>
 <li><a href="#10亿uid去重-统计不同的uid总数">10亿uid去重，统计不同的uid总数</a></li>
 <li><a href="#尾递归">尾递归</a></li>
 <li><a href="#udp和tcp的区别">UDP和TCP的区别</a></li>
