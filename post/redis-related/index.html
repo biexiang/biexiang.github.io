@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>进制转换 // Peculiar</title>
+    <title>Redis设计与实现-笔记 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="进制转换" />
+        <meta property="og:title" content="Redis设计与实现-笔记" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/hex-conversion/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/redis-related/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,157 +56,175 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">进制转换</h1>
+            <h1 class="article-title" itemprop="name">Redis设计与实现-笔记</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/hex-conversion/" class="article-date">
-                <time datetime='2017-11-03T18:42:32.000&#43;08:00' itemprop="datePublished">2017-11-03</time>
+            <a href="/post/redis-related/" class="article-date">
+                <time datetime='2017-11-05T18:40:14.000&#43;08:00' itemprop="datePublished">2017-11-05</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>如果做短链接服务，或者想要像Youtube那样隐藏主键ID，就可以使用进制转换来实现。</p>
+            <p>这本书设计到了Redis的实现的数据结构、计算机网络等知识，从底层学习Redis的知识。</p>
 
 <p></p>
 
-<h2 id="itoa和atoi">Itoa和Atoi</h2>
+<blockquote>
+<p>摘录来自: 黄健宏. “Redis 设计与实现（第二版）”。</p>
+</blockquote>
+
+<h2 id="数据结构与对象">数据结构与对象</h2>
+
+<h3 id="sds">SDS</h3>
+
+<pre><code>    struct sdshdr {
+
+        // 记录 buf 数组中已使用字节的数量
+        // 等于 SDS 所保存字符串的长度
+        int len;
+
+        // 记录 buf 数组中未使用字节的数量
+        int free;
+
+        // 字节数组，用于保存字符串
+        char buf[];
+
+    };
+</code></pre>
+
+<p><img src="/img/sds_01.png" alt="/img/sds_01.png" />
+<img src="/img/sds_02.png" alt="/img/sds_02.png" /></p>
 
 <ul>
-<li>Itoa：数字转为字符,会涉及到正负数和溢出问题。<br /></li>
-<li>Atoi：字符转为数字<br /></li>
+<li>O(1)获取字符长度</li>
+<li>SDS扩张减少内存重分配，如果扩张后小于1M，free空间为SDS的len长度；如果扩张后大于1M；则free空间为1M</li>
+<li>SDS释放；字符串SDStrim，trim后的空间不会释放，会加入free的空间以备下次使用<br /></li>
+<li>二进制安全，api安全<br /></li>
+<li>兼容一部分C语言<string.h>库中字符串处理函数<br /></li>
 </ul>
 
-<h2 id="转换代码">转换代码</h2>
+<h3 id="链表">链表</h3>
 
-<pre><code>    package main
+<pre><code>    //adlist.h/listNode
+    typedef struct listNode {
 
-    import (
-        &quot;fmt&quot;
-        &quot;math&quot;
-        &quot;strconv&quot;
-    )
+        // 前置节点
+        struct listNode *prev;
 
-    var kv map[int]string = map[int]string{
-        0:  &quot;0&quot;,
-        1:  &quot;1&quot;,
-        2:  &quot;2&quot;,
-        3:  &quot;3&quot;,
-        4:  &quot;4&quot;,
-        5:  &quot;5&quot;,
-        6:  &quot;6&quot;,
-        7:  &quot;7&quot;,
-        8:  &quot;8&quot;,
-        9:  &quot;9&quot;,
-        10: &quot;a&quot;,
-        11: &quot;b&quot;,
-        12: &quot;c&quot;,
-        13: &quot;d&quot;,
-        14: &quot;e&quot;,
-        15: &quot;f&quot;,
-        16: &quot;g&quot;,
-        17: &quot;h&quot;,
-        18: &quot;i&quot;,
-        19: &quot;j&quot;,
-        20: &quot;k&quot;,
-        21: &quot;l&quot;,
-        22: &quot;m&quot;,
-        23: &quot;n&quot;,
-        24: &quot;o&quot;,
-        25: &quot;p&quot;,
-        26: &quot;q&quot;,
-        27: &quot;r&quot;,
-        28: &quot;s&quot;,
-        29: &quot;t&quot;,
-        30: &quot;u&quot;,
-        31: &quot;v&quot;,
-        32: &quot;w&quot;,
-        33: &quot;x&quot;,
-        34: &quot;y&quot;,
-        35: &quot;z&quot;,
-        36: &quot;A&quot;,
-        37: &quot;B&quot;,
-        38: &quot;C&quot;,
-        39: &quot;D&quot;,
-        40: &quot;E&quot;,
-        41: &quot;F&quot;,
-        42: &quot;G&quot;,
-        43: &quot;H&quot;,
-        44: &quot;I&quot;,
-        45: &quot;J&quot;,
-        46: &quot;K&quot;,
-        47: &quot;L&quot;,
-        48: &quot;M&quot;,
-        49: &quot;N&quot;,
-        50: &quot;O&quot;,
-        51: &quot;P&quot;,
-        52: &quot;Q&quot;,
-        53: &quot;R&quot;,
-        54: &quot;S&quot;,
-        55: &quot;T&quot;,
-        56: &quot;U&quot;,
-        57: &quot;V&quot;,
-        58: &quot;W&quot;,
-        59: &quot;X&quot;,
-        60: &quot;Y&quot;,
-        61: &quot;Z&quot;,
-    }
+        // 后置节点
+        struct listNode *next;
 
-    //10进制转为任何进制
-    func Iencoding(dec, to int) string {
-        if to &gt; 61 || to &lt; 1 {
-            return &quot;&quot;
-        }
-        var result string
-        var remain int
-        for dec != 0 {
-            remain = dec % to
-            if remain &gt; 9 &amp;&amp; remain &lt; 62 {
-                result = kv[remain] + result
-            } else {
-                //转换超出62进制或者小于10，直接implode
-                result = strconv.Itoa(remain) + result
-            }
+        // 节点的值
+        void *value;
 
-            dec = dec / to
-        }
-        return result
-    }
+    } listNode;
 
-    func getIndex(word string) int {
-        var result int = -1
-        for k, v := range kv {
-            if v == word {
-                result = k
-                break
-            }
-        }
+    //adlist.h/list
+    typedef struct list {
 
-        if result == -1 {
-            result, _ = strconv.Atoi(word)
-        }
-        return result
-    }
+        // 表头节点
+        listNode *head;
 
-    //任何进制转为10进制
-    func Idecoding(enstr string, hex int) float64 {
-        var result float64 = 0.0
-        size := len(enstr)
-        for i := 0; i &lt; size; i++ {
-            key := getIndex(string(enstr[size-i-1]))
-            result += float64(key) * math.Pow(float64(hex), float64(i))
-        }
-        return result
-    }
+        // 表尾节点
+        listNode *tail;
 
-    func main() {
-        tst := Iencoding(4096, 25)
-        fmt.Println(tst)
-        fmt.Println(Idecoding(tst, 25))
+        // 链表所包含的节点数量
+        unsigned long len;
+
+        // 节点值复制函数
+        void *(*dup)(void *ptr);
+
+        // 节点值释放函数
+        void (*free)(void *ptr);
+
+        // 节点值对比函数
+        int (*match)(void *ptr, void *key);
+
+    } list;
+</code></pre>
+
+<p><img src="/img/node_01.png" alt="/img/node_01.png" />
+<img src="/img/node_02.png" alt="/img/node_02.png" /></p>
+
+<ul>
+<li>链表被广泛用于实现 Redis 的各种功能， 比如列表键， 发布与订阅， 慢查询， 监视器， 等等。</li>
+<li>每个链表节点由一个 listNode 结构来表示， 每个节点都有一个指向前置节点和后置节点的指针， 所以Redis 的链表实现是双端链表。</li>
+<li>每个链表使用一个 list 结构来表示， 这个结构带有表头节点指针、表尾节点指针、以及链表长度等信息。</li>
+<li>因为链表表头节点的前置节点和表尾节点的后置节点都指向 NULL ， 所以 Redis 的链表实现是无环链表。</li>
+<li>通过为链表设置不同的类型特定函数， Redis 的链表可以用于保存各种不同类型的值。</li>
+</ul>
+
+<h3 id="字典">字典</h3>
+
+<p>字典， 又称符号表（symbol table）、关联数组（associative array）或者映射（map）， 是一种用于保存键值对（key-value pair）的抽象数据结构。</p>
+
+<p>下面dictht中的掩码的作用是，如果Hash出来的结果超出了size，就与掩码进行与运算，计算出新的Hash结果，保证在size之内。</p>
+
+<pre><code>    //dict.h/dictht
+    typedef struct dictht {
+
+        // 哈希表数组
+        dictEntry **table;
+
+        // 哈希表大小
+        unsigned long size;
+
+        // 哈希表大小掩码，用于计算索引值
+        // 总是等于 size - 1
+        unsigned long sizemask;
+
+        // 该哈希表已有节点的数量
+        unsigned long used;
+
+    } dictht;
+
+
+    typedef struct dictEntry {
+
+        // 键
+        void *key;
+
+        // 值
+        union {
+            void *val;
+            uint64_t u64;
+            int64_t s64;
+        } v;
+
+        // 指向下个哈希表节点，形成链表
+        struct dictEntry *next;
+
+    } dictEntry;
+
+    typedef struct dict {
+
+        // 类型特定函数
+        dictType *type;
+
+        // 私有数据
+        void *privdata;
+
+        // 哈希表
+        dictht ht[2];
+
+        // rehash 索引
+        // 当 rehash 不在进行时，值为 -1”
+        rehash int
     }
 </code></pre>
+
+<p><img src="/img/dict_01.png" alt="/img/dict_01.png" />
+<img src="/img/dict_02.png" alt="/img/dict_02.png" />
+<img src="/img/dict_03.png" alt="/img/dict_03.png" /></p>
+
+<h2 id="单机数据库的实现">单机数据库的实现</h2>
+
+<h2 id="多机数据库的实现">多机数据库的实现</h2>
+
+<h2 id="独立功能的实现">独立功能的实现</h2>
         </div>
 
         
@@ -217,8 +235,15 @@
 <ul>
 <li>
 <ul>
-<li><a href="#itoa和atoi">Itoa和Atoi</a></li>
-<li><a href="#转换代码">转换代码</a></li>
+<li><a href="#数据结构与对象">数据结构与对象</a>
+<ul>
+<li><a href="#sds">SDS</a></li>
+<li><a href="#链表">链表</a></li>
+<li><a href="#字典">字典</a></li>
+</ul></li>
+<li><a href="#单机数据库的实现">单机数据库的实现</a></li>
+<li><a href="#多机数据库的实现">多机数据库的实现</a></li>
+<li><a href="#独立功能的实现">独立功能的实现</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -276,21 +301,31 @@
                     </a>
                 </li>
                 
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C">计算机网络
+                    </a>
+                </li>
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/redis">Redis
+                    </a>
+                </li>
+                
             </ul>
         </footer>
         
     </div>
     <nav id="article-nav">
     
-    <a href="/post/redis-related/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/post/permutation/" id="article-nav-newer" class="article-nav-link-wrap">
         <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Redis设计与实现-笔记
+            Golang实现排列组合
         </div>
     </a>
     
     
-    <a href="/post/video_clip/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">视频剪辑&nbsp;<span>&gt;</span></div>
+    <a href="/post/hex-conversion/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">进制转换&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>

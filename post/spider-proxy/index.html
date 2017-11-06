@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>进制转换 // Peculiar</title>
+    <title>爬虫代理 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="进制转换" />
+        <meta property="og:title" content="爬虫代理" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/hex-conversion/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/spider-proxy/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,157 +56,50 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">进制转换</h1>
+            <h1 class="article-title" itemprop="name">爬虫代理</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/hex-conversion/" class="article-date">
-                <time datetime='2017-11-03T18:42:32.000&#43;08:00' itemprop="datePublished">2017-11-03</time>
+            <a href="/post/spider-proxy/" class="article-date">
+                <time datetime='2017-11-06T19:18:08.000&#43;08:00' itemprop="datePublished">2017-11-06</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>如果做短链接服务，或者想要像Youtube那样隐藏主键ID，就可以使用进制转换来实现。</p>
+            <p>上次网易云爬取歌单的评论10多条之后，IP就被Ban了，需要好好考虑一个代理的方式。</p>
 
 <p></p>
 
-<h2 id="itoa和atoi">Itoa和Atoi</h2>
+<blockquote>
+<p>挖坑</p>
+</blockquote>
+
+<h2 id="搭建代理池">搭建代理池</h2>
 
 <ul>
-<li>Itoa：数字转为字符,会涉及到正负数和溢出问题。<br /></li>
-<li>Atoi：字符转为数字<br /></li>
+<li><p>爬取代理<br />
+爬取网站上的代理的IP和端口。</p></li>
+
+<li><p>维护代理<br />
+每隔10s，删除失效的代理。</p></li>
 </ul>
 
-<h2 id="转换代码">转换代码</h2>
+<h2 id="假扮代理服务器">假扮代理服务器</h2>
 
-<pre><code>    package main
+<p>一般获取真实IP，直接使用Remote_addr参数，但是因为有正向代理、反向代理、透明代理等，一般服务商不会直接相信Remote_addr，会使用X-Forwarded-For，来获取真实IP。而这个请求头刚好是我们可以伪造的。协议头的格式如下:</p>
 
-    import (
-        &quot;fmt&quot;
-        &quot;math&quot;
-        &quot;strconv&quot;
-    )
-
-    var kv map[int]string = map[int]string{
-        0:  &quot;0&quot;,
-        1:  &quot;1&quot;,
-        2:  &quot;2&quot;,
-        3:  &quot;3&quot;,
-        4:  &quot;4&quot;,
-        5:  &quot;5&quot;,
-        6:  &quot;6&quot;,
-        7:  &quot;7&quot;,
-        8:  &quot;8&quot;,
-        9:  &quot;9&quot;,
-        10: &quot;a&quot;,
-        11: &quot;b&quot;,
-        12: &quot;c&quot;,
-        13: &quot;d&quot;,
-        14: &quot;e&quot;,
-        15: &quot;f&quot;,
-        16: &quot;g&quot;,
-        17: &quot;h&quot;,
-        18: &quot;i&quot;,
-        19: &quot;j&quot;,
-        20: &quot;k&quot;,
-        21: &quot;l&quot;,
-        22: &quot;m&quot;,
-        23: &quot;n&quot;,
-        24: &quot;o&quot;,
-        25: &quot;p&quot;,
-        26: &quot;q&quot;,
-        27: &quot;r&quot;,
-        28: &quot;s&quot;,
-        29: &quot;t&quot;,
-        30: &quot;u&quot;,
-        31: &quot;v&quot;,
-        32: &quot;w&quot;,
-        33: &quot;x&quot;,
-        34: &quot;y&quot;,
-        35: &quot;z&quot;,
-        36: &quot;A&quot;,
-        37: &quot;B&quot;,
-        38: &quot;C&quot;,
-        39: &quot;D&quot;,
-        40: &quot;E&quot;,
-        41: &quot;F&quot;,
-        42: &quot;G&quot;,
-        43: &quot;H&quot;,
-        44: &quot;I&quot;,
-        45: &quot;J&quot;,
-        46: &quot;K&quot;,
-        47: &quot;L&quot;,
-        48: &quot;M&quot;,
-        49: &quot;N&quot;,
-        50: &quot;O&quot;,
-        51: &quot;P&quot;,
-        52: &quot;Q&quot;,
-        53: &quot;R&quot;,
-        54: &quot;S&quot;,
-        55: &quot;T&quot;,
-        56: &quot;U&quot;,
-        57: &quot;V&quot;,
-        58: &quot;W&quot;,
-        59: &quot;X&quot;,
-        60: &quot;Y&quot;,
-        61: &quot;Z&quot;,
-    }
-
-    //10进制转为任何进制
-    func Iencoding(dec, to int) string {
-        if to &gt; 61 || to &lt; 1 {
-            return &quot;&quot;
-        }
-        var result string
-        var remain int
-        for dec != 0 {
-            remain = dec % to
-            if remain &gt; 9 &amp;&amp; remain &lt; 62 {
-                result = kv[remain] + result
-            } else {
-                //转换超出62进制或者小于10，直接implode
-                result = strconv.Itoa(remain) + result
-            }
-
-            dec = dec / to
-        }
-        return result
-    }
-
-    func getIndex(word string) int {
-        var result int = -1
-        for k, v := range kv {
-            if v == word {
-                result = k
-                break
-            }
-        }
-
-        if result == -1 {
-            result, _ = strconv.Atoi(word)
-        }
-        return result
-    }
-
-    //任何进制转为10进制
-    func Idecoding(enstr string, hex int) float64 {
-        var result float64 = 0.0
-        size := len(enstr)
-        for i := 0; i &lt; size; i++ {
-            key := getIndex(string(enstr[size-i-1]))
-            result += float64(key) * math.Pow(float64(hex), float64(i))
-        }
-        return result
-    }
-
-    func main() {
-        tst := Iencoding(4096, 25)
-        fmt.Println(tst)
-        fmt.Println(Idecoding(tst, 25))
-    }
+<pre><code>    X-Forwarded-For: client, proxy1, proxy2         
 </code></pre>
+
+<p>一般服务商不会Ban代理服务器。</p>
+
+<ul>
+<li>正向代理：翻墙搭理那种直接转发流量，或者是企业内部加速访问，缓存内容，控制访问等。<br /></li>
+<li>反向搭理：Nginx做负载均衡器那种用户不知道真实处理请求的服务器是哪一台。<br /></li>
+<li>透明代理：感觉和正向搭理一样。</li>
+</ul>
         </div>
 
         
@@ -217,8 +110,8 @@
 <ul>
 <li>
 <ul>
-<li><a href="#itoa和atoi">Itoa和Atoi</a></li>
-<li><a href="#转换代码">转换代码</a></li>
+<li><a href="#搭建代理池">搭建代理池</a></li>
+<li><a href="#假扮代理服务器">假扮代理服务器</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -272,7 +165,12 @@
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%AE%97%E6%B3%95">算法
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%88%AC%E8%99%AB">爬虫
+                    </a>
+                </li>
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E4%BB%A3%E7%90%86">代理
                     </a>
                 </li>
                 
@@ -282,15 +180,9 @@
     </div>
     <nav id="article-nav">
     
-    <a href="/post/redis-related/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Redis设计与实现-笔记
-        </div>
-    </a>
     
-    
-    <a href="/post/video_clip/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">视频剪辑&nbsp;<span>&gt;</span></div>
+    <a href="/post/permutation/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Golang实现排列组合&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>

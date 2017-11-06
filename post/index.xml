@@ -8,10 +8,21 @@
     <language>en-us</language>
     <managingEditor>noreply#qq.com (Poly)</managingEditor>
     <webMaster>noreply#qq.com (Poly)</webMaster>
-    <lastBuildDate>Mon, 06 Nov 2017 17:30:40 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 06 Nov 2017 19:18:08 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>爬虫代理</title>
+      <link>https://biexiang.github.io/post/spider-proxy/</link>
+      <pubDate>Mon, 06 Nov 2017 19:18:08 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/post/spider-proxy/</guid>
+      <description>&lt;p&gt;上次网易云爬取歌单的评论10多条之后，IP就被Ban了，需要好好考虑一个代理的方式。&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Golang实现排列组合</title>
@@ -20,6 +31,17 @@
       <author>noreply#qq.com (Poly)</author>
       <guid>https://biexiang.github.io/post/permutation/</guid>
       <description>&lt;p&gt;上次面试的题目。&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Redis设计与实现-笔记</title>
+      <link>https://biexiang.github.io/post/redis-related/</link>
+      <pubDate>Sun, 05 Nov 2017 18:40:14 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/post/redis-related/</guid>
+      <description>&lt;p&gt;这本书设计到了Redis的实现的数据结构、计算机网络等知识，从底层学习Redis的知识。&lt;/p&gt;
 
 &lt;p&gt;&lt;/p&gt;</description>
     </item>
