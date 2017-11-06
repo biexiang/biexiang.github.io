@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mysql死锁问题分析 // Peculiar</title>
+    <title>Golang实现排列组合 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="Mysql死锁问题分析" />
+        <meta property="og:title" content="Golang实现排列组合" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/deadlock/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/permutation/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,67 +56,92 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">Mysql死锁问题分析</h1>
+            <h1 class="article-title" itemprop="name">Golang实现排列组合</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/deadlock/" class="article-date">
-                <time datetime='2017-10-06T16:58:52.000&#43;08:00' itemprop="datePublished">2017-10-06</time>
+            <a href="/post/permutation/" class="article-date">
+                <time datetime='2017-11-06T17:30:40.000&#43;08:00' itemprop="datePublished">2017-11-06</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>面试被问到，学习记录。</p>
+            <p>上次面试的题目。</p>
 
 <p></p>
 
-<h3 id="产生原因">产生原因</h3>
+<h2 id="全排列">全排列</h2>
 
-<p>事务之间等待超时，或者死循环。</p>
+<p>如下图所示，首先获取第一位不同的字串，再依次递归下去，直到index = length - 1。输出字符串。
+<img src="/img/permutation.png" alt="/img/permutation.png" /></p>
 
-<h3 id="如何检测">如何检测</h3>
+<pre><code>    /**
+     *  +全排列
+     *      ++递归排列
+     */
+    func rangeAll(slice []string, start int) {
+        size := len(slice)
+        if start == size-1 {
+            //如果已经是最后位置了，直接将数组数据合并输出
+            fmt.Println(strings.Join(slice, &quot;&quot;))
+        }
 
-<p>设定超时时间，如果事务A超时，即回滚事务，事务B执行。<br />
-或者<br />
-通过Wait-for-gragh算法主动检测。</p>
+        for i := start; i &lt; size; i++ {
 
-<h3 id="锁">锁</h3>
+            //  1、abc输出abc，i=start时，输出自己
+            //  2、如果i和start的值相同没有必要交换，交换后输出的是i=start时输出的内容，是重复的内容
+            if i == start || slice[i] != slice[start] {
+                //交换当前这个与后面的位置
+                slice[i], slice[start] = slice[start], slice[i]
+                //递归处理索引+1
+                rangeAll(slice, start+1)
+                //换回来，因为是递归，如果不换回来会影响后面的操作，并且出现重复
+                slice[i], slice[start] = slice[start], slice[i]
+            }
 
-<p><strong>共享锁(S):</strong> 读锁，被加共享锁对象不能再被加X锁，可读，不可修改。</p>
+        }
+</code></pre>
 
-<p><strong>排他锁(X):</strong>     写锁，被加X锁对象不能再被加任何锁，独占，其他事务不可读取和修改，直到释放。</p>
+<h2 id="全组合">全组合</h2>
 
-<h3 id="锁和索引">锁和索引</h3>
+<p>abc，长度为3，每一位是否出现显示为1/0，abc即111，ab即110，c即001，若给一个字符串求出全组合，即2^n - 1个，因为000(不出现一个字符)有毛病。</p>
 
-<p>因为Myisam不支持事务，也就不在讨论范围，假设cjy表为Innodb引擎，有a,b,c三列。</p>
+<pre><code>    /**
+     *  +全组合
+     *      +位图法
+     */
+    func combination(slice []string) {
+        str := strings.Join(slice, &quot;&quot;)
+        size := len(str)
+        max := 1 &lt;&lt; uint64(size)
 
-<p>a primary key<br />
-b index<br />
-c</p>
+        //至少出现一个字符
+        var word string
+        for i := 1; i &lt; max; i++ {
 
-<p>delete from cjy where a = 1; 直接根据主键，索引到=1的叶节点，将整条数据加行锁。<br />
-delete from cjy where b = 1; 首先根据b列的索引，找到叶节点锁住，再根据叶节点的主键值，找主键表，索引到叶节点，对行数据进行锁定。<br />
-delete from cjy where c = 1; 因为c没有索引，所以会走全表查询，表上的所有记录都会加上X锁。</p>
+            word = &quot;&quot;
+            for j := 0; j &lt; size; j++ {
+                tmp := i
+                if tmp&amp;(1&lt;&lt;uint64(j)) != 0 {
+                    word += string(str[j])
+                }
+            }
+            fmt.Println(word)
+        }
 
-<h3 id="锁和隔离级别">锁和隔离级别</h3>
+    }
+</code></pre>
 
-<p>脏读：可以读取未提交的数据。RC 要求解决脏读；</p>
+<h2 id="golang语法">Golang语法</h2>
 
-<p>不可重复读：同一个事务中多次执行同一个select, 读取到的数据发生了改变(被其它事务update并且提交)；</p>
-
-<p>可重复读：同一个事务中多次执行同一个select, 读取到的数据没有发生改变(一般使用MVCC实现)；RR各级级别要求达到可重复读的标准；</p>
-
-<p>幻读：同一个事务中多次执行同一个select, 读取到的数据行发生改变。也就是行数减少或者增加了(被其它事务delete/insert并且提交)。SERIALIZABLE要求解决幻读问题；</p>
-
-<p>READ UNCOMMITTED：可以读取未提交的数据，未提交的数据称为脏数据，所以又称脏读。此时：幻读，不可重复读和脏读均允许；</p>
-
-<p>READ COMMITTED：只能读取已经提交的数据；此时：允许幻读和不可重复读，但不允许脏读，所以RC隔离级别要求解决脏读；</p>
-
-<p>REPEATABLE READ：同一个事务中多次执行同一个select,读取到的数据没有发生改变；此时：允许幻读，但不允许不可重复读和脏读，所以RR隔离级别要求解决不可重复读；</p>
-
-<p>SERIALIZABLE: 幻读，不可重复读和脏读都不允许，所以serializable要求解决幻读；</p>
+<ul>
+<li>implode []string to string:<br />
+使用strings包的Join方法<br /></li>
+<li>移位:<br />
+1 &lt;&lt; 3 =&gt; (1是基数，3是移动的位数)</li>
+</ul>
         </div>
 
         
@@ -127,14 +152,9 @@ delete from cjy where c = 1; 因为c没有索引，所以会走全表查询，�
 <ul>
 <li>
 <ul>
-<li>
-<ul>
-<li><a href="#产生原因">产生原因</a></li>
-<li><a href="#如何检测">如何检测</a></li>
-<li><a href="#锁">锁</a></li>
-<li><a href="#锁和索引">锁和索引</a></li>
-<li><a href="#锁和隔离级别">锁和隔离级别</a></li>
-</ul></li>
+<li><a href="#全排列">全排列</a></li>
+<li><a href="#全组合">全组合</a></li>
+<li><a href="#golang语法">Golang语法</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -188,7 +208,7 @@ delete from cjy where c = 1; 因为c没有索引，所以会走全表查询，�
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/mysql">Mysql
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%AE%97%E6%B3%95">算法
                     </a>
                 </li>
                 
@@ -198,15 +218,9 @@ delete from cjy where c = 1; 因为c没有索引，所以会走全表查询，�
     </div>
     <nav id="article-nav">
     
-    <a href="/post/awk/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Awk记录
-        </div>
-    </a>
     
-    
-    <a href="/post/rsa/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">认识RSA&nbsp;<span>&gt;</span></div>
+    <a href="/post/hex-conversion/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">进制转换&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
