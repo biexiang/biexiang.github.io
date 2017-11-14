@@ -68,12 +68,12 @@
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>这本书设计到了Redis的实现的数据结构、计算机网络等知识，从底层学习Redis的知识。</p>
+            <p>这本书涉及到了Redis实现的数据结构、计算机网络等知识，从底层学习Redis。</p>
 
 <p></p>
 
 <blockquote>
-<p>摘录来自: 黄健宏. “Redis 设计与实现（第二版）”。</p>
+<p>摘录来自: 黄健宏. “Redis 设计与实现（第二版）”</p>
 </blockquote>
 
 <h2 id="数据结构与对象">数据结构与对象</h2>
@@ -269,6 +269,8 @@
         } level[];
 </code></pre>
 
+<p><img src="/img/skip_01.png" alt="/img/skip_01.png" /></p>
+
 <ul>
 <li>跳跃表是有序集合的底层实现之一， 除此之外它在 Redis 中没有其他应用。</li>
 <li>Redis 的跳跃表实现由 zskiplist 和 zskiplistNode 两个结构组成， 其中 zskiplist 用于保存跳跃表信息（比如表头节点、表尾节点、长度）， 而 zskiplistNode 则用于表示跳跃表节点。</li>
@@ -310,6 +312,10 @@ int8_t contents[];
 
 <h3 id="压缩列表">压缩列表</h3>
 
+<p><img src="/img/zlset_01.png" alt="/img/zlset_01.png" />
+<img src="/img/zlset_02.png" alt="/img/zlset_02.png" />
+<img src="/img/zlset_03.png" alt="/img/zlset_03.png" /></p>
+
 <ul>
 <li>压缩列表是一种为节约内存而开发的顺序型数据结构。</li>
 <li>压缩列表被用作列表键和哈希键的底层实现之一。</li>
@@ -317,7 +323,97 @@ int8_t contents[];
 <li>添加新节点到压缩列表， 或者从压缩列表中删除节点， 可能会引发连锁更新操作， 但这种操作出现的几率并不高。</li>
 </ul>
 
+<h3 id="对象">对象</h3>
+
+<p>前面的所有实现都是基于底层的对象系统。</p>
+
+<pre><code>    //redisObject:          
+    typedef struct redisObject {
+
+        // 类型
+        unsigned type:4;
+
+        // 编码
+        unsigned encoding:4;
+
+        // 指向底层实现数据结构的指针
+        void *ptr;
+
+        // 引用计数
+        int refcount;
+
+        unsigned lru:22;
+
+    } robj;
+</code></pre>
+
+<p>redisObject中type是记录对象的类型，比如REDIS_STRING，REDIS_LIST，REDIS_HASH，REDIS_SET，REDIS_ZSET。其实就是使用redis的基本数据结构。使用Type命令查看键的值是什么类型:</p>
+
+<pre><code>    redis&gt; Type msg 
+    string
+</code></pre>
+
+<p>encoding是对象对应的编码，类型下可能存在多种实现的编码。查看:</p>
+
+<pre><code>    redis&gt; OBJECT ENCODING msg
+    &quot;embstr”
+</code></pre>
+
+<p>REDIS_STRING：int、embstr、raw<br />
+REDIS_LIST：ziplist、linkedlist<br />
+REDIS_HASH：ziplist、hashtable<br />
+REDIS_SET：intset、hashtable<br />
+REDIS_ZSET：ziplist、skiplist</p>
+
+<p>其中zset使用跳跃表为实现时，既有使用跳跃表也有字典:</p>
+
+<pre><code>    typedef struct zset {
+
+        zskiplist *zsl;
+
+        dict *dict;
+
+    } zset;
+</code></pre>
+
+<p>其中跳跃表记录zrank和zrange等排行相关，而字典记录zscore成员的分值相关的内容。</p>
+
+<p><img src="/img/obj_01.png" alt="/img/obj_01.png" />
+<img src="/img/obj_02.png" alt="/img/obj_02.png" /></p>
+
+<ul>
+<li>Redis 数据库中的每个键值对的键和值都是一个对象。</li>
+<li>Redis 共有字符串、列表、哈希、集合、有序集合五种类型的对象， 每种类型的对象至少都有两种或以上的编码方式， 不同的编码可以在不同的使用场景上优化对象的使用效率。</li>
+<li>服务器在执行某些命令之前， 会先检查给定键的类型能否执行指定的命令， 而检查一个键的类型就是检查键的值对象的类型。</li>
+<li>Redis 的对象系统带有引用计数实现的内存回收机制， 当一个对象不再被使用时， 该对象所占用的内存就会被自动释放。</li>
+<li>Redis 会共享值为 0 到 9999 的字符串对象。</li>
+<li>对象会记录自己的最后一次被访问的时间， 这个时间可以用于计算对象的空转时间。<br /></li>
+</ul>
+
+<p>内存回收的实现和PHP早期的内存回收实现一样，都是引用计数方式。<br />
+redisObject的lru记录的控转时间是为了超出运行最大内存时，删除的依据，实现和LRU算法一样。</p>
+
 <h2 id="单机数据库的实现">单机数据库的实现</h2>
+
+<h3 id="数据库">数据库</h3>
+
+<ul>
+<li>Redis 服务器的所有数据库都保存在 redisServer.db 数组中， 而数据库的数量则由 redisServer.dbnum 属性保存。</li>
+<li>客户端通过修改目标数据库指针， 让它指向 redisServer.db 数组中的不同元素来切换不同的数据库。</li>
+<li>数据库主要由 dict 和 expires 两个字典构成， 其中 dict 字典负责保存键值对， 而 expires 字典则负责保存键的过期时间。</li>
+<li>因为数据库由字典构成， 所以对数据库的操作都是建立在字典操作之上的。</li>
+<li>数据库的键总是一个字符串对象， 而值则可以是任意一种 Redis 对象类型， 包括字符串对象、哈希表对象、集合对象、列表对象和有序集合对象， 分别对应字符串键、哈希表键、集合键、列表键和有序集合键。</li>
+<li>expires 字典的键指向数据库中的某个键， 而值则记录了数据库键的过期时间， 过期时间是一个以毫秒为单位的 UNIX 时间戳。</li>
+<li>Redis 使用惰性删除和定期删除两种策略来删除过期的键： 惰性删除策略只在碰到过期键时才进行删除操作， 定期删除策略则每隔一段时间， 主动查找并删除过期键。</li>
+<li>执行 SAVE 命令或者 BGSAVE 命令所产生的新 RDB 文件不会包含已经过期的键。</li>
+</ul>
+
+<h3 id="rdb持久化">RDB持久化</h3>
+
+<p><img src="/img/rdb_01.png" alt="/img/rdb_01.png" />
+<img src="/img/rdb_02.png" alt="/img/rdb_02.png" />
+<img src="/img/rdb_03.png" alt="/img/rdb_03.png" />
+<img src="/img/rdb_04.png" alt="/img/rdb_04.png" /></p>
 
 <h2 id="多机数据库的实现">多机数据库的实现</h2>
 
@@ -340,8 +436,13 @@ int8_t contents[];
 <li><a href="#跳跃表">跳跃表</a></li>
 <li><a href="#整数集合">整数集合</a></li>
 <li><a href="#压缩列表">压缩列表</a></li>
+<li><a href="#对象">对象</a></li>
 </ul></li>
-<li><a href="#单机数据库的实现">单机数据库的实现</a></li>
+<li><a href="#单机数据库的实现">单机数据库的实现</a>
+<ul>
+<li><a href="#数据库">数据库</a></li>
+<li><a href="#rdb持久化">RDB持久化</a></li>
+</ul></li>
 <li><a href="#多机数据库的实现">多机数据库的实现</a></li>
 <li><a href="#独立功能的实现">独立功能的实现</a></li>
 </ul></li>
