@@ -8,10 +8,32 @@
     <language>en-us</language>
     <managingEditor>noreply#qq.com (Poly)</managingEditor>
     <webMaster>noreply#qq.com (Poly)</webMaster>
-    <lastBuildDate>Mon, 06 Nov 2017 19:18:08 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 15 Nov 2017 22:28:53 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>双因素认证</title>
+      <link>https://biexiang.github.io/post/totp/</link>
+      <pubDate>Wed, 15 Nov 2017 22:28:53 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/post/totp/</guid>
+      <description>&lt;p&gt;看过阮一峰的这篇日志，写一个Golang的实现。&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Base64 in Golang</title>
+      <link>https://biexiang.github.io/post/base64/</link>
+      <pubDate>Wed, 15 Nov 2017 16:54:11 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/post/base64/</guid>
+      <description>&lt;p&gt;依据码表对字符进行重新编码，可逆。&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>爬虫代理</title>

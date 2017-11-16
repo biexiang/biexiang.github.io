@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Huffman // Peculiar</title>
+    <title>双因素认证 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="Huffman" />
+        <meta property="og:title" content="双因素认证" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/huffman/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/totp/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,159 +56,115 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">Huffman</h1>
+            <h1 class="article-title" itemprop="name">双因素认证</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/huffman/" class="article-date">
-                <time datetime='2017-10-07T10:11:57.000&#43;08:00' itemprop="datePublished">2017-10-07</time>
+            <a href="/post/totp/" class="article-date">
+                <time datetime='2017-11-15T22:28:53.000&#43;08:00' itemprop="datePublished">2017-11-15</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>哈夫曼算法常用于压缩。</p>
+            <p>看过阮一峰的这篇日志，写一个Golang的实现。</p>
 
 <p></p>
 
-<h2 id="压缩">压缩</h2>
+<h2 id="base32实现">Base32实现</h2>
 
-<h3 id="构造输入字符的优先队列">构造输入字符的优先队列</h3>
+<p>对于秘钥的发布，生成可以使用Base32进行编码，如果秘钥太长可以生成二维码扫码认证。Base32的实现可以参考 <a href="/post/base64/">Base64 in Golang</a><br />
+下面的实现没有使用Base32。</p>
 
-<p>统计单个字符出现的次数为一个map[string]int，并且按照出现的次数从小到大排列。之后将这个map构造为一棵哈夫曼树。</p>
+<h2 id="totp">TOTP</h2>
 
-<p>首先优先队列是一个抽象数据类型，一般使用堆来实现，Golang中有container/heap，在PHP里标准库中有实现SplPriorityQueue。这里使用Golang做简单的包装。</p>
+<p>TOTP Stands for Time-Based One-Time Password<br />
+由秘钥和时间作为参数生成一个Password，秘钥在客户端(用户)和服务端各自一份，用户生成这个Password后进行登录，服务端用相同的秘钥进行生成Password，再比对密码。<br />
+超出时间(比如30s)，则Password不相同，Password只在规定的时间内有效，所以服务器的时间和客户端的时间需要是同步的。</p>
 
-<p>Golang对于任何实现了container/heap接口的都提供优先队列的操作。<br />
-需要实现的接口有:</p>
+<p>代码如下：</p>
 
-<ul>
-<li>Len()int<br /></li>
-<li>Less(i,j int) bool<br /></li>
-<li>Swap(i,j int)<br /></li>
-<li>Push(x interface{})<br /></li>
-<li>Pop() interface{}</li>
-</ul>
+<pre><code>    package main
 
-<p>需要注意的是，Golang中类型转换interface到其他数据类型方法为：</p>
+    import (
+        &quot;crypto/hmac&quot;
+        &quot;crypto/sha1&quot;
+        &quot;fmt&quot;
+        &quot;os&quot;
+        &quot;time&quot;
+    )
 
-<pre><code>    var x interface{} = &quot;mmp&quot;
-    val,ok := x.(string)        //转换失败panic，not ok
-</code></pre>
-
-<p>还有Less实现的判断和Pop的顺序需要是一致的。</p>
-
-<p>首先结构定义：</p>
-
-<pre><code>    //结构定义
-    type Node struct {
-        value  string //字符 或者asc、unicode值
-        weight int    //权重
-        left   *Node
-        right  *Node
-    }
-    type Nodes []*Node
-</code></pre>
-
-<p>下面是container/heap接口的实现：</p>
-
-<pre><code>    //实现5个接口
-    func (n Nodes) Len() int {
-        return len(n)
+    /**
+     *  数字 =&gt; Byte数组
+     */
+    func toByte(input int64) []byte {
+        var output []byte
+        mask := int64(0xFF)
+        shifts := [8]uint16{56, 48, 40, 32, 24, 16, 8, 0}
+        for _, shift := range shifts {
+            tmp := byte((input &gt;&gt; shift) &amp; mask)
+            output = append(output, tmp)
+        }
+        return output
     }
 
-    func (n Nodes) Less(i, j int) bool {
-        return n[i].weight &lt; n[j].weight
+    func toDigit(input []byte) uint32 {
+        return (uint32(input[0]) &lt;&lt; 24) + (uint32(input[1]) &lt;&lt; 16) + (uint32(input[2]) &lt;&lt; 8) + uint32(input[3])
     }
 
-    func (n Nodes) Swap(i, j int) {
-        n[i], n[j] = n[j], n[i]
+    /**
+     *  生成器
+     */
+    func oneTimePassword(secret, ts []byte) uint32 {
+        //hmac-sha1生成Hash
+        hmacSha1 := hmac.New(sha1.New, secret)
+        hmacSha1.Write(ts)
+        //生成的Hash是20Byte的数据，相当于40个十六进制数
+        hash := hmacSha1.Sum(nil)
+
+        //缩短Hash，取Hash slice的最后一个字节数字&amp;15
+        offset := hash[len(hash)-1] &amp; 0x0F
+        //极限情况就是[15:19]，不会超过20字节
+        subhash := hash[offset : offset+4]
+
+        //忽略最高位，以防溢出
+        subhash[0] = subhash[0] &amp; 0x7F
+
+        //32bit转换为数字
+        digit := toDigit(subhash)
+
+        digit = digit % 1000000
+
+        return digit
     }
 
-    func (n *Nodes) Push(x interface{}) {
-        add := x.(*Node)
-        *n = append(*n, add)
-    }
-
-    func (n *Nodes) Pop() interface{} {
-        data := *n
-        first := data[0]
-        *n = data[1:]
-        return first
-    }
-</code></pre>
-
-<h3 id="构造哈夫曼树">构造哈夫曼树</h3>
-
-<p>首先对Map数据使用优先队列最小堆化。再依次Pop两个元素从下到上形成树，直到队列里只有一个元素。就是根节点。</p>
-
-<pre><code>    //Huffman树构建
-    func BuildTree(x map[string]int) *Node {
-        queue := &amp;Nodes{}
-        heap.Init(queue)
-
-        for str, cnt := range x {
-            tmp := &amp;Node{
-                value:  str,
-                weight: cnt,
-            }
-
-            heap.Push(queue, tmp)
+    func main() {
+        if len(os.Args) &lt; 2 {
+            fmt.Fprint(os.Stderr, &quot;Missing Parameter&quot;)
+            os.Exit(1)
         }
 
-        //优先队列OK
+        //这里没有选择Base32decode
+        secret := os.Args[1]
+        secretByte := []byte(secret)
+        ts := time.Now().Unix()
 
-        //构建树
-        for queue.Len() &gt; 1 {
-            left := queue.Pop().(*Node)
-            right := queue.Pop().(*Node)
+        pwd := oneTimePassword(secretByte, toByte(ts/30))
 
-            tmp := &amp;Node{
-                value:  &quot;&quot;,
-                weight: left.weight + right.weight,
-                left:   left,
-                right:  right,
-            }
-            queue.Push(tmp)
-        }
-        return queue.Pop().(*Node)
+        remain := 30 - ts%30
+        fmt.Println(pwd, &quot; | 可用时间&quot;, remain, &quot;s&quot;)
     }
 </code></pre>
 
-<h3 id="构造哈夫曼编码表格">构造哈夫曼编码表格</h3>
+<h2 id="运行结果">运行结果</h2>
 
-<p>从根节点开始遍历，value不为空的存储叶子节点的01串。</p>
+<p><img src="/img/totp.png" alt="/img/totp.png" /></p>
 
-<pre><code>    //遍历树获取哈夫曼编码
-    func GetHuffmanCode(node *Node, box map[string]string, prefix string) {
-        if node.value != &quot;&quot; {
-            //叶节点
-            box[node.value] = prefix
-        } else {
-            lprefix := prefix + &quot;0&quot;
-            GetHuffmanCode(node.left, box, lprefix)
-            rprefix := prefix + &quot;1&quot;
-            GetHuffmanCode(node.right, box, rprefix)
-        }
-    }
-</code></pre>
+<h2 id="参考">参考</h2>
 
-<h3 id="输出存储哈夫曼编码表格和对应的压缩数据01串">输出存储哈夫曼编码表格和对应的压缩数据01串</h3>
-
-<pre><code>    //获取压缩后的01串
-    func GetHuffman(before string, table map[string]string) string {
-        var resp string = &quot;&quot;
-        for i := 0; i &lt; len(before); i++ {
-            resp += table[string(before[i])]
-        }
-        return resp
-    } 
-</code></pre>
-
-<h2 id="解压">解压</h2>
-
-<p>在压缩存储时编码表应该也作为一部分进行压缩，解压的时候对于压缩后的01串进行编码表的匹配，匹配到了就替换为字符串。</p>
+<p><a href="https://garbagecollected.org/2014/09/14/how-google-authenticator-works/">how-google-authenticator-works</a><br />
+<a href="http://www.ruanyifeng.com/blog/2017/11/2fa-tutorial.html">双因素认证（2FA）教程</a></p>
         </div>
 
         
@@ -219,14 +175,10 @@
 <ul>
 <li>
 <ul>
-<li><a href="#压缩">压缩</a>
-<ul>
-<li><a href="#构造输入字符的优先队列">构造输入字符的优先队列</a></li>
-<li><a href="#构造哈夫曼树">构造哈夫曼树</a></li>
-<li><a href="#构造哈夫曼编码表格">构造哈夫曼编码表格</a></li>
-<li><a href="#输出存储哈夫曼编码表格和对应的压缩数据01串">输出存储哈夫曼编码表格和对应的压缩数据01串</a></li>
-</ul></li>
-<li><a href="#解压">解压</a></li>
+<li><a href="#base32实现">Base32实现</a></li>
+<li><a href="#totp">TOTP</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+<li><a href="#参考">参考</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -280,12 +232,7 @@
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%AE%97%E6%B3%95">算法
-                    </a>
-                </li>
-                
-                <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E5%93%88%E5%A4%AB%E6%9B%BC">哈夫曼
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E8%AE%A4%E8%AF%81">认证
                     </a>
                 </li>
                 
@@ -295,15 +242,9 @@
     </div>
     <nav id="article-nav">
     
-    <a href="/post/xiaozhao/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            校招
-        </div>
-    </a>
     
-    
-    <a href="/post/grey-pub/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Nginx 配置灰度发布&nbsp;<span>&gt;</span></div>
+    <a href="/post/base64/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Base64 in Golang&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>

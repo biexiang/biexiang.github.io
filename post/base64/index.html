@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Base64 in Golang // Peculiar</title>
+
+        <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+        <meta property="og:title" content="Base64 in Golang" />
+    <meta property="og:description" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://biexiang.github.io/post/base64/" />
+    
+
+    <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
+    <link rel="shortcut icon" href="/favicon.png">
+
+    <link href="https://biexiang.github.io/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
+    <link href="https://biexiang.github.io/webfonts/source-code-pro/main.css" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="https://biexiang.github.io/css/style.css">
+
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    
+    <meta name="generator" content="Hugo 0.24.1" />
+</head>
+
+
+<body>
+<div id="container">
+    <header id="header">
+    <div id="header-outer" class="outer">
+        <div id="header-inner" class="inner">
+            <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
+            <a id="logo" class="logo-text" href="https://biexiang.github.io/">Peculiar</a>
+            <nav id="main-nav">
+                
+                <a class="main-nav-link" href="/archives">Archives</a>
+                
+                <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            <nav id="sub-nav">
+                <div id="search-form-wrap">
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+    <section id="main" class="outer">
+        <article class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        <header class="article-header">
+            <h1 class="article-title" itemprop="name">Base64 in Golang</h1>
+        </header>
+        
+        <div class="article-meta">
+            <a href="/post/base64/" class="article-date">
+                <time datetime='2017-11-15T16:54:11.000&#43;08:00' itemprop="datePublished">2017-11-15</time>
+            </a>
+            
+            
+            
+        </div>
+        <div class="article-entry" itemprop="articleBody">
+            <p>依据码表对字符进行重新编码，可逆。</p>
+
+<p></p>
+
+<p>Ascii字符都是8位，范围在256以内。而Base64是使用6位表示一个字符所以范围是64以内，Base32是使用5位表示一个字符，范围在32以内，下面是码表字符，索引为数值。</p>
+
+<pre><code>    BASE64 string = &quot;ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;
+    BASE32 string = &quot;ABCDEFGHIJKLMNOPQRSTUVWZYZ234567&quot;
+</code></pre>
+
+<p>上面Base64编码如果结果不是4的整数倍需要补&rdquo;=&ldquo;号，少几个补几个。Base32也是对8进行取余Pad。</p>
+
+<p>编码的过程就是遍历字符串，去每一个字符的Ascii码表的十进制值，转换为二进制，不满8位，高位补0，拼接整个字符串的二进制，以6个切分取编码对应索引的值组成新的字符串，最后判断补&rdquo;=&ldquo;。<br />
+解码是编码的逆过程。</p>
+
+<pre><code>    package main
+
+    import (
+        &quot;fmt&quot;
+        &quot;os&quot;
+        &quot;strconv&quot;
+        &quot;strings&quot;
+    )
+
+    var (
+        BASE64 string = &quot;ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;
+        BASE32 string = &quot;ABCDEFGHIJKLMNOPQRSTUVWZYZ234567&quot;
+    )
+
+    /**
+     * 填充0
+     */
+    func strpad(target string, direction int, length int, pad string) string {
+        if len(target) &gt; length {
+            fmt.Fprintln(os.Stderr, &quot;no need to pad&quot;)
+            os.Exit(1)
+        }
+
+        if direction == 1 {
+            //left
+            for {
+                if len(target) &gt;= length {
+                    return target
+                }
+                target = pad + target
+            }
+        } else if direction == 0 {
+            //right
+            for {
+                if len(target) &gt;= length {
+                    return target
+                }
+                target = target + pad
+            }
+        } else {
+            fmt.Fprintln(os.Stderr, &quot;wrong direction&quot;)
+            os.Exit(1)
+        }
+
+        return &quot;error&quot;
+    }
+
+    /**
+     * 返回数字索引
+     */
+    func getIndex(str string, word byte) int {
+        for i := 0; i &lt; len(str); i++ {
+            if string(word) == &quot;=&quot; {
+                return 0
+            }
+
+            if str[i] == word {
+                return i
+            }
+        }
+        return -1
+    }
+
+    /**
+     * str =&gt; dec =&gt; bin =&gt; process
+     */
+    func enBase64(input string) string {
+        var (
+            binstr string = &quot;&quot;
+            output string = &quot;&quot;
+        )
+
+        for i := 0; i &lt; len(input); i++ {
+            dec := int64(input[i])
+            bin := strconv.FormatInt(dec, 2)
+            strbin := strpad(string(bin), 1, 8, &quot;0&quot;)
+            binstr += strbin
+        }
+
+        // 6*4 = 8*3 填充左边的0
+        num := (6 - len(binstr)%6) + len(binstr)
+        final := strpad(binstr, 0, num, &quot;0&quot;)
+
+        for i := 0; i &lt; num; i += 6 {
+            bin := final[i : i+6]
+            dec, err := strconv.ParseInt(bin, 2, 64)
+            if err != nil {
+                fmt.Fprintln(os.Stderr, err)
+                os.Exit(1)
+            }
+
+            output += string(BASE64[dec])
+        }
+
+        //添加等于号
+        num = (4 - len(output)%4) + len(output)
+        output = strpad(output, 0, num, &quot;=&quot;)
+
+        return output
+    }
+
+    /**
+     *  str =&gt; dec =&gt; bin =&gt; process
+     */
+    func deBase64(input string) string {
+        var (
+            binstr string = &quot;&quot;
+            output string = &quot;&quot;
+        )
+
+        //删除等于号
+        input = strings.TrimRight(input, &quot;=&quot;)
+
+        for i := 0; i &lt; len(input); i++ {
+            index := getIndex(BASE64, input[i])
+            if index == -1 {
+                fmt.Fprintln(os.Stderr, &quot;Wrong decode string in &quot;, i)
+                os.Exit(1)
+            }
+            bin := strconv.FormatInt(int64(index), 2)
+            strbin := strpad(string(bin), 1, 6, &quot;0&quot;)
+            binstr += string(strbin)
+        }
+
+        length := len(binstr)
+        overflow := length % 8
+        binstr = binstr[0 : length-overflow]
+
+        for i := 0; i &lt; len(binstr); i += 8 {
+            dec, err := strconv.ParseInt(binstr[i:i+8], 2, 64)
+            if err != nil {
+                fmt.Fprintln(os.Stderr, err)
+                os.Exit(1)
+            }
+
+            output += string(dec)
+        }
+        return output
+    }
+
+    /**
+     *  str =&gt; dec =&gt; bin =&gt; process
+     */
+    func enBase32(input string) string {
+        var (
+            binstr string = &quot;&quot;
+            output string = &quot;&quot;
+        )
+
+        for i := 0; i &lt; len(input); i++ {
+            dec := int64(input[i])
+            bin := strconv.FormatInt(dec, 2)
+            strbin := strpad(string(bin), 1, 8, &quot;0&quot;)
+            binstr += strbin
+        }
+
+        // 5*8 = 8*5 填充左边的0
+        num := (5 - len(binstr)%5) + len(binstr)
+        final := strpad(binstr, 0, num, &quot;0&quot;)
+
+        for i := 0; i &lt; num; i += 5 {
+            bin := final[i : i+5]
+            dec, err := strconv.ParseInt(bin, 2, 64)
+            if err != nil {
+                fmt.Fprintln(os.Stderr, err)
+                os.Exit(1)
+            }
+
+            output += string(BASE32[dec])
+        }
+
+        //添加等于号
+        num = (8 - len(output)%8) + len(output)
+        output = strpad(output, 0, num, &quot;=&quot;)
+
+        return output
+
+    }
+
+    func deBase32(input string) string {
+        var (
+            binstr string = &quot;&quot;
+            output string = &quot;&quot;
+        )
+
+        //删除等于号
+        input = strings.TrimRight(input, &quot;=&quot;)
+
+        for i := 0; i &lt; len(input); i++ {
+            index := getIndex(BASE32, input[i])
+            if index == -1 {
+                fmt.Fprintln(os.Stderr, &quot;Wrong decode string in &quot;, i)
+                os.Exit(1)
+            }
+            bin := strconv.FormatInt(int64(index), 2)
+            strbin := strpad(string(bin), 1, 5, &quot;0&quot;)
+            binstr += string(strbin)
+        }
+
+        length := len(binstr)
+        overflow := length % 8
+        binstr = binstr[0 : length-overflow]
+
+        for i := 0; i &lt; len(binstr); i += 8 {
+            dec, err := strconv.ParseInt(binstr[i:i+8], 2, 64)
+            if err != nil {
+                fmt.Fprintln(os.Stderr, err)
+                os.Exit(1)
+            }
+
+            output += string(dec)
+        }
+        return output
+    }
+
+    func main() {
+        str := &quot;liang&quot;
+        tst := enBase64(str)
+        fmt.Println(tst)
+        fmt.Println(deBase64(tst))
+
+        tst = enBase32(str)
+        fmt.Println(tst)
+        fmt.Println(deBase32(tst))
+    }
+</code></pre>
+        </div>
+
+        
+        
+        
+
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+        <script>
+            (function() {
+                var $toc = $('#TableOfContents');
+                if ($toc.length > 0) {
+                    var $window = $(window);
+
+                    function onScroll(){
+                        var currentScroll = $window.scrollTop();
+                        var h = $('.article-entry h1, .article-entry h2, .article-entry h3, .article-entry h4, .article-entry h5, .article-entry h6');
+                        var id = "";
+                        h.each(function (i, e) {
+                            e = $(e);
+                            if (e.offset().top - 10 <= currentScroll) {
+                                id = e.attr('id');
+                            }
+                        });
+                        var active = $toc.find('a.active');
+                        if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                        active.each(function (i, e) {
+                            $(e).removeClass('active').siblings('ul').hide();
+                        });
+                        $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                            $(e).children('a').addClass('active').siblings('ul').show();
+                        });
+                    }
+
+                    $window.on('scroll', onScroll);
+                    $(document).ready(function() {
+                        $toc.find('a').parent('li').find('ul').hide();
+                        onScroll();
+                        document.getElementsByClassName('article-toc')[0].style.display = '';
+                    });
+                }
+            })();
+        </script>
+        
+
+
+        
+        <footer class="article-footer">
+            <ul class="article-tag-list">
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%AE%97%E6%B3%95">算法
+                    </a>
+                </li>
+                
+            </ul>
+        </footer>
+        
+    </div>
+    <nav id="article-nav">
+    
+    <a href="/post/totp/" id="article-nav-newer" class="article-nav-link-wrap">
+        <div class="article-nav-title"><span>&lt;</span>&nbsp;
+            双因素认证
+        </div>
+    </a>
+    
+    
+    <a href="/post/spider-proxy/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">爬虫代理&nbsp;<span>&gt;</span></div>
+    </a>
+    
+</nav>
+</article>
+
+        
+    </section>
+    <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
+            Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
+        </div>
+    </div>
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/tomorrow-night.min.css" integrity="sha256-2wL88NKUqvJi/ExflDzkzUumjUM73mcK2gBvBBeLvTk=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js" integrity="sha256-KbfTjB0WZ8vvXngdpJGY3Yp3xKk+tttbqClO11anCIU=" crossorigin="anonymous"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js" integrity="sha256-ExtbCSBuYA7kq1Pz362ibde9nnsHYPt6JxuxYeZbU+c=" crossorigin="anonymous"></script>
+        <script>renderMathInElement(document.body);</script>
+    
+    <script>
+        document.getElementById('main-nav-toggle').addEventListener('click', function () {
+            var header = document.getElementById('header');
+            if (header.classList.contains('mobile-on')) {
+                header.classList.remove('mobile-on');
+            } else {
+                header.classList.add('mobile-on');
+            }
+        });
+    </script>
+</footer>
+</div>
+</body>
+</html>
