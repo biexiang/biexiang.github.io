@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>视频剪辑 // Peculiar</title>
+    <title>循环冗余检验 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="视频剪辑" />
+        <meta property="og:title" content="循环冗余检验" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/video_clip/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/crc-m/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,64 +56,172 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">视频剪辑</h1>
+            <h1 class="article-title" itemprop="name">循环冗余检验</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/video_clip/" class="article-date">
-                <time datetime='2017-10-28T11:55:49.000&#43;08:00' itemprop="datePublished">2017-10-28</time>
+            <a href="/post/crc-m/" class="article-date">
+                <time datetime='2017-11-20T15:56:57.000&#43;08:00' itemprop="datePublished">2017-11-20</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>Mac系统有个好玩的功能——快速预览（QuickLook）——在任何文件上敲击「空格」键，可以快速预览文件内容。
-</p>
+            <p>学计算机网络的时候接触过，CRC对于报文的完整性检验，记录下。</p>
 
-<h2 id="基础概念">基础概念</h2>
+<p></p>
+
+<p>首先计算待传输数据的冗余码(余数)，将余数加到数据后面进行传输，另一端收到后将数据对同一个除数进行取余，若余数为0，则数据完整。</p>
+
+<h2 id="基础知识">基础知识</h2>
 
 <ul>
-<li><p>分辨率<br />
-没什么好说的。</p></li>
+<li>LSB<br />
+最低有效位(Least Significant Bit)</li>
+<li>MSB<br />
+最高有效位(Most Significant Bit)<br /></li>
+<li>生成多项式<br />
+生成多项式的选择是CRC算法实现中最重要的部分，所选择的多项式必须有最大的错误检测能力，同时保证总体的碰撞概率最小。多项式最重要的属性是它的长度，也就是最高非零系数的数值，因为它直接影响着计算的校验和的长度。比如CRC-8 = x^8+x^2+x+1，即 10000 0111，去掉MSB即 0000 0111(0x07)。<br /></li>
 
-<li><p>帧率
-FPS。</p></li>
+<li><p>反转字节</p>
 
-<li><p>码率<br />
-又称为比特率，主要是保证视频在线直出的一个速率，计算方式=视频大小(单位为bit)/视频时长。<br />
-一般视频网站规定上传的视频码率为1Mbit左右，如果大于就需要转换，也就是对于画质进行压缩，导致bit减少。保证一个在线观看的速率不会卡顿，网易云音乐的上传视频就会转换。<br />
-100分钟1GB的电影的码率大概为1.4Mbit/s。<br />
-iOS 设备采集的视频码率大约在 50 Mbps，相比而言 Bilibili 弹幕网对超清视频的要求上限是 1.8 Mbps，一旦超过这个码率，视频会被官方重新压制（官方压制后的清晰度惨不忍睹）。</p></li>
+<pre><code>func ReverseByte(val byte) byte {
+    var rval byte = 0
+    for i := uint8(0); i &lt; 8; i++ {
+        if val&amp;(1&lt;&lt;i) != 0 {
+            rval |= 0x80 &gt;&gt; i
+        }
+    }
+    return rval
+}
+</code></pre></li>
 
-<li><p>封装格式</p>
+<li><p>CRC-M表格<br />
+8位，一共256种可以提前生成一个对应的CRC表格。</p>
 
-<pre><code>常见的视频流：H264（或称AVC1）、XVID、DIVX、RV40、RV50、RV60、RM8、RM9、RM10
-常见的音频流：mp3、aac、ogg、flac
-常见封装格式可行的组合：                                  
-                                  mp4：H264+mp3/aac/ogg/alac；  XVID+mp3/aac/ogg/alac
-                                  mov：H264+mp4；H264+aac
-                                  avi:     H264+mp3;  XVID+mp3;  DIVX+mp3
-                                  rmvb：RV40~RV60+aac/mp3；RM8~RM10+aac/mp3
-                                  mkv:   万能封装，任意组合
-QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac的mov或mp4封装。
+<pre><code>func makeTable(params Params) *Table {
+    table := new(Table)
+    table.params = params
+
+    for i := 0; i &lt; 256; i++ {
+        num := uint8(i)
+        //遍历整个字节的每一位
+        for j := 0; j &lt; 8; j++ {
+            //MSB是否为1，为1则与多项式异或
+            yep := (num &amp; 0x80) != 0
+            num &lt;&lt;= 1
+            if yep {
+                num ^= params.Poly
+            }
+        }
+        table.data[i] = num
+    }
+    return table
+}
 </code></pre></li>
 </ul>
 
-<h2 id="转码">转码</h2>
+<h2 id="思路">思路</h2>
 
-<h2 id="final-cut-pro">Final Cut Pro</h2>
+<p>A = 0011 1110，C1=00110000B，C2=1110B<br />
+A = C1 XOR C2<br />
+B = Poly(多项式)<br />
+则 A XOR B = （C1 XOR C2） XOR B =(C1 XOR B )XOR C2<br />
+这里的例子是CRC-4，下面的Update函数是CRC-8。</p>
 
-<ul>
-<li>剪片段: 目标段首尾按B，CUT出一个区域，右键新建复合，再双击该片段，进入后可以进行导出。<br /></li>
-<li>合成片段: 把素材拖到时间轴。<br /></li>
-<li>加背景音乐: 拖进来后，如果需要某一段音量调高，使用区域工具(I O)选择后，拖动音量调整。<br /></li>
-<li>加水印: 制作自己风格的Logo，调整大小放在视频上层。<br /></li>
-</ul>
+<h2 id="完整代码">完整代码</h2>
 
-<h2 id="参考">参考</h2>
+<pre><code>    package main
 
-<p><a href="http://bbs.feng.com/read-htm-tid-6839308.html">http://bbs.feng.com/read-htm-tid-6839308.html</a></p>
+    import (
+        &quot;fmt&quot;
+    )
+
+    /**
+     *  Poly 多项式
+     *  Init 初始化值
+     *  RefIn 如果此值为true，表示输入的数据需要进行比特翻转，也就是Bit7要变成最低位， Bit0要变成最高位
+     *  RefOut 如果此值为true，这表示进行异或后算出来的CRC需要进行整个比特翻转
+     *  XorOut 最终异或的值
+     */
+    type Params struct {
+        Poly   uint8
+        Init   uint8
+        RefIn  bool
+        RefOut bool
+        XorOut uint8
+    }
+
+    type Table struct {
+        params Params
+        data   [256]uint8
+    }
+
+    func makeTable(params Params) *Table {
+        table := new(Table)
+        table.params = params
+
+        for i := 0; i &lt; 256; i++ {
+            num := uint8(i)
+            //遍历整个字节的每一位
+            for j := 0; j &lt; 8; j++ {
+                //MSB是否为1，为1则与多项式异或
+                yep := (num &amp; 0x80) != 0
+                num &lt;&lt;= 1
+                if yep {
+                    num ^= params.Poly
+                }
+            }
+            table.data[i] = num
+        }
+        return table
+    }
+
+    /**
+     *  反转字节
+     */
+    func ReverseByte(val byte) byte {
+        var rval byte = 0
+        for i := uint8(0); i &lt; 8; i++ {
+            if val&amp;(1&lt;&lt;i) != 0 {
+                rval |= 0x80 &gt;&gt; i
+            }
+        }
+        return rval
+    }
+
+    func ReverseUint8(input uint8) uint8 {
+        return ReverseByte(input)
+    }
+
+    func Update(init uint8, data []byte, table *Table) uint8 {
+        for _, value := range data {
+            if table.params.RefIn {
+                value = ReverseByte(value)
+            }
+            init = table.data[init^value]
+        }
+        return init
+    }
+
+    func Complete(crc uint8, table *Table) uint8 {
+        if table.params.RefOut {
+            crc = ReverseUint8(crc)
+        }
+        return crc ^ table.params.XorOut
+    }
+
+    func main() {
+        crc8 := Params{0x07, 0x00, false, false, 0x00}
+        table := makeTable(crc8)
+        init := table.params.Init
+        crc := Update(init, []byte{0x12, 0x55}, table)
+        crc = Complete(crc, table)
+
+        fmt.Println(crc)
+    }
+</code></pre>
         </div>
 
         
@@ -124,10 +232,9 @@ QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac�
 <ul>
 <li>
 <ul>
-<li><a href="#基础概念">基础概念</a></li>
-<li><a href="#转码">转码</a></li>
-<li><a href="#final-cut-pro">Final Cut Pro</a></li>
-<li><a href="#参考">参考</a></li>
+<li><a href="#基础知识">基础知识</a></li>
+<li><a href="#思路">思路</a></li>
+<li><a href="#完整代码">完整代码</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -181,7 +288,12 @@ QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac�
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E8%A7%86%E9%A2%91%E5%89%AA%E8%BE%91">视频剪辑
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%AE%97%E6%B3%95">算法
+                    </a>
+                </li>
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/crc-8">CRC-8
                     </a>
                 </li>
                 
@@ -191,15 +303,9 @@ QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac�
     </div>
     <nav id="article-nav">
     
-    <a href="/post/hex-conversion/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            进制转换
-        </div>
-    </a>
     
-    
-    <a href="/post/sphinx/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Sphinx初试&nbsp;<span>&gt;</span></div>
+    <a href="/post/totp/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">双因素认证&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
@@ -210,7 +316,7 @@ QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac�
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2017 map[email:noreply#qq.com name:Poly]&nbsp;
+            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
