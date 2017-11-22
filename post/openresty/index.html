@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenResty最佳实践 // Peculiar</title>
+
+        <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+        <meta property="og:title" content="OpenResty最佳实践" />
+    <meta property="og:description" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://biexiang.github.io/post/openresty/" />
+    
+
+    <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
+    <link rel="shortcut icon" href="/favicon.png">
+
+    <link href="https://biexiang.github.io/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
+    <link href="https://biexiang.github.io/webfonts/source-code-pro/main.css" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="https://biexiang.github.io/css/style.css">
+
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    
+    <meta name="generator" content="Hugo 0.24.1" />
+</head>
+
+
+<body>
+<div id="container">
+    <header id="header">
+    <div id="header-outer" class="outer">
+        <div id="header-inner" class="inner">
+            <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
+            <a id="logo" class="logo-text" href="https://biexiang.github.io/">Peculiar</a>
+            <nav id="main-nav">
+                
+                <a class="main-nav-link" href="/archives">Archives</a>
+                
+                <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            <nav id="sub-nav">
+                <div id="search-form-wrap">
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+    <section id="main" class="outer">
+        <article class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        <header class="article-header">
+            <h1 class="article-title" itemprop="name">OpenResty最佳实践</h1>
+        </header>
+        
+        <div class="article-meta">
+            <a href="/post/openresty/" class="article-date">
+                <time datetime='2017-11-21T15:24:01.000&#43;08:00' itemprop="datePublished">2017-11-21</time>
+            </a>
+            
+            
+            
+        </div>
+        <div class="article-entry" itemprop="articleBody">
+            <p>因为lnmp认识了Nginx，后面又认识了Redis，它们都有使用Lua，所以一直想学学OpenResty。</p>
+
+<p></p>
+
+<h2 id="lua入门">Lua入门</h2>
+
+<h3 id="luajit安装">LuaJit安装</h3>
+
+<p><a href="http://luajit.org/">官网</a>下载Luajit-beta3，解压后有MakeFile，可以直接make =&gt; sudo make insall</p>
+
+<h3 id="数据类型">数据类型</h3>
+
+<ul>
+<li>Number</li>
+<li>String</li>
+<li>nil</li>
+<li>Table</li>
+<li>boolean</li>
+<li>function<br /></li>
+</ul>
+
+<h3 id="控制结构">控制结构</h3>
+
+<ul>
+<li>while</li>
+<li>for</li>
+<li>repeat</li>
+<li>if</li>
+</ul>
+
+<h3 id="函数">函数</h3>
+
+<ul>
+<li>函数声明<br /></li>
+<li>匿名函数</li>
+<li>传值、传址和多个参数</li>
+<li>多个返回值</li>
+</ul>
+
+<h3 id="包和api">包和API</h3>
+
+<ul>
+<li>String库<br /></li>
+<li>Table库</li>
+<li>正则
+&hellip;</li>
+</ul>
+
+<h3 id="metatable">MetaTable</h3>
+
+<pre><code>    --[[第三方包引入时，局部化，防止变量污染--]]
+    local cao = require(&quot;cao&quot;)
+
+    --[[初始化版本信息--]]
+    local _M = {_VERSION = &quot;0.1&quot; }
+
+    --[[元表初始化或者设置父类的继承--]]
+    local mt = {__index = _M}
+
+    function _M.new(self)
+        local sleep = cao.sleep
+
+        --[[绑定sleep方法到元表--]]
+        return setmetatable({sleep = sleep} , mt)
+    end
+
+    function _M.say(self)
+        local sleep = self.sleep
+
+        print(&quot;Focus more&quot;,sleep())
+    end
+
+    return _M
+</code></pre>
+
+<h2 id="nginx配置">Nginx配置</h2>
+
+<h3 id="location段">location段</h3>
+
+<ul>
+<li><p>加速首页访问<br />
+直接转发到一个静态页面或者后端应用服务器</p>
+
+<pre><code>location = / {
+    proxy_pass http://tomcat:8080/index
+}           
+</code></pre></li>
+
+<li><p>加载静态资源<br />
+^~代表以URL什么开头<br />
+~*表示不区分大小写</p>
+
+<pre><code>//静态资源请求匹配到目录
+location ^~ /static/ {
+    root /webroot/static/;
+}
+
+//匹配请求的后缀
+location ~* \.(gif|jpg|jpeg|png|css|js|ico)$ {
+    root /webroot/res/;
+}
+</code></pre></li>
+
+<li><p>转发到后端应用服务器<br />
+优先级相对于上面最低，通用匹配。</p>
+
+<pre><code>location / {
+    proxy_pass http://tomcat:8080/
+}
+</code></pre></li>
+</ul>
+
+<h3 id="alias和root的区别">alias和root的区别</h3>
+
+<p>如果出现问题，最好还是查看Nginx的error log，方便找到问题。<br />
+区别见下面的注释。</p>
+
+<pre><code>    server {
+        listen 80; 
+        server_name os.me;
+
+        location /page {
+            #alias对应的路径只是/page/的一个别名
+            alias        /Users/poly/Desktop/page/;
+            index        index.html;
+        }
+
+        #location /page {
+        #    #使用root时，对应的url访问为      http://os.me/page/
+        #    #对应的路径是root字段+location字段       /Users/poly/Desktop/page/     
+        #    root        /Users/poly/Desktop/;
+        #    index       index.html;
+        #}
+
+    }
+</code></pre>
+
+<h3 id="块内跳转">@块内跳转</h3>
+
+<pre><code>    location /info {
+            error_page 404 403 @not_found;
+        }
+
+    location @not_found {
+        proxy_pass https://biexiang.github.io;
+        proxy_redirect     off;
+        proxy_set_header   Host             $host;
+        proxy_set_header   X-Real-IP        $remote_addr;
+        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+    }
+</code></pre>
+
+<h3 id="静态文件服务">静态文件服务</h3>
+
+<p>开启Gzip会增加CPU的开销，默认Gzip关闭。</p>
+
+<pre><code>    http {
+        # inactive 是指经过多长时间文件没被请求后删除缓存。
+        open_file_cache max=204800 inactive=20s;
+
+        # open_file_cache 指令中的inactive 参数时间内文件的最少使用次数，
+        open_file_cache_min_uses 1;
+
+        # 这个是指多长时间检查一次缓存的有效信息
+        open_file_cache_valid 30s;
+
+        gzip on;
+        gzip_min_length 1k;
+        gzip_buffers 4 16k;
+        gzip_http_version 1.0;
+        gzip_comp_level 2;
+        gzip_types text/plain application/x-javascript text/css application/xml;
+
+        server {
+            listen       80;
+            server_name www.test.com;
+            charset utf-8;
+            root   /data/www.test.com;
+            index  index.html index.htm;
+        }
+    }
+</code></pre>
+
+<h3 id="日志">日志</h3>
+
+<ul>
+<li><p>访问日志</p>
+
+<pre><code>log_format myformat '$remote_addr  $status  $time_local';
+access_log logs/access.log  myformat;
+</code></pre></li>
+
+<li><p>错误日志<br />
+日志等级包括 debug、info、notice、warn、error、crit，从左至右，日志详细程度逐级递减。</p>
+
+<pre><code>error_log path level;
+#关闭错误日志:   
+error_log /dev/null;
+</code></pre></li>
+</ul>
+
+<h3 id="反向代理">反向代理</h3>
+
+<p>反向代理默认不会转发原始请求的头部，需要自己加上proxy_set_header等参数设置。</p>
+
+<pre><code>    location /tmp {
+        proxy_pass https://raw.githubusercontent.com/biexiang/biexiang.github.io/master/index.xml;
+        proxy_set_header   X-Real-IP        $remote_addr;
+        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+    }
+</code></pre>
+
+<h3 id="负载均衡">负载均衡</h3>
+
+<p>调度算法见之前的<a href="/post/xiaozhao/#使用upstream进行负载均衡的算法">笔记</a></p>
+
+<pre><code>    upstream webservers {
+        server 192.168.18.201 weight=1 max_fails=2 fail_timeout=2;
+        server 192.168.18.202 weight=1 max_fails=2 fail_timeout=2;
+    }
+
+    server {
+        listen       80;
+        server_name  localhost;
+        location / {
+            proxy_pass      http://webservers;
+            proxy_set_header  X-Real-IP  $remote_addr;
+        }
+    }
+</code></pre>
+
+<h3 id="tryfiles">TryFiles</h3>
+
+<p>if $uri is valid，then go $uri<br />
+if $uri is not valid，then go $uri/<br />
+if both of $uri and $uri/ are not valid，then go /index.html<br />
+make sure /index.html is absolutely valid</p>
+
+<pre><code>    location / {
+        try_files $uri $uri/ /index.html;
+
+        #PHP中框架常用
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location /new {
+        //永久重定向
+        rewrite ^ https://baidu.com$request_uri? permanent;
+    }
+</code></pre>
+
+<p>不要把所有的请求都交给proxy，使用try_files。</p>
+
+<pre><code>    ##配置一
+    server {
+        listen       80;
+        server_name  xhprof.com;
+        root   /path/to;
+
+        location / {
+            try_files $uri $uri/ @proxy;
+        }
+        location @proxy {
+            fastcgi_pass   127.0.0.1:9000;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME  /$document_root$fastcgi_script_name;
+            include        fastcgi_params;
+        }
+    }
+
+    ##配置二
+    server {
+        listen       80;
+        server_name  xhprof.com;
+        root   /path/to;
+
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+        location ~ \.php$ {
+            fastcgi_pass   127.0.0.1:9000;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME  /$document_root$fastcgi_script_name;
+            include        fastcgi_params;
+        }
+    }
+</code></pre>
+
+<h2 id="openresty">OpenResty</h2>
+
+<h3 id="安装">安装</h3>
+
+<p>没有使用brew安装，下载源码包解压。</p>
+
+<pre><code>    #初始化
+    ./configure --prefix=/opt/openresty\
+                 --with-cc-opt=&quot;-I/usr/local/include&quot;\
+                 --with-luajit\
+                 --without-http_redis2_module \
+                 --with-ld-opt=&quot;-L/usr/local/lib&quot;
+
+    #编译
+    gmake 
+
+    #安装(需要root权限)
+    sudo gmake install 
+</code></pre>
+
+<p>因为openresty下的nginx需要和nginx共存，环境变量已经有了nginx，alias如下：</p>
+
+<pre><code>    alias rnginx='/opt/openresty/nginx/sbin/nginx'
+</code></pre>
+
+<h3 id="hello-world">hello world</h3>
+
+<p>创建工作目录 /Users/poly/Desktop/OpenResty/openresty<br />
+目录下新建logs和conf<br />
+conf下建nginx.conf</p>
+
+<pre><code>    #主要server
+    server {
+            listen 6699;
+            location / {
+                default_type text/html;
+
+                content_by_lua_block {
+                    ngx.say(&quot;HelloWorld&quot;)
+                }
+            }
+    }
+
+    #cli
+    rnginx -p /Users/poly/Desktop/OpenResty/openresty  
+
+    #结果
+    ➜  openresty curl localhost:6699
+    HelloWorld
+</code></pre>
+        </div>
+
+        
+        
+        <div class="article-toc" style="display:none;">
+            <h3>Contents</h3>
+            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#lua入门">Lua入门</a>
+<ul>
+<li><a href="#luajit安装">LuaJit安装</a></li>
+<li><a href="#数据类型">数据类型</a></li>
+<li><a href="#控制结构">控制结构</a></li>
+<li><a href="#函数">函数</a></li>
+<li><a href="#包和api">包和API</a></li>
+<li><a href="#metatable">MetaTable</a></li>
+</ul></li>
+<li><a href="#nginx配置">Nginx配置</a>
+<ul>
+<li><a href="#location段">location段</a></li>
+<li><a href="#alias和root的区别">alias和root的区别</a></li>
+<li><a href="#块内跳转">@块内跳转</a></li>
+<li><a href="#静态文件服务">静态文件服务</a></li>
+<li><a href="#日志">日志</a></li>
+<li><a href="#反向代理">反向代理</a></li>
+<li><a href="#负载均衡">负载均衡</a></li>
+<li><a href="#tryfiles">TryFiles</a></li>
+</ul></li>
+<li><a href="#openresty">OpenResty</a>
+<ul>
+<li><a href="#安装">安装</a></li>
+<li><a href="#hello-world">hello world</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+        </div>
+        
+        
+
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+        <script>
+            (function() {
+                var $toc = $('#TableOfContents');
+                if ($toc.length > 0) {
+                    var $window = $(window);
+
+                    function onScroll(){
+                        var currentScroll = $window.scrollTop();
+                        var h = $('.article-entry h1, .article-entry h2, .article-entry h3, .article-entry h4, .article-entry h5, .article-entry h6');
+                        var id = "";
+                        h.each(function (i, e) {
+                            e = $(e);
+                            if (e.offset().top - 10 <= currentScroll) {
+                                id = e.attr('id');
+                            }
+                        });
+                        var active = $toc.find('a.active');
+                        if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                        active.each(function (i, e) {
+                            $(e).removeClass('active').siblings('ul').hide();
+                        });
+                        $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                            $(e).children('a').addClass('active').siblings('ul').show();
+                        });
+                    }
+
+                    $window.on('scroll', onScroll);
+                    $(document).ready(function() {
+                        $toc.find('a').parent('li').find('ul').hide();
+                        onScroll();
+                        document.getElementsByClassName('article-toc')[0].style.display = '';
+                    });
+                }
+            })();
+        </script>
+        
+
+
+        
+        <footer class="article-footer">
+            <ul class="article-tag-list">
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/nginx">Nginx
+                    </a>
+                </li>
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/openresty">OpenResty
+                    </a>
+                </li>
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/lua">Lua
+                    </a>
+                </li>
+                
+            </ul>
+        </footer>
+        
+    </div>
+    <nav id="article-nav">
+    
+    
+    <a href="/post/crc-m/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">循环冗余检验&nbsp;<span>&gt;</span></div>
+    </a>
+    
+</nav>
+</article>
+
+        
+    </section>
+    <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
+            Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
+        </div>
+    </div>
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/tomorrow-night.min.css" integrity="sha256-2wL88NKUqvJi/ExflDzkzUumjUM73mcK2gBvBBeLvTk=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js" integrity="sha256-KbfTjB0WZ8vvXngdpJGY3Yp3xKk+tttbqClO11anCIU=" crossorigin="anonymous"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js" integrity="sha256-ExtbCSBuYA7kq1Pz362ibde9nnsHYPt6JxuxYeZbU+c=" crossorigin="anonymous"></script>
+        <script>renderMathInElement(document.body);</script>
+    
+    <script>
+        document.getElementById('main-nav-toggle').addEventListener('click', function () {
+            var header = document.getElementById('header');
+            if (header.classList.contains('mobile-on')) {
+                header.classList.remove('mobile-on');
+            } else {
+                header.classList.add('mobile-on');
+            }
+        });
+    </script>
+</footer>
+</div>
+</body>
+</html>

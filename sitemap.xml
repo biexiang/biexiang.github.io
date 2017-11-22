@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://biexiang.github.io/post/openresty/</loc>
+    <lastmod>2017-11-21T15:24:01+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://biexiang.github.io/post/crc-m/</loc>
     <lastmod>2017-11-20T15:56:57+08:00</lastmod>
   </url>
@@ -142,6 +147,12 @@
   </url>
   
   <url>
+    <loc>https://biexiang.github.io/tags/lua/</loc>
+    <lastmod>2017-11-21T15:24:01+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://biexiang.github.io/tags/mac/</loc>
     <lastmod>2017-10-06T17:16:24+08:00</lastmod>
     <priority>0</priority>
@@ -155,13 +166,19 @@
   
   <url>
     <loc>https://biexiang.github.io/tags/nginx/</loc>
-    <lastmod>2017-10-06T17:21:12+08:00</lastmod>
+    <lastmod>2017-11-21T15:24:01+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://biexiang.github.io/tags/openresty/</loc>
+    <lastmod>2017-11-21T15:24:01+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://biexiang.github.io/</loc>
-    <lastmod>2017-11-20T15:56:57+08:00</lastmod>
+    <lastmod>2017-11-21T15:24:01+08:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -173,7 +190,7 @@
   
   <url>
     <loc>https://biexiang.github.io/post/</loc>
-    <lastmod>2017-11-20T15:56:57+08:00</lastmod>
+    <lastmod>2017-11-21T15:24:01+08:00</lastmod>
     <priority>0</priority>
   </url>
   

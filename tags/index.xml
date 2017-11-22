@@ -50,6 +50,15 @@
     </item>
     
     <item>
+      <title>Lua</title>
+      <link>https://biexiang.github.io/tags/lua/</link>
+      <pubDate>Tue, 21 Nov 2017 15:24:01 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/tags/lua/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Mac</title>
       <link>https://biexiang.github.io/tags/mac/</link>
       <pubDate>Fri, 06 Oct 2017 17:16:24 +0800</pubDate>
@@ -70,9 +79,18 @@
     <item>
       <title>Nginx</title>
       <link>https://biexiang.github.io/tags/nginx/</link>
-      <pubDate>Fri, 06 Oct 2017 17:21:12 +0800</pubDate>
+      <pubDate>Tue, 21 Nov 2017 15:24:01 +0800</pubDate>
       <author>noreply#qq.com (Poly)</author>
       <guid>https://biexiang.github.io/tags/nginx/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Openresty</title>
+      <link>https://biexiang.github.io/tags/openresty/</link>
+      <pubDate>Tue, 21 Nov 2017 15:24:01 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/tags/openresty/</guid>
       <description></description>
     </item>
     
