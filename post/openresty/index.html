@@ -406,6 +406,146 @@ conf下建nginx.conf</p>
     ➜  openresty curl localhost:6699
     HelloWorld
 </code></pre>
+
+<p>因为会有很多请求测试，curl参数比较多，使用httpie更方便。</p>
+
+<pre><code>    brew install httpie
+</code></pre>
+
+<h3 id="获取get-post-body-参数">获取GET、POST(Body)参数</h3>
+
+<p>读取body内容，全局则使用下面这句，局部使用ngx.req.read_body()</p>
+
+<pre><code>    lua_need_request_body on;
+    location /body {
+        content_by_lua_block {
+            local data = ngx.req.get_body_data()
+            ngx.say(&quot;Hi&quot;,data)
+        }
+    }
+
+    location /uri {
+        content_by_lua_block {
+            local arg = ngx.req.get_uri_args()
+            for k,v in pairs(arg) do 
+                ngx.say(k,&quot; GET &quot;,v)
+            end
+
+            --[[获取POST参数前先read_body--]]
+            ngx.req.read_body()
+            arg = ngx.req.get_post_args()
+            for k,v in pairs(arg) do
+                ngx.say(k,&quot; POST &quot;,v)
+            end
+        }
+    }         
+</code></pre>
+
+<h3 id="调用location">调用location</h3>
+
+<p>使用ngx.location.capture 调用同一个server内的其他location</p>
+
+<pre><code>    location /son {
+        content_by_lua_block {
+            local res = ngx.location.capture(
+                &quot;/uri&quot;,
+                {
+                    method  =   ngx.HTTP_POST,
+                    args    =   ngx.encode_args({ a = 1, b = 2 }),
+                    body    =   ngx.encode_args({ c = 3, d = 4})
+                }
+            )s
+            ngx.say(res.body)
+        }
+    }
+</code></pre>
+
+<h3 id="ngx日志">Ngx日志</h3>
+
+<p>ngx.say和ngx.print为异步输出，flush或者前面输出超出缓存大小</p>
+
+<pre><code>    location /log {
+        content_by_lua_block {
+            ngx.log(ngx.ERR, &quot;WRONG REQUEST&quot;)
+            ngx.log(ngx.INFO, &quot;INFO ABOUT REQUEST&quot;)
+            ngx.say(&quot;Test Log&quot;)
+        }
+    }
+</code></pre>
+
+<p>也可以使用lua-resty-logger-socket 推送同步日志</p>
+
+<h3 id="计算器api">计算器API</h3>
+
+<p>conf/nginx.conf</p>
+
+<pre><code>    ##避免Nginx需要reload，设置lua路径
+    lua_code_cache off;
+    ##lua模块加载路径使用绝对路径、';;'代表默认路径、路径与路径之间用;分开、require的内容代替?
+    lua_package_path '/Users/poly/Desktop/OpenResty/openresty/lua/?.lua;;';
+
+    server {
+        listen 2222;
+        #匹配API
+        location ~^/api/([-_A-Z0-9a-z/]+) {
+            #入口控制
+            access_by_lua_file lua/access_control.lua;
+            #具体执行
+            content_by_lua_file lua/$1.lua;
+        }
+    }
+</code></pre>
+
+<p>lua/access_control.lua</p>
+
+<pre><code>    local params = require(&quot;comm.params&quot;)
+
+    local args = ngx.req.get_uri_args()
+    if not params.isNumber(args.a,args.b) then 
+        ngx.exit(ngx.HTTP_BAD_REQUEST)
+        return 
+    end
+</code></pre>
+
+<p>lua/comm/params.lua</p>
+
+<pre><code>    local _M = {}
+
+    function _M.isNumber(...)
+        local numbers = {...}
+
+        for _,v in pairs(numbers) do 
+            num = tonumber(v)
+            if num == nil then 
+                return false
+            end
+        end
+        return true
+    end
+    return _M
+</code></pre>
+
+<p>lua/div.lua</p>
+
+<pre><code>    local args = ngx.req.get_uri_args()
+    ngx.say(args.a / args.b)
+</code></pre>
+
+<p>其他计算类似。</p>
+
+<h3 id="access-by-lua-block">access_by_lua_block</h3>
+
+<p>这个模块可以对请求做预处理，比如IP白名单处理，流量控制等。</p>
+
+<pre><code>    #控制下载速度
+    location /download {
+        access_by_lua_block {
+            --[[单位Byte字节--]]
+            ngx.var.limit_rate = 1024
+        }
+        alias /Users/poly/Desktop/;
+    }
+</code></pre>
         </div>
 
         
@@ -440,6 +580,11 @@ conf下建nginx.conf</p>
 <ul>
 <li><a href="#安装">安装</a></li>
 <li><a href="#hello-world">hello world</a></li>
+<li><a href="#获取get-post-body-参数">获取GET、POST(Body)参数</a></li>
+<li><a href="#调用location">调用location</a></li>
+<li><a href="#ngx日志">Ngx日志</a></li>
+<li><a href="#计算器api">计算器API</a></li>
+<li><a href="#access-by-lua-block">access_by_lua_block</a></li>
 </ul></li>
 </ul></li>
 </ul>
