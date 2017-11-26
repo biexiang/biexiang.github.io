@@ -143,6 +143,21 @@
     return _M
 </code></pre>
 
+<h3 id="和-的区别">.和:的区别</h3>
+
+<p>在函数声明的地方有区别</p>
+
+<pre><code>    obj = { x = 20 }
+
+    function obj:fun1()
+        print(self.x)
+    end
+
+    function obj.fun2(self)
+        print(self.x)
+    end
+</code></pre>
+
 <h2 id="nginx配置">Nginx配置</h2>
 
 <h3 id="location段">location段</h3>
@@ -546,6 +561,258 @@ conf下建nginx.conf</p>
         alias /Users/poly/Desktop/;
     }
 </code></pre>
+
+<h3 id="执行阶段">执行阶段</h3>
+
+<p>阶段分工，代码解耦，每个阶段负责每个阶段的。</p>
+
+<pre><code>    set_by_lua*
+    rewrite_by_lua*
+    access_by_lua*
+    content_by_lua*
+    header_filter_by_lua*
+    body_filter_by_lua*
+    log_by_lua*
+</code></pre>
+
+<h3 id="ngx-ctx共享变量">ngx.ctx共享变量</h3>
+
+<pre><code>    ngx.ctx.name = caojunyi
+</code></pre>
+
+<p>由于 ngx.ctx 保存的是指定请求资源，所以这个变量是不能直接共享给其他请求使用的。</p>
+
+<h3 id="redis封装">Redis封装</h3>
+
+<p>使用元表封装，密码、选库、设置超时、Pipeline都支持，连接池保证减少创建连接、失联次数。</p>
+
+<p>测试代码：</p>
+
+<pre><code>    location /redis {
+        content_by_lua_block {
+            local factory = require &quot;comm.packredis&quot;
+            local redis = factory:new({
+                    pass=404,
+                    db_index=2
+                })
+            -- local ok,err = redis:set(&quot;s:14408100227&quot;,'Mengliang')
+            -- if not ok or err then
+            --     ngx.say(err)
+            -- end
+            -- local name = redis:get(&quot;s:14408100227&quot;)
+            -- ngx.say(name)
+
+            redis:pipeline_init()
+            redis:set(&quot;name&quot;,&quot;Junyi&quot;)
+            redis:set(&quot;Age&quot;,20)
+            local res,err = redis:pipeline_commit()
+            if not res or err then
+                ngx.say(err)
+            end
+            ngx.say(res)
+
+        }
+    }
+</code></pre>
+
+<p>封装代码：</p>
+
+<pre><code>    local ori_redis = require &quot;resty.redis&quot;
+
+    local ok,table_new = pcall(require &quot;table.new&quot;)
+    if not ok or type(table_new) ~= &quot;function&quot; then 
+        table_new = function(args1,args2) return {} end
+    end
+
+    local _M = table_new(0,155)
+    _M._VERSION = &quot;0.1&quot;
+
+
+    local commands = {
+        &quot;append&quot;,            &quot;auth&quot;,              &quot;bgrewriteaof&quot;,
+        &quot;bgsave&quot;,            &quot;bitcount&quot;,          &quot;bitop&quot;,
+        &quot;blpop&quot;,             &quot;brpop&quot;,
+        &quot;brpoplpush&quot;,        &quot;client&quot;,            &quot;config&quot;,
+        &quot;dbsize&quot;,
+        &quot;debug&quot;,             &quot;decr&quot;,              &quot;decrby&quot;,
+        &quot;del&quot;,               &quot;discard&quot;,           &quot;dump&quot;,
+        &quot;echo&quot;,
+        &quot;eval&quot;,              &quot;exec&quot;,              &quot;exists&quot;,
+        &quot;expire&quot;,            &quot;expireat&quot;,          &quot;flushall&quot;,
+        &quot;flushdb&quot;,           &quot;get&quot;,               &quot;getbit&quot;,
+        &quot;getrange&quot;,          &quot;getset&quot;,            &quot;hdel&quot;,
+        &quot;hexists&quot;,           &quot;hget&quot;,              &quot;hgetall&quot;,
+        &quot;hincrby&quot;,           &quot;hincrbyfloat&quot;,      &quot;hkeys&quot;,
+        &quot;hlen&quot;,
+        &quot;hmget&quot;,              &quot;hmset&quot;,      &quot;hscan&quot;,
+        &quot;hset&quot;,
+        &quot;hsetnx&quot;,            &quot;hvals&quot;,             &quot;incr&quot;,
+        &quot;incrby&quot;,            &quot;incrbyfloat&quot;,       &quot;info&quot;,
+        &quot;keys&quot;,
+        &quot;lastsave&quot;,          &quot;lindex&quot;,            &quot;linsert&quot;,
+        &quot;llen&quot;,              &quot;lpop&quot;,              &quot;lpush&quot;,
+        &quot;lpushx&quot;,            &quot;lrange&quot;,            &quot;lrem&quot;,
+        &quot;lset&quot;,              &quot;ltrim&quot;,             &quot;mget&quot;,
+        &quot;migrate&quot;,
+        &quot;monitor&quot;,           &quot;move&quot;,              &quot;mset&quot;,
+        &quot;msetnx&quot;,            &quot;multi&quot;,             &quot;object&quot;,
+        &quot;persist&quot;,           &quot;pexpire&quot;,           &quot;pexpireat&quot;,
+        &quot;ping&quot;,              &quot;psetex&quot;,            &quot;psubscribe&quot;,
+        &quot;pttl&quot;,
+        &quot;publish&quot;,      --[[ &quot;punsubscribe&quot;, ]]   &quot;pubsub&quot;,
+        &quot;quit&quot;,
+        &quot;randomkey&quot;,         &quot;rename&quot;,            &quot;renamenx&quot;,
+        &quot;restore&quot;,
+        &quot;rpop&quot;,              &quot;rpoplpush&quot;,         &quot;rpush&quot;,
+        &quot;rpushx&quot;,            &quot;sadd&quot;,              &quot;save&quot;,
+        &quot;scan&quot;,              &quot;scard&quot;,             &quot;script&quot;,
+        &quot;sdiff&quot;,             &quot;sdiffstore&quot;,
+        &quot;select&quot;,            &quot;set&quot;,               &quot;setbit&quot;,
+        &quot;setex&quot;,             &quot;setnx&quot;,             &quot;setrange&quot;,
+        &quot;shutdown&quot;,          &quot;sinter&quot;,            &quot;sinterstore&quot;,
+        &quot;sismember&quot;,         &quot;slaveof&quot;,           &quot;slowlog&quot;,
+        &quot;smembers&quot;,          &quot;smove&quot;,             &quot;sort&quot;,
+        &quot;spop&quot;,              &quot;srandmember&quot;,       &quot;srem&quot;,
+        &quot;sscan&quot;,
+        &quot;strlen&quot;,       --[[ &quot;subscribe&quot;,  ]]     &quot;sunion&quot;,
+        &quot;sunionstore&quot;,       &quot;sync&quot;,              &quot;time&quot;,
+        &quot;ttl&quot;,
+        &quot;type&quot;,         --[[ &quot;unsubscribe&quot;, ]]    &quot;unwatch&quot;,
+        &quot;watch&quot;,             &quot;zadd&quot;,              &quot;zcard&quot;,
+        &quot;zcount&quot;,            &quot;zincrby&quot;,           &quot;zinterstore&quot;,
+        &quot;zrange&quot;,            &quot;zrangebyscore&quot;,     &quot;zrank&quot;,
+        &quot;zrem&quot;,              &quot;zremrangebyrank&quot;,   &quot;zremrangebyscore&quot;,
+        &quot;zrevrange&quot;,         &quot;zrevrangebyscore&quot;,  &quot;zrevrank&quot;,
+        &quot;zscan&quot;,
+        &quot;zscore&quot;,            &quot;zunionstore&quot;,       &quot;evalsha&quot;
+    }
+
+
+    local mt = {__index = _M}
+
+    function _M.connect(self,redis)
+        redis:set_timeout(self.timeout)
+        local ok,err = redis:connect('127.0.0.1',6379)
+        if not ok or err then
+            return nil,err 
+        end
+
+        --[[pass auth--]]
+        local count 
+        count,err = redis:get_reused_times()
+        if count == 0 then 
+            ok,err = redis:auth(self.pass)
+            if not ok or err then
+                return nil,err 
+            end
+        elseif err then 
+            return nil,err 
+        end
+
+        ok,err = redis:select(self.db_index)
+        if not ok then 
+            return nil,err 
+        end
+
+        return redis,nil
+    end
+
+    function _M.keepalive(self,redis)
+        return redis:set_keepalive(60000,1000)
+    end
+
+    function do_command(self,cmd,...)
+        if self.reqs then
+            table.insert(self.reqs,{cmd,...})
+            return &quot;PIPELINE&quot;,nil
+        end
+
+        local redis,err = ori_redis:new()
+        if not redis or err then
+            return nil,err
+        end
+
+        local ok,err = self:connect(redis)
+        if not ok or err then
+            return nil,err
+        end
+
+        local func = redis[cmd]
+        local result,err = func(redis,...)
+        if not result or err then
+            return nil,err 
+        end
+
+        self:keepalive(redis)
+        return result,err
+    end
+
+
+    function _M.pipeline_init(self)
+        self.reqs = {}
+    end
+
+    function _M.pipeline_commit(self)
+        local requests = self.reqs 
+        if requests == nil or #requests == 0 then
+            return nil,&quot;no need to commit&quot;
+        else 
+            self.reqs = nil 
+        end
+
+        local redis,err = ori_redis:new()
+        if not redis or err then
+            return nil,err
+        end
+
+        local ok,err = self:connect(redis)
+        if not ok or err then
+            return nil,err
+        end 
+
+        redis:init_pipeline()
+        for _,v in pairs(requests) do
+            --[[Get function--]]
+            local func = redis[v[1]]
+            table.remove(v,1)
+            --[[call function--]]
+            func(redis,unpack(v))
+        end
+
+        local result,err = redis:commit_pipeline()
+        if not result or err then
+            return nil,err 
+        end
+
+        self:keepalive(redis)
+
+        return result,nil
+    end
+
+
+    function _M.new(self,opts)
+        opts = opts or {}
+        local timeout = (opts.timeout and opts.timeout*1000) or 1000
+        local db_index = opts.db_index or 0         
+        local pass = opts.pass or 123456
+
+        for i=1,#commands do
+            local cmd = commands[i]
+            _M[cmd] = function(self,...)
+                return do_command(self,cmd,...)
+            end
+        end
+
+        return setmetatable({
+                timeout = timeout,
+                db_index = db_index,
+                pass = pass
+            }, mt)
+
+    end
+
+    return _M
+</code></pre>
         </div>
 
         
@@ -564,6 +831,7 @@ conf下建nginx.conf</p>
 <li><a href="#函数">函数</a></li>
 <li><a href="#包和api">包和API</a></li>
 <li><a href="#metatable">MetaTable</a></li>
+<li><a href="#和-的区别">.和:的区别</a></li>
 </ul></li>
 <li><a href="#nginx配置">Nginx配置</a>
 <ul>
@@ -585,6 +853,9 @@ conf下建nginx.conf</p>
 <li><a href="#ngx日志">Ngx日志</a></li>
 <li><a href="#计算器api">计算器API</a></li>
 <li><a href="#access-by-lua-block">access_by_lua_block</a></li>
+<li><a href="#执行阶段">执行阶段</a></li>
+<li><a href="#ngx-ctx共享变量">ngx.ctx共享变量</a></li>
+<li><a href="#redis封装">Redis封装</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -672,7 +943,7 @@ conf下建nginx.conf</p>
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
+            &copy; 2017 map[email:noreply#qq.com name:Poly]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
