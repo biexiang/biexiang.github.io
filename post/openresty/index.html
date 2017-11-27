@@ -158,6 +158,14 @@
     end
 </code></pre>
 
+<h3 id="assert">assert</h3>
+
+<p>assert首先检查的是第一个参数是否返回错误，如果不返回错误，则assert简单返回，否则则以第二个参数抛出异常信息。</p>
+
+<pre><code>    n = io.read()
+    assert(tonumber(n), &quot;invalid input:&quot; .. n .. &quot;is not a number&quot;)
+</code></pre>
+
 <h2 id="nginx配置">Nginx配置</h2>
 
 <h3 id="location段">location段</h3>
@@ -813,6 +821,130 @@ conf下建nginx.conf</p>
 
     return _M
 </code></pre>
+
+<h3 id="php连接池">PHP连接池</h3>
+
+<p>参考学习<a href="https://huoding.com/2017/09/10/635">史上最LOW的PHP连接池解决方案</a><br />
+基于Nginx和lua实现的Redis连接池，PHP通过Unix Domain Socket进行连接。<br />
+Lua实现的Redis连接服务相当于一个中间件，连接Redis后，监听socket的请求，一旦请求到达了，分析<a href="http://redisdoc.com/topic/protocol.html">请求报文</a>中的通信协议，得到具体命令参数的数组，判断是否为QUIT，不是的话就整合请求再发送给Redis，fetch返回的response，分析response交给PHP。使用set_keepalive将连接放入连接池。</p>
+
+<p>Redis基本命令协议：</p>
+
+<pre><code>    *&lt;参数数量&gt; CR LF
+    $&lt;参数 1 的字节数量&gt; CR LF
+    &lt;参数 1 的数据&gt; CR LF
+    ...
+    $&lt;参数 N 的字节数量&gt; CR LF
+    &lt;参数 N 的数据&gt; CR LF
+</code></pre>
+
+<p>nginx.conf：</p>
+
+<pre><code>    stream {
+        lua_code_cache on;
+        lua_check_client_abort on;
+        lua_package_path '/Users/poly/Desktop/OpenResty/openresty/lua/?.lua;;';
+
+        server {
+            listen unix:/Users/poly/Desktop/tmp/redis.sock;
+
+            content_by_lua_block {
+                 local redis = require &quot;comm.stream_redis&quot;
+                 pool = redis:new({
+                     ip = &quot;127.0.0.1&quot;, 
+                     port = 6379, 
+                     auth = 404
+                 })
+                 pool:run()
+            }
+        }
+    }
+</code></pre>
+
+<p>读取socket，解析出命令：</p>
+
+<pre><code>    local function parse_request(sock)
+        local line, err = sock:receive()
+
+        if not line then
+            return nil, err
+        end
+
+        local prefix = str_byte(line)
+
+        if prefix == 42 then -- char '*'
+            local result = {}
+
+            local num = tonumber(str_sub(line, 2))
+
+            if num &lt;= 0 then
+                return nil, &quot;Wrong protocol format&quot;
+            end
+
+            for i = 1, num do
+                local res, err = parse_request(sock)
+
+                if res == nil then
+                    return nil, err
+                end
+
+                result[i] = res
+            end
+
+            return result
+        end
+
+        if prefix == 36 then -- char '$'
+            local size = tonumber(str_sub(line, 2))
+
+            if size &lt; 0 then
+                return nil, &quot;Wrong protocol format&quot;
+            end
+
+            local result, err = sock:receive(size)
+
+            if not result then
+                return nil, err
+            end
+
+            local crlf, err = sock:receive(2)
+
+            if not crlf then
+                return nil, err
+            end
+
+            return result
+        end
+
+        -- inline
+        local result = {}
+
+        for res in str_gmatch(line, &quot;%S+&quot;) do
+            result[#result + 1] = res
+        end
+
+        return result
+    end
+</code></pre>
+
+<p>PHP连接socket：</p>
+
+<pre><code>    &lt;?php
+    $redis = new Redis();
+    $redis-&gt;connect('/Users/poly/Desktop/tmp/redis.sock');
+    $redis-&gt;set(&quot;foo&quot;, &quot;bar&quot;);
+    echo $redis-&gt;get(&quot;foo&quot;);
+</code></pre>
+
+<h3 id="访问控制">访问控制</h3>
+
+<p>直接location块内allow/deny某些IP地址，或者<br />
+使用<a href="https://github.com/hamishforbes/lua-resty-iputils">lua-resty-iputils</a></p>
+
+<h3 id="请求返回后继续执行">请求返回后继续执行</h3>
+
+<pre><code>    ngx.eof()
+</code></pre>
         </div>
 
         
@@ -832,6 +964,7 @@ conf下建nginx.conf</p>
 <li><a href="#包和api">包和API</a></li>
 <li><a href="#metatable">MetaTable</a></li>
 <li><a href="#和-的区别">.和:的区别</a></li>
+<li><a href="#assert">assert</a></li>
 </ul></li>
 <li><a href="#nginx配置">Nginx配置</a>
 <ul>
@@ -856,6 +989,9 @@ conf下建nginx.conf</p>
 <li><a href="#执行阶段">执行阶段</a></li>
 <li><a href="#ngx-ctx共享变量">ngx.ctx共享变量</a></li>
 <li><a href="#redis封装">Redis封装</a></li>
+<li><a href="#php连接池">PHP连接池</a></li>
+<li><a href="#访问控制">访问控制</a></li>
+<li><a href="#请求返回后继续执行">请求返回后继续执行</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -943,7 +1079,7 @@ conf下建nginx.conf</p>
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2017 map[email:noreply#qq.com name:Poly]&nbsp;
+            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
