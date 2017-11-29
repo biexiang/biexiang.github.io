@@ -23,6 +23,11 @@
   </url>
   
   <url>
+    <loc>https://biexiang.github.io/post/cannon-m6/</loc>
+    <lastmod>2017-11-11T21:02:31+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://biexiang.github.io/post/spider-proxy/</loc>
     <lastmod>2017-11-06T19:18:08+08:00</lastmod>
   </url>
@@ -233,6 +238,12 @@
   <url>
     <loc>https://biexiang.github.io/tags/%E5%93%88%E5%A4%AB%E6%9B%BC/</loc>
     <lastmod>2017-10-07T10:11:57+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://biexiang.github.io/tags/%E6%91%84%E5%BD%B1/</loc>
+    <lastmod>2017-11-11T21:02:31+08:00</lastmod>
     <priority>0</priority>
   </url>
   

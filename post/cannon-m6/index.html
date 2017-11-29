@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>爬虫代理 // Peculiar</title>
+    <title>Cannon M6 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="爬虫代理" />
+        <meta property="og:title" content="Cannon M6" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/spider-proxy/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/cannon-m6/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,50 +56,97 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">爬虫代理</h1>
+            <h1 class="article-title" itemprop="name">Cannon M6</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/spider-proxy/" class="article-date">
-                <time datetime='2017-11-06T19:18:08.000&#43;08:00' itemprop="datePublished">2017-11-06</time>
+            <a href="/post/cannon-m6/" class="article-date">
+                <time datetime='2017-11-11T21:02:31.000&#43;08:00' itemprop="datePublished">2017-11-11</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>上次网易云爬取歌单的评论10多条之后，IP就被Ban了，需要好好考虑一个代理的方式。</p>
+            <p>今年开始看Testv的评测，迷上了相机，因为穷多次考虑后在双11购买佳能M6。还算实惠，这里记录相机使用。</p>
 
 <p></p>
 
-<blockquote>
-<p>挖坑</p>
-</blockquote>
-
-<h2 id="搭建代理池">搭建代理池</h2>
+<h2 id="防伪">防伪</h2>
 
 <ul>
-<li><p>爬取代理<br />
-爬取网站上的代理的IP和端口。</p></li>
+<li><p>佳能正品服务<br />
+Google Play下载 佳能正品服务 这个App，开启手机NFC，靠近包装的防伪标签(标签内有RFID线圈-拆包装前进行验证)，验证是否为正品。<a href="http://www.canon.com.cn/support/app/cfeos/index.html">官网链接</a>。</p></li>
 
-<li><p>维护代理<br />
-每隔10s，删除失效的代理。</p></li>
+<li><p>快门数<br />
+<a href="https://orlv.github.io/freeshuttercounter/">Mac App</a><br />
+<a href="http://www.eosmsg.com/">Eosmsg</a></p></li>
 </ul>
 
-<h2 id="假扮代理服务器">假扮代理服务器</h2>
+<h2 id="手机连接">手机连接</h2>
 
-<p>一般获取真实IP，直接使用Remote_addr参数，但是因为有正向代理、反向代理、透明代理等，一般服务商不会直接相信Remote_addr，会使用X-Forwarded-For，来获取真实IP。而这个请求头刚好是我们可以伪造的。协议头的格式如下:</p>
+<p>使用Canon Camera Connect</p>
 
-<pre><code>    X-Forwarded-For: client, proxy1, proxy2         
-</code></pre>
+<h2 id="摄影基础知识">摄影基础知识</h2>
 
-<p>一般服务商不会Ban代理服务器。</p>
+<h3 id="光圈大小">光圈大小</h3>
 
-<ul>
-<li>正向代理：翻墙搭理那种直接转发流量，或者是企业内部加速访问，缓存内容，控制访问等。<br /></li>
-<li>反向搭理：Nginx做负载均衡器那种用户不知道真实处理请求的服务器是哪一台。<br /></li>
-<li>透明代理：感觉和正向搭理一样。</li>
-</ul>
+<p>即镜头通光口径的大小，通常用f值来表示，f=镜头的焦距/镜头的有效口径的直径。f值越小，光圈越大，单位通光量越多；f值越大，光圈越小，单位通光量越小。例如：光圈f/1.8要比f/5.6的口径更大，单位时间内通光量更多<br />
+同时，光圈也是影响景深的一个重要因素，在保持其它因素不变的情况下，光圈越大，景深越浅（虚化效果越明显）；光圈越小，景深越深（清晰范围越宽广）。</p>
+
+<p><img src="/img/big-aperture.jpg" alt="/img/big-aperture.jpg" /></p>
+
+<p>大光圈可以制造虚化，小光圈容易产生星芒。</p>
+
+<p><img src="/img/tiny-aperture.jpg" alt="/img/tiny-aperture.jpg" /></p>
+
+<p>由此可见，我们通过控制光圈可以达到两个目的，一是控制光线的进入量，二是可以控制景深的效果。</p>
+
+<h3 id="快门速度">快门速度</h3>
+
+<p>快门速度即是曝光时间，通常用分数来表示，速度越快，曝光时间越短，通光量越少；速度越慢，曝光时间越长，通光量越多。例如，1/250s的快门要比1/30s秒更快，也就意味着通光的时间更少，所以获取的光线也更少。</p>
+
+<p><img src="/img/shutter.jpg" alt="/img/shutter.jpg" /></p>
+
+<h3 id="感光度">感光度</h3>
+
+<p>感光度（ISO），这是一个从胶片时期就流传下来的概念，代表感光材料对光线的敏感程度，ISO越高，感光元件对光线越敏感，达到同样效果需要的光线量越少；ISO越低，感光元件对光线越迟钝，达到同样效果需要的光线量越多。<br />
+不过由于数码相机感光元件的限制，高ISO下，画面容易产生噪点，所以许多摄影爱好者在拍摄时都在尽量压低ISO，以获得更加纯净的画面。ISO的意义，就是在光线条件极其不好的情况下，通过提升感光元件的灵敏性，从而解放光圈和快门的组合。</p>
+
+<h2 id="模式选择">模式选择</h2>
+
+<h3 id="自动挡">自动挡</h3>
+
+<p>全自动档也就是傻瓜模式，全靠相机环境的测定制定出一套保证曝光足够的模式，他会自动选择白平衡、光圈、快门、ISO、闪光灯等一切手段促使拍摄成功，不会考虑拍摄意图。而P档是由相机根据拍摄环境，再结合内部储存的曝光资料来生成一个相对合适的光圈和快门的曝光组合进行曝光。看起来好像高级辣么一点，其实都是只需按下快门的傻瓜模式。</p>
+
+<h3 id="光圈优先模式">光圈优先模式</h3>
+
+<p>顾名思义，摄影师根据自身所需先确定拍摄光圈，然后相机根据你的光圈给出一个保证合理曝光的快门速度。
+使用光圈优先模式，首要考虑的就是景深的变化，对于不同的主题肯定需要通过不同的景深来表现。例如使用大光圈让人像的背景虚化：</p>
+
+<p><img src="/img/prefer_aperture_01.jpg" alt="/img/prefer_aperture_01.jpg" /></p>
+
+<p>又如在风光摄影师中，使用小光圈保证足够的景深：</p>
+
+<p><img src="/img/prefer_aperture_02.jpg" alt="/img/prefer_aperture_02.jpg" /></p>
+
+<p>需要注意的是，使用小光圈拍摄，相应的快门速度也会变慢，常常需要用到三脚架来固定相机。<br />
+就算使用光圈优先模式，也应该注意快门的速度。相机只会根据光线的通量来给出一个建议快门速度，它无法细致判定当时的拍摄环境，比如弱光环境，相机可能会根据你的光圈给出一个低于安全快门的速度，导致手抖。</p>
+
+<h3 id="快门优先模式">快门优先模式</h3>
+
+<p>根据我们以往的认识，拍照就是定格某个精彩瞬间，的确,有时候就是这么简单。例如在拍摄运动场景时，面对高速移动的物体，只有通过同样高速的快门才能够捕捉。</p>
+
+<p><img src="/img/prefer_shutter_01.jpg" alt="/img/prefer_shutter_01.jpg" /></p>
+
+<p>我们在使用高速快门时，要注意是否有足够大的光圈或是ISO来保证曝光量。<br />
+通过控制快门，不仅能定格瞬间，还能“拖延”时间，例如在拍摄跑步或赛车，利用较慢的快门，拍摄时跟随画面主体移动，就能形成“主体清晰，背景模糊”的追焦效果。</p>
+
+<p><img src="/img/prefer_shutter_02.jpg" alt="/img/prefer_shutter_02.jpg" /></p>
+
+<h3 id="手动模式">手动模式</h3>
+
+<p>手动挡</p>
         </div>
 
         
@@ -110,8 +157,21 @@
 <ul>
 <li>
 <ul>
-<li><a href="#搭建代理池">搭建代理池</a></li>
-<li><a href="#假扮代理服务器">假扮代理服务器</a></li>
+<li><a href="#防伪">防伪</a></li>
+<li><a href="#手机连接">手机连接</a></li>
+<li><a href="#摄影基础知识">摄影基础知识</a>
+<ul>
+<li><a href="#光圈大小">光圈大小</a></li>
+<li><a href="#快门速度">快门速度</a></li>
+<li><a href="#感光度">感光度</a></li>
+</ul></li>
+<li><a href="#模式选择">模式选择</a>
+<ul>
+<li><a href="#自动挡">自动挡</a></li>
+<li><a href="#光圈优先模式">光圈优先模式</a></li>
+<li><a href="#快门优先模式">快门优先模式</a></li>
+<li><a href="#手动模式">手动模式</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -165,12 +225,7 @@
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%88%AC%E8%99%AB">爬虫
-                    </a>
-                </li>
-                
-                <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E4%BB%A3%E7%90%86">代理
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E6%91%84%E5%BD%B1">摄影
                     </a>
                 </li>
                 
@@ -180,15 +235,15 @@
     </div>
     <nav id="article-nav">
     
-    <a href="/post/cannon-m6/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/post/base64/" id="article-nav-newer" class="article-nav-link-wrap">
         <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Cannon M6
+            Base64 in Golang
         </div>
     </a>
     
     
-    <a href="/post/permutation/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Golang实现排列组合&nbsp;<span>&gt;</span></div>
+    <a href="/post/spider-proxy/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">爬虫代理&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
