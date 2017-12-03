@@ -74,6 +74,44 @@
 
 <hr />
 
+<h2 id="大端序和小端序">大端序和小端序</h2>
+
+<p>网络传输主要使用大端序，我的MBP是使用的小端序。<br />
+比如一个4字节的 0x1234abcd<br />
+大端序：</p>
+
+<pre><code>    低地址 =&gt; 高地址              
+    0x12 0x34 0xab 0xcd            
+</code></pre>
+
+<p>小端序：</p>
+
+<pre><code>    高地址 =&gt; 低地址      
+    0xcd 0xab 0x34 0x12
+</code></pre>
+
+<h2 id="struct和union的区别">Struct和Union的区别</h2>
+
+<pre><code>    struct sTest
+    {
+        int a;  //sizeof(int) = 4
+        char b;  //sizeof(char) = 1
+        shot c； //sizeof(shot) = 2
+    }x;
+
+    union uTest
+    {
+        int a;   //sizeof(int) = 4
+        double b;  //sizeof(double) = 8
+        char c;  //sizeof(char) = 1
+    }x;
+</code></pre>
+
+<ul>
+<li>结构体内每个类型变量都会分配内存，而Union所有元素则共享一个内存空间，且只会保存最近复制的值，在上面例子中要么uTest.a = 16，或者uTest.b = 2.33，或者uTest.c = &ldquo;F&rdquo;，只会保存一个选择到内存空间。<br /></li>
+<li>Struct和Union内存分配情况不一样。<br /></li>
+</ul>
+
 <h2 id="结构体内存对齐">结构体内存对齐</h2>
 
 <p><strong>非#pragma指定对齐情况</strong></p>
@@ -517,6 +555,8 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
 <ul>
 <li>
 <ul>
+<li><a href="#大端序和小端序">大端序和小端序</a></li>
+<li><a href="#struct和union的区别">Struct和Union的区别</a></li>
 <li><a href="#结构体内存对齐">结构体内存对齐</a></li>
 <li><a href="#10亿uid去重-统计不同的uid总数">10亿uid去重，统计不同的uid总数</a></li>
 <li><a href="#尾递归">尾递归</a></li>
@@ -633,7 +673,7 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
+            &copy; 2017 map[email:noreply#qq.com name:Poly]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>

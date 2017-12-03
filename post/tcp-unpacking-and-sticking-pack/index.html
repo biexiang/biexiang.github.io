@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Awk记录 // Peculiar</title>
+    <title>Tcp拆包和粘包 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="Awk记录" />
+        <meta property="og:title" content="Tcp拆包和粘包" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/awk/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/tcp-unpacking-and-sticking-pack/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,53 +56,81 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">Awk记录</h1>
+            <h1 class="article-title" itemprop="name">Tcp拆包和粘包</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/awk/" class="article-date">
-                <time datetime='2017-10-06T17:03:58.000&#43;08:00' itemprop="datePublished">2017-10-06</time>
+            <a href="/post/tcp-unpacking-and-sticking-pack/" class="article-date">
+                <time datetime='2017-12-03T21:06:21.000&#43;08:00' itemprop="datePublished">2017-12-03</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>分析Access_log 获取 性能瓶颈</p>
+            <p>UDP基于报文传输，头部有2个字节表示报文的长度，所以不会发生拆包和粘包的问题。TCP基于字节流的传输，服务端分不清数据包的界限，所以会有这个问题。</p>
 
 <p></p>
 
-<p>如果需要对已经上线的服务进行性能上的优化，可以把当前的Access log拷贝下来进行分析。<br />
-前提是你对于某个上线的服务开启了访问日志的记录，自己设定了自己的access format。<br />
-php-fpm.cgi的分析可以根据format的参数，$upstream_response_time。<br />
-或者是整个响应的时间$request_time进行分析。</p>
+<h2 id="表现形式">表现形式</h2>
 
-<pre><code>    //分析获取cgi消耗时间前80的排行数据
-    cat  acagrid.log  | awk '{print $8,$1,$11,$12}' | sort -nr | head -80
+<p>Client向Server发送两个数据包</p>
 
-    &gt;17.929 &quot;200&quot; GET /dashboard/index
-    &gt;14.889 &quot;200&quot; GET /college/index/index
-    &gt;14.081 &quot;200&quot; GET /dashboard/college/api_filter?&amp;page=4
-</code></pre>
+<ul>
+<li><p>正常情况<br />
+<img src="/img/tcp_pack_1.png" alt="/img/tcp_pack_1.png" /></p></li>
 
-<p>AWK使用$0打印整行数据，而$1,$2等分别代表第一列，第二列的数据。打印出来，再进行字典序倒序排列，并且打印访问的路由，知道哪些路由需要优化。</p>
+<li><p>粘包情况<br />
+<img src="/img/tcp_pack_2.png" alt="/img/tcp_pack_2.png" /></p></li>
 
-<p>当然也可以用来批量杀掉PHP的进程:</p>
+<li><p>粘包+拆包情况<br />
+<img src="/img/tcp_pack_3.png" alt="/img/tcp_pack_3.png" />
+<img src="/img/tcp_pack_4.png" alt="/img/tcp_pack_4.png" /></p></li>
+</ul>
 
-<pre><code>    #注意grep -v grep用来忽略当前执行进程
-    ps -ef | grep php | grep -v grep  | awk '{print $2}' | xargs kill -9   
+<h2 id="原因">原因</h2>
 
-    #使用grep [p]hp忽略当前执行进程
-    ps -ef | grep [p]hp | awk '{print $2}' | xargs kill -9
-</code></pre>
+<ul>
+<li>要发送的数据大于TCP发送缓冲区剩余空间大小，将会发生拆包。</li>
+<li>待发送数据大于MSS（最大报文长度），TCP在传输前将进行拆包。</li>
+<li>要发送的数据小于TCP发送缓冲区的大小，TCP将多次写入缓冲区的数据一次发送出去，将会发生粘包。</li>
+<li>接收数据端的应用层没有及时读取接收缓冲区中的数据，将发生粘包。</li>
+</ul>
 
-<p>也可以用来打包文件:</p>
+<h2 id="解决方法">解决方法</h2>
 
-<pre><code>    find . -name &quot;*.jpg&quot; | xargs tar cvzf o.tar.gz
-</code></pre>
+<ul>
+<li>固定包的长度<br /></li>
+<li>头部添加数据包的长度<br /></li>
+<li>设置边界符号<br /></li>
+</ul>
+
+<h2 id="in-golang">In Golang</h2>
+
+<p>挖坑&hellip;</p>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="http://blog.csdn.net/Scythe666/article/details/51996268">别人的文章</a></p>
         </div>
 
         
+        
+        <div class="article-toc" style="display:none;">
+            <h3>Contents</h3>
+            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#表现形式">表现形式</a></li>
+<li><a href="#原因">原因</a></li>
+<li><a href="#解决方法">解决方法</a></li>
+<li><a href="#in-golang">In Golang</a></li>
+<li><a href="#参考">参考</a></li>
+</ul></li>
+</ul>
+</nav>
+        </div>
         
         
 
@@ -152,12 +180,12 @@ php-fpm.cgi的分析可以根据format的参数，$upstream_response_time。<br 
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/linux">Linux
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/tcp">TCP
                     </a>
                 </li>
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/awk">Awk
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/socket%E7%BC%96%E7%A8%8B">Socket编程
                     </a>
                 </li>
                 
@@ -167,15 +195,9 @@ php-fpm.cgi的分析可以根据format的参数，$upstream_response_time。<br 
     </div>
     <nav id="article-nav">
     
-    <a href="/post/penetration/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Penetration
-        </div>
-    </a>
     
-    
-    <a href="/post/deadlock/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Mysql死锁问题分析&nbsp;<span>&gt;</span></div>
+    <a href="/post/openresty/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">OpenResty最佳实践&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
@@ -186,7 +208,7 @@ php-fpm.cgi的分析可以根据format的参数，$upstream_response_time。<br 
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2017 map[email:noreply#qq.com name:Poly]&nbsp;
+            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
