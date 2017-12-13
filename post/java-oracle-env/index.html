@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>爬虫代理 // Peculiar</title>
+    <title>Java Oracle 环境搭建 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="爬虫代理" />
+        <meta property="og:title" content="Java Oracle 环境搭建" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/spider-proxy/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/java-oracle-env/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,50 +56,110 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">爬虫代理</h1>
+            <h1 class="article-title" itemprop="name">Java Oracle 环境搭建</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/spider-proxy/" class="article-date">
-                <time datetime='2017-11-06T19:18:08.000&#43;08:00' itemprop="datePublished">2017-11-06</time>
+            <a href="/post/java-oracle-env/" class="article-date">
+                <time datetime='2017-12-13T12:09:23.000&#43;08:00' itemprop="datePublished">2017-12-13</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>上次网易云爬取歌单的评论10多条之后，IP就被Ban了，需要好好考虑一个代理的方式。</p>
+            <p>Java + Oracle 课程设计，记录Mac下环境的搭建。</p>
 
 <p></p>
 
-<blockquote>
-<p>挖坑</p>
-</blockquote>
+<h2 id="java">Java</h2>
 
-<h2 id="搭建代理池">搭建代理池</h2>
+<p>以前Mac是自带Java环境的，Sierra没有了，需要自己下载Java安装包安装。
+安装完成后，环境变量软链接：</p>
 
-<ul>
-<li><p>爬取代理<br />
-爬取网站上的代理的IP和端口。</p></li>
-
-<li><p>维护代理<br />
-每隔10s，删除失效的代理。</p></li>
-</ul>
-
-<h2 id="假扮代理服务器">假扮代理服务器</h2>
-
-<p>一般获取真实IP，直接使用Remote_addr参数，但是因为有正向代理、反向代理、透明代理等，一般服务商不会直接相信Remote_addr，会使用X-Forwarded-For，来获取真实IP。而这个请求头刚好是我们可以伪造的。协议头的格式如下:</p>
-
-<pre><code>    X-Forwarded-For: client, proxy1, proxy2         
+<pre><code>    ➜  blog ls -al /usr/bin/java
+    lrwxr-xr-x  1 root  wheel  74  1 11  2017 /usr/bin/java -&gt; /System/Library/Frameworks/JavaVM.framework/Versions/Current/Commands/java    
 </code></pre>
 
-<p>一般服务商不会Ban代理服务器。</p>
+<p>JDK路径：</p>
+
+<pre><code>    /Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk
+</code></pre>
+
+<h2 id="tomcat">Tomcat</h2>
 
 <ul>
-<li>正向代理：翻墙搭理那种直接转发流量，或者是企业内部加速访问，缓存内容，控制访问等。<br /></li>
-<li>反向搭理：Nginx做负载均衡器那种用户不知道真实处理请求的服务器是哪一台。<br /></li>
-<li>透明代理：感觉和正向搭理一样。</li>
+<li>官网下载源码，解压，我放在了/usr/local下<br /></li>
+<li>chmod +x /usr/local/tomcat/bin/*.sh<br /></li>
+<li>./bin/start.sh</li>
+<li>curl 127.0.0.1:8080 Check下<br /></li>
 </ul>
+
+<h2 id="intellij-idea">Intellij IDEA</h2>
+
+<ul>
+<li>NetBeans出品，官网下载</li>
+<li>License sever address: <a href="http://xidea.online">http://xidea.online</a></li>
+<li>Import Eclipse项目</li>
+<li>配置JDK路径</li>
+</ul>
+
+<h2 id="oracle">Oracle</h2>
+
+<p>oracle一个用户，对应一个库，比如system用户对应system库</p>
+
+<ul>
+<li>安装Docker</li>
+<li>配置镜像下载路径：<a href="https://www.daocloud.io/mirror#accelerator-doc">https://www.daocloud.io/mirror#accelerator-doc</a></li>
+<li>docker pull alexeiled/docker-oracle-xe-11g</li>
+<li>docker run -d &ndash;name &ldquo;oracle&rdquo; -p 2405:22 -p 2406:1521 -p 2407:8080 alexeiled/docker-oracle-xe-11g</li>
+<li>以后再打开可以 docker start [container_id]</li>
+</ul>
+
+<h2 id="navicat">Navicat</h2>
+
+<p>用来连接Oracle，因为sshd好像没开启，其实可以选择NetBeans的DataGrip</p>
+
+<h2 id="项目问题">项目问题</h2>
+
+<h3 id="java-compile-1-8">Java Compile 1.8</h3>
+
+<ul>
+<li>Go to file -&gt; settings -&gt; Build Execution and Deployment -&gt; Java -&gt; Compiler</li>
+<li>File -&gt; Project Structure -&gt; Module Settings -&gt; Tab: Source: Language Level</li>
+<li>File -&gt; Project Structure -&gt; Project(In left pane) -&gt; Project language level</li>
+</ul>
+
+<h3 id="程序包javax-servlet不存在">程序包javax.servlet不存在</h3>
+
+<ul>
+<li>Project Structure -&gt; library -&gt; add java -&gt; choose tomcat/lib/servlet-api.jar</li>
+</ul>
+
+<h3 id="mac选择路径下的文件">Mac选择路径下的文件</h3>
+
+<ul>
+<li>Command+Shift+G<br /></li>
+</ul>
+
+<h3 id="manifest-mf">MANIFEST.MF</h3>
+
+<ul>
+<li>src/main/resources/META_INF/<br /></li>
+</ul>
+
+<h3 id="打包成war-发布到tomcat">打包成war，发布到Tomcat</h3>
+
+<ul>
+<li>Project Structure -&gt; 配置Artifacts -&gt; + Web Application Archive -&gt; Output Layouts + Directory Content(Meta_inf的上一级目录) -&gt; ok<br /></li>
+<li>Build -&gt; Build Artifact -&gt; 右上角启动旁边的汤姆猫 Edit Configuration -&gt; Deploy + -&gt; Server 配置Tomcat -&gt; ok<br /></li>
+<li>classes Mark as Sources<br /></li>
+<li>点击右上角的RUN</li>
+</ul>
+
+<h2 id="总结">总结</h2>
+
+<p>Oracle用起来很怪，导入/导出数据都很麻烦。好在Docker很方便，比用win的同学感觉还要方便，容器化环境减轻了开发难度。</p>
         </div>
 
         
@@ -110,8 +170,20 @@
 <ul>
 <li>
 <ul>
-<li><a href="#搭建代理池">搭建代理池</a></li>
-<li><a href="#假扮代理服务器">假扮代理服务器</a></li>
+<li><a href="#java">Java</a></li>
+<li><a href="#tomcat">Tomcat</a></li>
+<li><a href="#intellij-idea">Intellij IDEA</a></li>
+<li><a href="#oracle">Oracle</a></li>
+<li><a href="#navicat">Navicat</a></li>
+<li><a href="#项目问题">项目问题</a>
+<ul>
+<li><a href="#java-compile-1-8">Java Compile 1.8</a></li>
+<li><a href="#程序包javax-servlet不存在">程序包javax.servlet不存在</a></li>
+<li><a href="#mac选择路径下的文件">Mac选择路径下的文件</a></li>
+<li><a href="#manifest-mf">MANIFEST.MF</a></li>
+<li><a href="#打包成war-发布到tomcat">打包成war，发布到Tomcat</a></li>
+</ul></li>
+<li><a href="#总结">总结</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -165,12 +237,12 @@
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%88%AC%E8%99%AB">爬虫
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/java">Java
                     </a>
                 </li>
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E4%BB%A3%E7%90%86">代理
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/oracle">Oracle
                     </a>
                 </li>
                 
@@ -180,15 +252,9 @@
     </div>
     <nav id="article-nav">
     
-    <a href="/post/cannon-m6/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Cannon M6
-        </div>
-    </a>
     
-    
-    <a href="/post/permutation/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Golang实现排列组合&nbsp;<span>&gt;</span></div>
+    <a href="/post/tcp-unpacking-and-sticking-pack/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Tcp拆包和粘包&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>

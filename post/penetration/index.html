@@ -72,6 +72,15 @@
 
 <p></p>
 
+<h2 id="刷洗澡卡">刷洗澡卡</h2>
+
+<p>使用PN532对学校的洗澡卡进行写和读，学校的洗澡卡数据部分放在了3和4扇区。</p>
+
+<ul>
+<li>mfoc -o 对卡进行破解，如果找到了key A或者key B，可以读取整个卡的数据，dump成16进制文件，这个文件中的3扇区有价格的内容，16进制数字需要倒过来进行存放，行尾还有一个校验位，卡的最高改动额度为650左右。</li>
+<li>在将改过的数据写入白卡中即可。</li>
+</ul>
+
 <h2 id="fake-ap-and-login-page">Fake AP and Login Page</h2>
 
 <p><a href="https://github.com/markszabo/Hacktivity2016">https://github.com/markszabo/Hacktivity2016</a><br />
@@ -202,6 +211,7 @@ Payload的安装后，可以开启msfconsole进行渗透。 </div>
 <ul>
 <li>
 <ul>
+<li><a href="#刷洗澡卡">刷洗澡卡</a></li>
 <li><a href="#fake-ap-and-login-page">Fake AP and Login Page</a></li>
 <li><a href="#电信天翼家庭宽带密码">电信天翼家庭宽带密码</a></li>
 <li><a href="#ms17-010-http-sec000-com-ms17-010">MS17-010 <a href="http://sec000.com/ms17-010/">http://sec000.com/ms17-010/</a></a></li>

@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://biexiang.github.io/post/java-oracle-env/</loc>
+    <lastmod>2017-12-13T12:09:23+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://biexiang.github.io/post/tcp-unpacking-and-sticking-pack/</loc>
     <lastmod>2017-12-03T21:06:21+08:00</lastmod>
   </url>
@@ -151,6 +156,12 @@
   </url>
   
   <url>
+    <loc>https://biexiang.github.io/tags/java/</loc>
+    <lastmod>2017-12-13T12:09:23+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://biexiang.github.io/tags/linux/</loc>
     <lastmod>2017-10-06T17:03:58+08:00</lastmod>
     <priority>0</priority>
@@ -187,8 +198,14 @@
   </url>
   
   <url>
+    <loc>https://biexiang.github.io/tags/oracle/</loc>
+    <lastmod>2017-12-13T12:09:23+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://biexiang.github.io/</loc>
-    <lastmod>2017-12-03T21:06:21+08:00</lastmod>
+    <lastmod>2017-12-13T12:09:23+08:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -200,7 +217,7 @@
   
   <url>
     <loc>https://biexiang.github.io/post/</loc>
-    <lastmod>2017-12-03T21:06:21+08:00</lastmod>
+    <lastmod>2017-12-13T12:09:23+08:00</lastmod>
     <priority>0</priority>
   </url>
   
