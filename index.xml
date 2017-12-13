@@ -8,10 +8,20 @@
     <language>en-us</language>
     <managingEditor>noreply#qq.com (Poly)</managingEditor>
     <webMaster>noreply#qq.com (Poly)</webMaster>
-    <lastBuildDate>Wed, 13 Dec 2017 12:09:23 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 13 Dec 2017 22:52:42 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Nginx动态添加模块</title>
+      <link>https://biexiang.github.io/post/nginx-dynamic-add-module/</link>
+      <pubDate>Wed, 13 Dec 2017 22:52:42 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/post/nginx-dynamic-add-module/</guid>
+      <description>&lt;p&gt;好几次为了一个模块重新编译整个Nginx，其实可以更简单。
+&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Java Oracle 环境搭建</title>

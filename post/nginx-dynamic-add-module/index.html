@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>视频剪辑 // Peculiar</title>
+    <title>Nginx动态添加模块 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="视频剪辑" />
+        <meta property="og:title" content="Nginx动态添加模块" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/video_clip/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/nginx-dynamic-add-module/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,64 +56,91 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">视频剪辑</h1>
+            <h1 class="article-title" itemprop="name">Nginx动态添加模块</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/video_clip/" class="article-date">
-                <time datetime='2017-10-28T11:55:49.000&#43;08:00' itemprop="datePublished">2017-10-28</time>
+            <a href="/post/nginx-dynamic-add-module/" class="article-date">
+                <time datetime='2017-12-13T22:52:42.000&#43;08:00' itemprop="datePublished">2017-12-13</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>Mac系统有个好玩的功能——快速预览（QuickLook）——在任何文件上敲击「空格」键，可以快速预览文件内容。
+            <p>好几次为了一个模块重新编译整个Nginx，其实可以更简单。
 </p>
 
-<h2 id="基础概念">基础概念</h2>
+<h2 id="步骤">步骤</h2>
 
 <ul>
-<li><p>分辨率<br />
-没什么好说的。</p></li>
+<li><p>我已经安装了Nginx，nginx -V查看编译参数。</p>
 
-<li><p>帧率
-FPS。</p></li>
+<pre><code>➜  bin ./nginx_bak -V
+nginx version: nginx/1.12.0
+built by clang 8.1.0 (clang-802.0.42)
+built with OpenSSL 1.1.0e  16 Feb 2017 (running with OpenSSL 1.1.0f  25 May 2017)
+TLS SNI support enabled
+configure arguments: --prefix=/usr/local/Cellar/nginx/1.12.0_1 --with-http_ssl_module --with-pcre --sbin-path=/usr/local/Cellar/nginx/1.12.0_1/bin/nginx --with-cc-opt='-I/usr/local/opt/pcre/include -I/usr/local/opt/openssl@1.1/include' --with-ld-opt='-L/usr/local/opt/pcre/lib -L/usr/local/opt/openssl@1.1/lib' --conf-path=/usr/local/etc/nginx/nginx.conf --pid-path=/usr/local/var/run/nginx.pid --lock-path=/usr/local/var/run/nginx.lock --http-client-body-temp-path=/usr/local/var/run/nginx/client_body_temp --http-proxy-temp-path=/usr/local/var/run/nginx/proxy_temp --http-fastcgi-temp-path=/usr/local/var/run/nginx/fastcgi_temp --http-uwsgi-temp-path=/usr/local/var/run/nginx/uwsgi_temp --http-scgi-temp-path=/usr/local/var/run/nginx/scgi_temp --http-log-path=/usr/local/var/log/nginx/access.log --error-log-path=/usr/local/var/log/nginx/error.log --with-http_gzip_static_module --with-http_v2_module
+</code></pre></li>
 
-<li><p>码率<br />
-又称为比特率，主要是保证视频在线直出的一个速率，计算方式=视频大小(单位为bit)/视频时长。<br />
-一般视频网站规定上传的视频码率为1Mbit左右，如果大于就需要转换，也就是对于画质进行压缩，导致bit减少。保证一个在线观看的速率不会卡顿，网易云音乐的上传视频就会转换。<br />
-100分钟1GB的电影的码率大概为1.4Mbit/s。<br />
-iOS 设备采集的视频码率大约在 50 Mbps，相比而言 Bilibili 弹幕网对超清视频的要求上限是 1.8 Mbps，一旦超过这个码率，视频会被官方重新压制（官方压制后的清晰度惨不忍睹）。</p></li>
+<li><p>下载Nginx源码包</p>
 
-<li><p>封装格式</p>
+<pre><code>wget http://nginx.org/download/nginx-1.12.0.tar.gz
+</code></pre></li>
 
-<pre><code>常见的视频流：H264（或称AVC1）、XVID、DIVX、RV40、RV50、RV60、RM8、RM9、RM10
-常见的音频流：mp3、aac、ogg、flac
-常见封装格式可行的组合：                                  
-                                  mp4：H264+mp3/aac/ogg/alac；  XVID+mp3/aac/ogg/alac
-                                  mov：H264+mp4；H264+aac
-                                  avi:     H264+mp3;  XVID+mp3;  DIVX+mp3
-                                  rmvb：RV40~RV60+aac/mp3；RM8~RM10+aac/mp3
-                                  mkv:   万能封装，任意组合
-QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac的mov或mp4封装。
+<li><p>待添加的模块</p>
+
+<pre><code>wget https://github.com/openresty/echo-nginx-module/archive/v0.61.tar.gz
+</code></pre></li>
+
+<li><p>解压两个包，源码包内重新编译并且&ndash;add-module=path/to/mudule</p>
+
+<pre><code>./configure --prefix=/usr/local/Cellar/nginx/1.12.0_1 --with-http_ssl_module --with-pcre --sbin-path=/usr/local/Cellar/nginx/1.12.0_1/bin/nginx --with-cc-opt='-I/usr/local/opt/pcre/include -I/usr/local/opt/openssl@1.1/include' --with-ld-opt='-L/usr/local/opt/pcre/lib -L/usr/local/opt/openssl@1.1/lib' --conf-path=/usr/local/etc/nginx/nginx.conf --pid-path=/usr/local/var/run/nginx.pid --lock-path=/usr/local/var/run/nginx.lock --http-client-body-temp-path=/usr/local/var/run/nginx/client_body_temp --http-proxy-temp-path=/usr/local/var/run/nginx/proxy_temp --http-fastcgi-temp-path=/usr/local/var/run/nginx/fastcgi_temp --http-uwsgi-temp-path=/usr/local/var/run/nginx/uwsgi_temp --http-scgi-temp-path=/usr/local/var/run/nginx/scgi_temp --http-log-path=/usr/local/var/log/nginx/access.log --error-log-path=/usr/local/var/log/nginx/error.log --with-http_gzip_static_module --with-http_v2_module --add-module=/Users/poly/Desktop/tmp/garbage/echo-nginx-module-0.61
+</code></pre></li>
+
+<li><p>make进行编译，不要进行make install<br />
+make install 会导致配置文件和网站清空</p></li>
+
+<li><p>替换./objs/nginx到环境变量中的nginx<br />
+注意软连接</p></li>
+
+<li><p>测试使用echo-nginx-module</p>
+
+<pre><code>location /hello {
+    echo &quot;hello, world!&quot;;
+}
+
+----------
+
+➜  objs curl cjy.com/hello
+hello, world!
 </code></pre></li>
 </ul>
 
-<h2 id="转码">转码</h2>
-
-<h2 id="final-cut-pro">Final Cut Pro</h2>
+<h2 id="问题">问题</h2>
 
 <ul>
-<li>剪片段: 目标段首尾按B，CUT出一个区域，右键新建复合，再双击该片段，进入后可以进行导出。<br /></li>
-<li>合成片段: 把素材拖到时间轴。<br /></li>
-<li>加背景音乐: 拖进来后，如果需要某一段音量调高，使用区域工具(I O)选择后，拖动音量调整。<br /></li>
-<li>加水印: 制作自己风格的Logo，调整大小放在视频上层。<br /></li>
+<li><p>Nginx的权限问题</p>
+
+<pre><code>nginx: [alert] could not open error log file: open() &quot;/usr/local/var/log/nginx/error.log&quot; failed (13: Permission denied)
+2017/12/13 22:36:23 [warn] 41178#0: the &quot;user&quot; directive makes sense only if the master process runs with super-user privileges, ignored in /usr/local/etc/nginx/nginx.conf:1
+2017/12/13 22:36:23 [emerg] 41178#0: open() &quot;/usr/local/var/log/nginx/error.log&quot; failed (13: Permission denied)
+</code></pre></li>
 </ul>
 
-<h2 id="参考">参考</h2>
+<p>nginx.conf的user是staff组的poly，这个配置没有问题<br />
+poly有执行权限x，但是nginx要求super user<br />
+最后发现可以将执行权限改为s，执行者将具有该文件拥有者的权限，相当于临时拥有root权限</p>
 
-<p><a href="http://bbs.feng.com/read-htm-tid-6839308.html">http://bbs.feng.com/read-htm-tid-6839308.html</a></p>
+<pre><code>    sudo chmod u+s nginx
+
+    -------
+
+    -rwsr-xr-x   1 root  wheel  1064556 12 13 22:10 nginx
+</code></pre>
+
+<p>之前以为只有RWX权限，不知道还有S和T。</p>
         </div>
 
         
@@ -124,10 +151,8 @@ QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac�
 <ul>
 <li>
 <ul>
-<li><a href="#基础概念">基础概念</a></li>
-<li><a href="#转码">转码</a></li>
-<li><a href="#final-cut-pro">Final Cut Pro</a></li>
-<li><a href="#参考">参考</a></li>
+<li><a href="#步骤">步骤</a></li>
+<li><a href="#问题">问题</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -181,7 +206,7 @@ QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac�
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E8%A7%86%E9%A2%91%E5%89%AA%E8%BE%91">视频剪辑
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/nginx">Nginx
                     </a>
                 </li>
                 
@@ -191,15 +216,9 @@ QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac�
     </div>
     <nav id="article-nav">
     
-    <a href="/post/hex-conversion/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            进制转换
-        </div>
-    </a>
     
-    
-    <a href="/post/sphinx/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Sphinx初试&nbsp;<span>&gt;</span></div>
+    <a href="/post/java-oracle-env/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Java Oracle 环境搭建&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
@@ -210,7 +229,7 @@ QuickTime &amp; Final Cut Pro X原生支持的常见组合：H264+mp3/aac/alac�
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2017 map[email:noreply#qq.com name:Poly]&nbsp;
+            &copy; 2017 map[name:Poly email:noreply#qq.com]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
