@@ -303,6 +303,9 @@ error_log /dev/null;
     }
 </code></pre>
 
+<p>Nginx反向代理时，header头会被忽略掉，如果需要传给后端服务，需要添加 proxy_set_header
+比如Nginx做Websocket的负载需要设置Upgrade头和Connection头</p>
+
 <h3 id="负载均衡">负载均衡</h3>
 
 <p>调度算法见之前的<a href="/post/xiaozhao/#使用upstream进行负载均衡的算法">笔记</a></p>
@@ -1066,9 +1069,9 @@ Lua实现的Redis连接服务相当于一个中间件，连接Redis后，监听s
     </div>
     <nav id="article-nav">
     
-    <a href="/post/tcp-unpacking-and-sticking-pack/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/post/java-oracle-env/" id="article-nav-newer" class="article-nav-link-wrap">
         <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Tcp拆包和粘包
+            Java Oracle 环境搭建
         </div>
     </a>
     
