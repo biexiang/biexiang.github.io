@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Adobe Effects on Peculiar</title>
+    <link>https://biexiang.github.io/tags/adobe-effects/</link>
+    <description>Recent content in Adobe Effects on Peculiar</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <managingEditor>noreply#qq.com (Poly)</managingEditor>
+    <webMaster>noreply#qq.com (Poly)</webMaster>
+    <lastBuildDate>Tue, 19 Dec 2017 00:06:09 +0800</lastBuildDate>
+    
+	<atom:link href="https://biexiang.github.io/tags/adobe-effects/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Ae丢照片 Demo</title>
+      <link>https://biexiang.github.io/post/ae-throw-picture/</link>
+      <pubDate>Tue, 19 Dec 2017 00:06:09 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/post/ae-throw-picture/</guid>
+      <description>&lt;p&gt;有趣的是，丢照片视频的制作和HTML5的一些效果有相似的地方&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
