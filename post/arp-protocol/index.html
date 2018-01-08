@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Redis Cluster // Peculiar</title>
+    <title>Arp协议 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="Redis Cluster" />
+        <meta property="og:title" content="Arp协议" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/redis-cluster/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/arp-protocol/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,64 +56,58 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">Redis Cluster</h1>
+            <h1 class="article-title" itemprop="name">Arp协议</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/redis-cluster/" class="article-date">
-                <time datetime='2018-01-07T22:37:22.000&#43;08:00' itemprop="datePublished">2018-01-07</time>
+            <a href="/post/arp-protocol/" class="article-date">
+                <time datetime='2018-01-08T22:36:54.000&#43;08:00' itemprop="datePublished">2018-01-08</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>Redis集群搭建</p>
+            <p>理解ARP协议。</p>
 
 <p></p>
 
-<h2 id="搭建">搭建</h2>
+<h2 id="理解">理解</h2>
 
-<pre><code>    ######## Cluster Config Start 
-    port 9001
-    daemonize yes
-    bind 192.168.50.167
-    dir ./
-    pidfile /var/run/redis_9001.pid
-    cluster-enabled yes
-    cluster-config-file nodes-9001.conf
-    cluster-node-timeout 15000
-    appendonly yes
-    ######### Cluster Config End
-
-    ##开启主从集群 IP可以改为局域网IP
-    ./bin/redis-trib.rb create --replicas 1 127.0.0.1:9001 127.0.0.1:9002 127.0.0.1:9003 127.0.0.1:9004 127.0.0.1:9005 127.0.0.1:9006
-</code></pre>
+<p>ARP全称地址解析协议，是通过解析网路层地址来找寻数据链路层地址的一个在网络协议包中极其重要的网络传输协议。</p>
 
 <ul>
-<li>集群最少三个节点，并且为了冗余数据不丢失采用主从模式，所以一共6个节点</li>
-<li>mkdir建立6个redis实例目录，独立的redis.conf文件，端口为9001-9006</li>
-<li>开启6个redis实例</li>
-<li>使用redis-trib.rb命令建立主从集群，cluster使用ruby，需要合适版本的ruby环境，并且gem install redis</li>
+<li>往目的IP发送数据包时，如果路由表中有缓存IP对应的Mac地址，即可直接发送。如果路由表中不含有对应的记录，即可发送一个ARP Request，请求包含源IP、源Mac地址和目的IP地址，主机接收到这个ARP广播，发现自己有这个记录或者自己的IP是这个目的IP，即发送一个ARP Reply，其中包括Mac地址信息。</li>
 </ul>
 
-<h2 id="使用">使用</h2>
+<p><strong>目标IP与自己在同一网段</strong></p>
 
-<pre><code>    redis-cli -c -h 192.168.50.167 -p 9001
-</code></pre>
+<ul>
+<li>arp高速缓存有目标IP的MAC地址：直接发送到该物理地址</li>
+<li>arp高速缓存没有目标IP的MAC地址：发送ARP广播请求目标IP的MAC地址，缓存该MAC地址，然后发数据报到该MAC地址。</li>
+</ul>
 
-<p>-c连接上后，cluster nodes命令可以看到6个节点，3个master，3个slave。设置每一个键都会对键名进行CRC16%16383，获得节点索引并且重定向到那个实例的shell，进行SET或者其他命令。<br />
-如果主Down了，会将slave会替代为主，提供读写。<br />
-如果主Recovery了，会变成Slave。</p>
+<p><strong>目标IP与自己不在同一个网段</strong></p>
 
-<h2 id="总结">总结</h2>
+<ul>
+<li>arp高速缓存有默认网关的MAC地址：直接发送IP数据报道默认网关，再由网关转发到外网。</li>
+<li>arp高速缓存没有默认网关的MAC地址：还是发送ARP广播请求默认网关的MAC地址，缓存该地址，并且发送数据报到网关。</li>
+</ul>
 
-<p>集群模式提高了性能的情况下，也提高了数据的安全性能，有时间可以仔细看看实现。<br />
-<a href="https://github.com/biexiang/redis-cluster">DEMO地址</a></p>
+<h2 id="arp-spoof">ARP Spoof</h2>
+
+<p>因为收到ARP reply不会进行验证直接更新，所以有这个攻击。</p>
+
+<ul>
+<li>主机A和主机B为客户端，路由器C为网关。(前提是主机B有缓存主机A和网关C的Mac地址)</li>
+<li>主机B给主机A发送ARP reply，包的内容为源IP为网关C的IP，源Mac地址为B自己的地址。这样以后主机A发送任何请求给网关都会经过主机B，主机B可以处理也可以不处理。<br /></li>
+<li>主机B给网关C发送ARP reply，包的内容为源IP为主机A的IP，源Mac地址为B自己的地址。这样以后网关C收到主机A的包会转发给主机B，主机B可以处理或者不处理。<br /></li>
+<li>这样主机A就OFFLINE了。<br /></li>
+</ul>
 
 <h2 id="ref">REF</h2>
 
-<p><a href="https://www.zybuluo.com/phper/note/195558">Redis集群研究和实践</a></p>
+<p><a href="http://tips.codekiller.cn/2017/05/25/arpspoof/">Network Tips: 局域网 ARP 欺骗原理详解</a></p>
         </div>
 
         
@@ -124,9 +118,8 @@
 <ul>
 <li>
 <ul>
-<li><a href="#搭建">搭建</a></li>
-<li><a href="#使用">使用</a></li>
-<li><a href="#总结">总结</a></li>
+<li><a href="#理解">理解</a></li>
+<li><a href="#arp-spoof">ARP Spoof</a></li>
 <li><a href="#ref">REF</a></li>
 </ul></li>
 </ul>
@@ -181,7 +174,12 @@
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/redis">redis
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C">计算机网络
+                    </a>
+                </li>
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/arp">ARP
                     </a>
                 </li>
                 
@@ -191,15 +189,9 @@
     </div>
     <nav id="article-nav">
     
-    <a href="/post/arp-protocol/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Arp协议
-        </div>
-    </a>
     
-    
-    <a href="/post/ae-throw-picture/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Ae丢照片 Demo&nbsp;<span>&gt;</span></div>
+    <a href="/post/redis-cluster/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Redis Cluster&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
@@ -210,7 +202,7 @@
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2018 map[name:Poly email:noreply#qq.com]&nbsp;
+            &copy; 2018 map[email:noreply#qq.com name:Poly]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
