@@ -74,6 +74,68 @@
 
 <hr />
 
+<h2 id="tcp建连接时syn超时">TCP建连接时SYN超时</h2>
+
+<p>试想一下，如果server端接到了clien发的SYN后回了SYN-ACK后client掉线了，server端没有收到client回来的ACK，那么，这个连接处于一个中间状态，即没成功，也没失败。于是，server端如果在一定时间内没有收到的TCP会重发SYN-ACK。在Linux下，默认重试次数为5次，重试的间隔时间从1s开始每次都翻售，5次的重试时间间隔为1s, 2s, 4s, 8s, 16s，总共31s，第5次发出后还要等32s都知道第5次也超时了，所以，总共需要 1s + 2s + 4s+ 8s+ 16s + 32s = 2^6 -1 = 63s，TCP才会把断开这个连接。<br />
+From <a href="https://coolshell.cn/articles/11564.html">TCP的那些事</a></p>
+
+<h2 id="php相关问题">PHP相关问题</h2>
+
+<h3 id="unset-a-global-value">unset a global value</h3>
+
+<pre><code>    $a = 10;
+    function tst()
+    {
+        global $a;
+        unset($a);
+    }      
+</code></pre>
+
+<p>当用 global $var 声明一个变量时实际上建立了一个到全局变量的引用，也可以使用$_GLOBALS[&lsquo;VAR&rsquo;]。</p>
+
+<h3 id="函数名前加-符号">函数名前加&amp;符号</h3>
+
+<pre><code>    &lt;?php
+    class foo {
+        public $value = 42;
+
+        public function &amp;getValue() {
+            return $this-&gt;value;
+        }
+    }
+
+    $obj = new foo;
+    $myValue = &amp;$obj-&gt;getValue(); // $myValue is a reference to $obj-&gt;value, which is 42.
+    $obj-&gt;value = 2;
+    echo $myValue;                // prints the new value of $obj-&gt;value, i.e. 2.
+    ?&gt;
+</code></pre>
+
+<p>这里涉及到引用返回，myvalue指向对象中的属性value的值。<a href="https://segmentfault.com/a/1190000004272256">引用返回</a></p>
+
+<h3 id="foreach与引用赋值">foreach与引用赋值</h3>
+
+<pre><code>    &lt;?php 
+        $ar = array('a', 'b', 'c');
+
+        foreach ($ar as &amp;$v) {}
+        foreach ($ar as $v) {
+            var_dump($ar);
+        }
+    ?&gt;   
+</code></pre>
+
+<p>第一个foreach是引用赋值，$v作为一个变量依次指向a、b、c的内存空间，方便修改数组的值。最后循环结束时，$v指向字符c的内存空间。<br />
+第二个foreach为拷贝赋值，因为没有unset掉$v，所以$v依然指向字符c的内存空间，第二个foreach就是在循环修改$v指向的内存空间的值。</p>
+
+<ul>
+<li>第一次，$v = &lsquo;a&rsquo;，$ar = [&lsquo;a&rsquo;,&lsquo;b&rsquo;,&lsquo;a&rsquo;]；<br /></li>
+<li>第二次，$v = &lsquo;b&rsquo;，$ar = [&lsquo;a&rsquo;,&lsquo;b&rsquo;,&lsquo;b&rsquo;]；<br /></li>
+<li>第三次，$v = &lsquo;b&rsquo;；$ar = [&lsquo;a&rsquo;,&lsquo;b&rsquo;,&lsquo;b&rsquo;]；<br /></li>
+</ul>
+
+<p>所以最终打印为a、b、b</p>
+
 <h2 id="大端序和小端序">大端序和小端序</h2>
 
 <p>网络传输主要使用大端序，我的MBP是使用的小端序。<br />
@@ -555,6 +617,13 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
 <ul>
 <li>
 <ul>
+<li><a href="#tcp建连接时syn超时">TCP建连接时SYN超时</a></li>
+<li><a href="#php相关问题">PHP相关问题</a>
+<ul>
+<li><a href="#unset-a-global-value">unset a global value</a></li>
+<li><a href="#函数名前加-符号">函数名前加&amp;符号</a></li>
+<li><a href="#foreach与引用赋值">foreach与引用赋值</a></li>
+</ul></li>
 <li><a href="#大端序和小端序">大端序和小端序</a></li>
 <li><a href="#struct和union的区别">Struct和Union的区别</a></li>
 <li><a href="#结构体内存对齐">结构体内存对齐</a></li>
@@ -673,7 +742,7 @@ cwnd = ssthresh =&gt; 两者都ok</p></li>
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2018 map[name:Poly email:noreply#qq.com]&nbsp;
+            &copy; 2018 map[email:noreply#qq.com name:Poly]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
