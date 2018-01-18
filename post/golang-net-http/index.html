@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>循环冗余检验 // Peculiar</title>
+    <title>Golang net/Http // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="循环冗余检验" />
+        <meta property="og:title" content="Golang net/Http" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/crc-m/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/golang-net-http/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,81 +56,110 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">循环冗余检验</h1>
+            <h1 class="article-title" itemprop="name">Golang net/Http</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/crc-m/" class="article-date">
-                <time datetime='2017-11-20T15:56:57.000&#43;08:00' itemprop="datePublished">2017-11-20</time>
+            <a href="/post/golang-net-http/" class="article-date">
+                <time datetime='2018-01-17T22:26:15.000&#43;08:00' itemprop="datePublished">2018-01-17</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>学计算机网络的时候接触过，CRC对于报文的完整性检验，记录下。</p>
+            <p>阅读ProxyTool源码时，补充net/http包的理解。</p>
 
 <p></p>
 
-<p>首先计算待传输数据的冗余码(余数)，将余数加到数据后面进行传输，另一端收到后将数据对同一个除数进行取余，若余数为0，则数据完整。</p>
+<h2 id="http-server">HTTP SERVER</h2>
 
-<h2 id="基础知识">基础知识</h2>
+<pre><code>    package main
+    import (
+        &quot;net/http&quot;
+    )
 
-<ul>
-<li>LSB<br />
-最低有效位(Least Significant Bit)</li>
-<li>MSB<br />
-最高有效位(Most Significant Bit)<br /></li>
-<li>生成多项式<br />
-生成多项式的选择是CRC算法实现中最重要的部分，所选择的多项式必须有最大的错误检测能力，同时保证总体的碰撞概率最小。多项式最重要的属性是它的长度，也就是最高非零系数的数值，因为它直接影响着计算的校验和的长度。比如CRC-8 = x^8+x^2+x+1，即 10000 0111，去掉MSB即 0000 0111(0x07)。<br /></li>
-
-<li><p>反转字节</p>
-
-<pre><code>func ReverseByte(val byte) byte {
-    var rval byte = 0
-    for i := uint8(0); i &lt; 8; i++ {
-        if val&amp;(1&lt;&lt;i) != 0 {
-            rval |= 0x80 &gt;&gt; i
-        }
+    func h1(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte(&quot;This Is From H1&quot;))
     }
-    return rval
-}
-</code></pre></li>
 
-<li><p>CRC-M表格<br />
-8位，一共256种可以提前生成一个对应的CRC表格。</p>
-
-<pre><code>func makeTable(params Params) *Table {
-    table := new(Table)
-    table.params = params
-
-    for i := 0; i &lt; 256; i++ {
-        num := uint8(i)
-        //遍历整个字节的每一位
-        for j := 0; j &lt; 8; j++ {
-            //MSB是否为1，为1则与多项式异或
-            yep := (num &amp; 0x80) != 0
-            num &lt;&lt;= 1
-            if yep {
-                num ^= params.Poly
-            }
-        }
-        table.data[i] = num
+    func h2(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte(&quot;This Is From H2&quot;))
     }
-    return table
-}
-</code></pre></li>
-</ul>
 
-<h2 id="思路">思路</h2>
+    type hhandler struct{}
 
-<p>A = 0011 1110，C1=00110000B，C2=1110B<br />
-A = C1 XOR C2<br />
-B = Poly(多项式)<br />
-则 A XOR B = （C1 XOR C2） XOR B =(C1 XOR B )XOR C2<br />
-这里的例子是CRC-4，下面的Update函数是CRC-8。</p>
+    func (h *hhandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte(&quot;This Is From H3&quot;))
+    }
 
-<h2 id="完整代码">完整代码</h2>
+    func main() {
+        mux := http.NewServeMux()
+        mux.HandleFunc(&quot;/h1&quot;, h1)
+        mux.Handle(&quot;/h2&quot;, http.HandlerFunc(h2))
+        mux.Handle(&quot;/h3&quot;, &amp;hhandler{})
+        http.ListenAndServe(&quot;:1234&quot;, mux)
+    }
+</code></pre>
+
+<p>上面的HTTP SERVER代码核心理解几个：</p>
+
+<h3 id="路由管理器-servermux">路由管理器(ServerMux)</h3>
+
+<p>ServerMux类型解释：</p>
+
+<pre><code>    type ServeMux struct {
+        mu    sync.RWMutex  //同步锁
+        m     map[string]muxEntry  //存储路由和handler的映射关系
+        hosts bool // whether any patterns contain hostnames
+    }
+
+    type muxEntry struct {
+        explicit bool    //路由是否精确
+        h        Handler //请求处理方法相当于控制器，实现了ServeHTTP方法
+        pattern  string  //匹配模式
+    }
+</code></pre>
+
+<p>这里是主动创建一个ServeMux路由管理器</p>
+
+<pre><code>    http.NewServeMux()  //返回一个ServeMux
+</code></pre>
+
+<p>但是也可以使用默认的ServeMux，比如：</p>
+
+<pre><code>    http.HandleFunc(&quot;/&quot;,handler)
+
+    //下面来自server.go 
+    // DefaultServeMux is the default ServeMux used by Serve.
+    var DefaultServeMux = &amp;defaultServeMux
+    var defaultServeMux ServeMux
+    func HandleFunc(pattern string, handler func(ResponseWriter, *Request)) {
+        DefaultServeMux.HandleFunc(pattern, handler)
+    }
+</code></pre>
+
+<h3 id="handlerfunc类型">HandlerFunc类型</h3>
+
+<pre><code>    type HandlerFunc func(ResponseWriter, *Request)
+
+    // ServeHTTP calls f(w, r).
+    func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request) {
+        f(w, r)
+    }
+</code></pre>
+
+<p>这里HandlerFunc相当于func(ResponseWriter, *Request)的一个别名类型，这个类型拥有ServeHTTP方法，只要把类似的方法转型为HandlerFunc类型，就可以调用它的ServeHTTP方法。</p>
+
+<pre><code>    func NotFound(w ResponseWriter, r *Request) { Error(w, &quot;404 page not found&quot;, StatusNotFound) }
+
+    func NotFoundHandler() Handler { return HandlerFunc(NotFound) }
+</code></pre>
+
+<p>同理，上面的404代码，具有类似签名的函数转型 HandlerFunc(NotFound)，因为转型后拥有ServeHTTP方法，Handler是一个接口类型，其中包含ServeHTTP方法，所以返回为一个Handler。<br />
+相当于函数实现了接口的某个方法。</p>
+
+<p>类似的：</p>
 
 <pre><code>    package main
 
@@ -138,90 +167,77 @@ B = Poly(多项式)<br />
         &quot;fmt&quot;
     )
 
-    /**
-     *  Poly 多项式
-     *  Init 初始化值
-     *  RefIn 如果此值为true，表示输入的数据需要进行比特翻转，也就是Bit7要变成最低位， Bit0要变成最高位
-     *  RefOut 如果此值为true，这表示进行异或后算出来的CRC需要进行整个比特翻转
-     *  XorOut 最终异或的值
-     */
-    type Params struct {
-        Poly   uint8
-        Init   uint8
-        RefIn  bool
-        RefOut bool
-        XorOut uint8
+    // a定义了一个函数结构，b具有相同的函数结构，转型为a后获得的结果，既有b之前的功能，也有a实现的接口方法
+
+    type a func(name string,age uint8)
+
+    func (fun a) impl(){
+        fmt.Println(&quot;Same Implemetion&quot;)
     }
 
-    type Table struct {
-        params Params
-        data   [256]uint8
+    func b(name string,age uint8) {
+        fmt.Println(&quot;INFO:&quot;,name,age)
     }
 
-    func makeTable(params Params) *Table {
-        table := new(Table)
-        table.params = params
-
-        for i := 0; i &lt; 256; i++ {
-            num := uint8(i)
-            //遍历整个字节的每一位
-            for j := 0; j &lt; 8; j++ {
-                //MSB是否为1，为1则与多项式异或
-                yep := (num &amp; 0x80) != 0
-                num &lt;&lt;= 1
-                if yep {
-                    num ^= params.Poly
-                }
-            }
-            table.data[i] = num
-        }
-        return table
-    }
-
-    /**
-     *  反转字节
-     */
-    func ReverseByte(val byte) byte {
-        var rval byte = 0
-        for i := uint8(0); i &lt; 8; i++ {
-            if val&amp;(1&lt;&lt;i) != 0 {
-                rval |= 0x80 &gt;&gt; i
-            }
-        }
-        return rval
-    }
-
-    func ReverseUint8(input uint8) uint8 {
-        return ReverseByte(input)
-    }
-
-    func Update(init uint8, data []byte, table *Table) uint8 {
-        for _, value := range data {
-            if table.params.RefIn {
-                value = ReverseByte(value)
-            }
-            init = table.data[init^value]
-        }
-        return init
-    }
-
-    func Complete(crc uint8, table *Table) uint8 {
-        if table.params.RefOut {
-            crc = ReverseUint8(crc)
-        }
-        return crc ^ table.params.XorOut
-    }
-
-    func main() {
-        crc8 := Params{0x07, 0x00, false, false, 0x00}
-        table := makeTable(crc8)
-        init := table.params.Init
-        crc := Update(init, []byte{0x12, 0x55}, table)
-        crc = Complete(crc, table)
-
-        fmt.Println(crc)
+    func main(){
+        b(&quot;biexiang&quot;,21)
+        after := a(b)
+        after(&quot;biexiang&quot;,21)
+        after.impl()
     }
 </code></pre>
+
+<h3 id="handler的处理">Handler的处理</h3>
+
+<p>首先Handler是一个接口，其中包含ServeHTTP方法</p>
+
+<pre><code>    type Handler interface {
+        ServeHTTP(ResponseWriter, *Request)
+    }
+</code></pre>
+
+<p>第一种，ServerMux的一个方法调用：</p>
+
+<pre><code>    mux.HandleFunc(&quot;/h1&quot;, h1)
+
+    //server.go
+    //HandlerFunc将handler(函数)转型为Handler接口类型
+    func (mux *ServeMux) HandleFunc(pattern string, handler func(ResponseWriter, *Request)) {
+        mux.Handle(pattern, HandlerFunc(handler))
+    }
+
+    //将路由和handler的映射关系添加到mux(ServeMux)的map字典中
+    func (mux *ServeMux) Handle(pattern string, handler Handler) {
+        ...
+    }
+</code></pre>
+
+<p>第二种，直接调用handle方法，省去了第一种在函数内将函数转为接口类型，直接在外面进行转换：</p>
+
+<pre><code>    mux.Handle(&quot;/h2&quot;, http.HandlerFunc(h2))
+</code></pre>
+
+<p>第三种，是自定义Handler，可以是AdminHandler或者是IndexHandler，只要实现了ServeHTTP方法，就实现了Handler接口，可以直接处理。</p>
+
+<pre><code>    mux.Handle(&quot;/h3&quot;, &amp;hhandler{})
+</code></pre>
+
+<h3 id="serve监听">Serve监听</h3>
+
+<p>http包直接提供了可以外调的方法ListenAndServe，其实是内部Server类型的方法。</p>
+
+<pre><code>    type Server struct {
+        Addr           string        // 监听的地址和端口
+        Handler        Handler       // 所有请求需要调用的Handler（实际上这里说是ServeMux更确切）如果为空则设置为DefaultServeMux
+        ReadTimeout    time.Duration // 读的最大Timeout时间
+        WriteTimeout   time.Duration // 写的最大Timeout时间
+        MaxHeaderBytes int           // 请求头的最大长度
+        TLSConfig      *tls.Config   // 配置TLS
+    }
+</code></pre>
+
+<p>ServerMux其实也实现了ServeHTTP方法，所以Server结构体中的Handler就是指ServeMux，为空的话就为默认的。<br />
+当请求进来的时候，首先查找ServeMux中的map映射中是否有响应的路由，有的话调用对应handler的ServeHTTP方法处理，并且返回Response。</p>
         </div>
 
         
@@ -232,9 +248,13 @@ B = Poly(多项式)<br />
 <ul>
 <li>
 <ul>
-<li><a href="#基础知识">基础知识</a></li>
-<li><a href="#思路">思路</a></li>
-<li><a href="#完整代码">完整代码</a></li>
+<li><a href="#http-server">HTTP SERVER</a>
+<ul>
+<li><a href="#路由管理器-servermux">路由管理器(ServerMux)</a></li>
+<li><a href="#handlerfunc类型">HandlerFunc类型</a></li>
+<li><a href="#handler的处理">Handler的处理</a></li>
+<li><a href="#serve监听">Serve监听</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -288,12 +308,7 @@ B = Poly(多项式)<br />
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E7%AE%97%E6%B3%95">算法
-                    </a>
-                </li>
-                
-                <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/crc-8">CRC-8
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/golang">Golang
                     </a>
                 </li>
                 
@@ -303,15 +318,9 @@ B = Poly(多项式)<br />
     </div>
     <nav id="article-nav">
     
-    <a href="/post/openresty/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            OpenResty最佳实践
-        </div>
-    </a>
     
-    
-    <a href="/post/totp/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">双因素认证&nbsp;<span>&gt;</span></div>
+    <a href="/post/arp-protocol/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Arp协议&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>

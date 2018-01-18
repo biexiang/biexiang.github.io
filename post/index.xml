@@ -8,10 +8,21 @@
     <language>en-us</language>
     <managingEditor>noreply#qq.com (Poly)</managingEditor>
     <webMaster>noreply#qq.com (Poly)</webMaster>
-    <lastBuildDate>Mon, 08 Jan 2018 22:36:54 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 17 Jan 2018 22:26:15 +0800</lastBuildDate>
     
 	<atom:link href="https://biexiang.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Golang net/Http</title>
+      <link>https://biexiang.github.io/post/golang-net-http/</link>
+      <pubDate>Wed, 17 Jan 2018 22:26:15 +0800</pubDate>
+      <author>noreply#qq.com (Poly)</author>
+      <guid>https://biexiang.github.io/post/golang-net-http/</guid>
+      <description>&lt;p&gt;阅读ProxyTool源码时，补充net/http包的理解。&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Arp协议</title>

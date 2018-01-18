@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://biexiang.github.io/post/golang-net-http/</loc>
+    <lastmod>2018-01-17T22:26:15+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://biexiang.github.io/post/arp-protocol/</loc>
     <lastmod>2018-01-08T22:36:54+08:00</lastmod>
   </url>
@@ -182,6 +187,12 @@
   </url>
   
   <url>
+    <loc>https://biexiang.github.io/tags/golang/</loc>
+    <lastmod>2018-01-17T22:26:15+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://biexiang.github.io/tags/hack/</loc>
     <lastmod>2017-10-06T17:09:53+08:00</lastmod>
     <priority>0</priority>
@@ -237,7 +248,7 @@
   
   <url>
     <loc>https://biexiang.github.io/</loc>
-    <lastmod>2018-01-08T22:36:54+08:00</lastmod>
+    <lastmod>2018-01-17T22:26:15+08:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -249,7 +260,7 @@
   
   <url>
     <loc>https://biexiang.github.io/post/</loc>
-    <lastmod>2018-01-08T22:36:54+08:00</lastmod>
+    <lastmod>2018-01-17T22:26:15+08:00</lastmod>
     <priority>0</priority>
   </url>
   
