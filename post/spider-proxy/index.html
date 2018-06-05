@@ -61,7 +61,7 @@
         
         <div class="article-meta">
             <a href="/post/spider-proxy/" class="article-date">
-                <time datetime='2017-11-06T19:18:08.000&#43;08:00' itemprop="datePublished">2017-11-06</time>
+                <time datetime='2018-01-22T19:18:08.000&#43;08:00' itemprop="datePublished">2018-01-22</time>
             </a>
             
             
@@ -72,10 +72,6 @@
 
 <p></p>
 
-<blockquote>
-<p>挖坑</p>
-</blockquote>
-
 <h2 id="搭建代理池">搭建代理池</h2>
 
 <ul>
@@ -84,7 +80,12 @@
 
 <li><p>维护代理<br />
 每隔10s，删除失效的代理。</p></li>
+
+<li><p>提供接口<br />
+代理的API接口提供</p></li>
 </ul>
+
+<p>已填坑，<a href="https://github.com/biexiang/AgentPool">项目地址</a></p>
 
 <h2 id="假扮代理服务器">假扮代理服务器</h2>
 
@@ -100,6 +101,17 @@
 <li>反向搭理：Nginx做负载均衡器那种用户不知道真实处理请求的服务器是哪一台。<br /></li>
 <li>透明代理：感觉和正向搭理一样。</li>
 </ul>
+
+<h2 id="web前端部分">Web前端部分</h2>
+
+<p>使用Element-ui，进行数据展示，调用API接口数据的内容。</p>
+
+<ul>
+<li><a href="https://doc.webpack-china.org/concepts/configuration/">Webpack配置</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2016/01/babel.html">什么是Babel</a>，用来编译ES6或者ES7(stage-x)</li>
+<li><a href="https://github.com/ElementUI/element-starter">使用element-starter</a>，不要问为什么，因为自己写坑太多了，看懂了，自己再慢慢改。<br /></li>
+<li>配置Vue ProxyTable，因为我API跑在另外一个端口，需要跨域请求，ProxyTable都说是Vue-cli脚手架工具生成的，其实在webpack的devserver内配置。</li>
+</ul>
         </div>
 
         
@@ -112,6 +124,7 @@
 <ul>
 <li><a href="#搭建代理池">搭建代理池</a></li>
 <li><a href="#假扮代理服务器">假扮代理服务器</a></li>
+<li><a href="#web前端部分">Web前端部分</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -180,15 +193,9 @@
     </div>
     <nav id="article-nav">
     
-    <a href="/post/cannon-m6/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Cannon M6
-        </div>
-    </a>
     
-    
-    <a href="/post/permutation/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Golang实现排列组合&nbsp;<span>&gt;</span></div>
+    <a href="/post/golang-net-http/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">Golang net/Http&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
