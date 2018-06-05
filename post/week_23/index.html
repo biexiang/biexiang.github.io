@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tcp拆包和粘包 // Peculiar</title>
+    <title>2018年第23周 // Peculiar</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="author" content="">
-        <meta property="og:title" content="Tcp拆包和粘包" />
+        <meta property="og:title" content="2018年第23周" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://biexiang.github.io/post/tcp-unpacking-and-sticking-pack/" />
+    <meta property="og:url" content="https://biexiang.github.io/post/week_23/" />
     
 
     <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
@@ -56,154 +56,61 @@
     <div class="article-inner">
         
         <header class="article-header">
-            <h1 class="article-title" itemprop="name">Tcp拆包和粘包</h1>
+            <h1 class="article-title" itemprop="name">2018年第23周</h1>
         </header>
         
         <div class="article-meta">
-            <a href="/post/tcp-unpacking-and-sticking-pack/" class="article-date">
-                <time datetime='2017-12-17T21:06:21.000&#43;08:00' itemprop="datePublished">2017-12-17</time>
+            <a href="/post/week_23/" class="article-date">
+                <time datetime='2018-06-05T19:04:20.000&#43;08:00' itemprop="datePublished">2018-06-05</time>
             </a>
             
             
             
         </div>
         <div class="article-entry" itemprop="articleBody">
-            <p>UDP基于报文传输，头部有2个字节表示报文的长度，所以不会发生拆包和粘包的问题。TCP基于字节流的传输，服务端分不清数据包的界限，所以会有这个问题。</p>
+            <p>答辩前一周</p>
 
 <p></p>
 
-<h2 id="表现形式">表现形式</h2>
+<h2 id="想法">想法</h2>
 
-<p>Client向Server发送两个数据包</p>
+<p>今年年后去实习了2个月，在实习的时候每天都会有学习的想法，但是实习结束后回到学校制定的计划就都没有完成，所以今天制定一个计划，每周在博客上记录自己的生活和学习帮助自己记住每天都在做些什么，让生活有规律和学习一点。</p>
 
-<ul>
-<li><p>正常情况<br />
-<img src="/img/tcp_pack_1.png" alt="/img/tcp_pack_1.png" /></p></li>
+<h2 id="做过的">做过的</h2>
 
-<li><p>粘包情况<br />
-<img src="/img/tcp_pack_2.png" alt="/img/tcp_pack_2.png" /></p></li>
+<blockquote>
+<p>小说 + 东野圭吾 恶意</p>
+</blockquote>
 
-<li><p>粘包+拆包情况<br />
-<img src="/img/tcp_pack_3.png" alt="/img/tcp_pack_3.png" />
-<img src="/img/tcp_pack_4.png" alt="/img/tcp_pack_4.png" /></p></li>
-</ul>
+<p>整个小说都是围绕杀人动机来叙述的，野野口修设计一个动机给警察发现，从而隐藏最真实的动机。</p>
 
-<h2 id="原因">原因</h2>
+<p>小说恶意讲的是儿童文学作家野野口修从小嫉妒成名作家日高，小时候为了保护自己而成为校园恶霸人设，欺负甚至帮忙强暴女生。长大后发现日高写小说成名，在发现自己患了癌症后，而日高在发表的小说改编自小时候的霸凌事件，害怕揭露自己的过往，而计划的一场骗局谋杀。提前准备渲染自己新人设的素材和环境，比如收集日高前妻的围裙等为自己和日高前妻的假私情做下可调查的资料的准备，并且希望日高的人设成为一个拿为私情谋杀来威胁自己的人设，并且将自己的人设设置为日高小说的源作者，抄写所有日高的成名作作为原著。准备好一切，开始实施谋杀，并且留下证据让警察找到自己，让警察去寻找自己这么做的动机，并且诱导警察去寻找设计好的动机，使得自己成为著名小说的源作者，并且毁灭日高的一切人设。</p>
 
-<ul>
-<li>要发送的数据大于TCP发送缓冲区剩余空间大小，将会发生拆包。</li>
-<li>待发送数据大于MSS（最大报文长度），TCP在传输前将进行拆包。</li>
-<li>要发送的数据小于TCP发送缓冲区的大小，TCP将多次写入缓冲区的数据一次发送出去，将会发生粘包。</li>
-<li>接收数据端的应用层没有及时读取接收缓冲区中的数据，将发生粘包。</li>
-</ul>
+<blockquote>
+<p>剪辑 + fcpx 精剪分身</p>
+</blockquote>
 
-<h2 id="解决方法">解决方法</h2>
+<p>拍摄使用固定机位，背景为静止环境。同一个人物在不同的位置活动，最后将素材导入fcpx，通过视频的裁剪功能让不同的任务活动在某一块，即可完成人物精分。</p>
 
-<ul>
-<li>固定包的长度<br /></li>
-<li>头部添加数据包的长度<br /></li>
-<li>设置边界符号<br /></li>
-</ul>
+<blockquote>
+<p>剪辑 + 穿梭延时</p>
+</blockquote>
 
-<h2 id="in-golang">In Golang</h2>
+<p>将快门时间调整为1s，选择人群环境，拿着相机往前跑，穿越人群达到穿梭延时的效果，但是要求稳定器，否则抖动过大。</p>
 
-<ul>
-<li><p>固定长度将长度加入包头</p>
+<blockquote>
+<p>技巧 + Google Slide</p>
+</blockquote>
 
-<pre><code>func Encode(input string) ([]byte, error) {
-    var len = int32(len(input))
-    var pkg *bytes.Buffer = new(bytes.Buffer)
+<p>使用Google Slide做PPT可以导出，素材也很方便，没有平台限制，还有好看的模板，有网就能下载。</p>
 
-    err := binary.Write(pkg, binary.LittleEndian, len)
-    if err != nil {
-        return nil, err
-    }
+<h2 id="没做的">没做的</h2>
 
-    err = binary.Write(pkg, binary.LittleEndian, []byte(input))
-    if err != nil {
-        return nil, err
-    }
+<blockquote>
+<p>翻译</p>
+</blockquote>
 
-    return pkg.Bytes(), nil
-}
-
-func Decode(input *bufio.Reader) (string, error) {
-    //读取长度
-    slice, _ := input.Peek(4)
-    sliceData := bytes.NewBuffer(slice)
-    var len int32
-    err := binary.Read(sliceData, binary.LittleEndian, &amp;len)
-    if err != nil {
-        return &quot;&quot;, err
-    }
-
-    if int32(input.Buffered()) &lt; len+4 {
-        return &quot;&quot;, errors.New(&quot;invalid packet length&quot;)
-    }
-
-    pack := make([]byte, len+4)
-    _, err = input.Read(pack)
-    if err != nil {
-        return &quot;&quot;, err
-    }
-
-    return string(pack[4:]), nil
-}
-</code></pre></li>
-
-<li><p>加分隔符<br />
-分隔符加换行(\n)或者其他</p></li>
-</ul>
-
-<h2 id="golang知识">Golang知识</h2>
-
-<p>Socket编程主要设计到net包、io相关的bufio包</p>
-
-<ul>
-<li><p>listen和listenTcp的区别</p>
-
-<pre><code>func Listen(net, laddr string) (Listener, error) {
-     la, err := resolveAddr(&quot;listen&quot;, net, laddr, noDeadline)
-     if err != nil {
-        return nil, &amp;OpError{Op: &quot;listen&quot;, Net: net, Addr: nil, Err: err}
-     }
-     var l Listener
-     switch la := la.toAddr().(type) {
-     case *TCPAddr:
-        l, err = ListenTCP(net, la)
-     case *UnixAddr:
-        l, err = ListenUnix(net, la)
-     default:
-        return nil, &amp;OpError{Op: &quot;listen&quot;, Net: net, Addr: la, Err: &amp;AddrError{Err: &quot;unexpected address type&quot;, Addr: laddr}}
-     }
-     if err != nil {
-        return nil, err // l is non-nil interface containing nil pointer
-     }
-     return l, nil
-  }
-</code></pre></li>
-
-<li><p>服务端流程，使用ResolveTCPAddr解析出规范的地址，listenTcp进行端口绑定，accept监听，一旦连接建立返回一个句柄，开协程进行处理，不阻塞别的连接</p></li>
-
-<li><p>客户端流程，同样ResolveTCPAddr获取地址，DialTcp给该地址拨号，拨号成功返回conn句柄，进行读写操作</p></li>
-
-<li><p>Tcp in Golang主要有几个结构：addr、listener、conn</p></li>
-
-<li><p>数据传输都是基于二进制数据流，需要把字符串转换为[]byte</p></li>
-
-<li><p>引入自己的包时，公有的方法记得大写</p></li>
-
-<li><p>bufio.NewReader方法接受所有实现了io.read接口的对象，包括os.stdin和net.conn</p></li>
-</ul>
-
-<h2 id="详细代码">详细代码</h2>
-
-<p><a href="https://github.com/biexiang/socket_in_golang">socket_in_golang</a></p>
-
-<h2 id="参考">参考</h2>
-
-<p><a href="http://blog.csdn.net/Scythe666/article/details/51996268">别人的文章</a>
-<a href="https://victoriest.gitbooks.io/golang-tcp-server/content/chapter1.html">以及</a></p>
+<p>前几天在推特上看到medium的文章，但是文章虽好都是英文的，如果有专业翻译为中文会更好，还能提高自己的单词量。</p>
         </div>
 
         
@@ -214,13 +121,9 @@ func Decode(input *bufio.Reader) (string, error) {
 <ul>
 <li>
 <ul>
-<li><a href="#表现形式">表现形式</a></li>
-<li><a href="#原因">原因</a></li>
-<li><a href="#解决方法">解决方法</a></li>
-<li><a href="#in-golang">In Golang</a></li>
-<li><a href="#golang知识">Golang知识</a></li>
-<li><a href="#详细代码">详细代码</a></li>
-<li><a href="#参考">参考</a></li>
+<li><a href="#想法">想法</a></li>
+<li><a href="#做过的">做过的</a></li>
+<li><a href="#没做的">没做的</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -274,12 +177,7 @@ func Decode(input *bufio.Reader) (string, error) {
             <ul class="article-tag-list">
                 
                 <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/tcp">TCP
-                    </a>
-                </li>
-                
-                <li class="article-tag-list-item">
-                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/socket%E7%BC%96%E7%A8%8B">Socket编程
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E5%91%A8%E8%AE%B0">周记
                     </a>
                 </li>
                 
@@ -289,15 +187,9 @@ func Decode(input *bufio.Reader) (string, error) {
     </div>
     <nav id="article-nav">
     
-    <a href="/post/ae-throw-picture/" id="article-nav-newer" class="article-nav-link-wrap">
-        <div class="article-nav-title"><span>&lt;</span>&nbsp;
-            Ae丢照片 Demo
-        </div>
-    </a>
     
-    
-    <a href="/post/nginx-dynamic-add-module/" id="article-nav-older" class="article-nav-link-wrap">
-        <div class="article-nav-title">Nginx动态添加模块&nbsp;<span>&gt;</span></div>
+    <a href="/post/spider-proxy/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">爬虫代理&nbsp;<span>&gt;</span></div>
     </a>
     
 </nav>
