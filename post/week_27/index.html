@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>2018年第27周 // Peculiar</title>
+
+        <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+        <meta property="og:title" content="2018年第27周" />
+    <meta property="og:description" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://biexiang.github.io/post/week_27/" />
+    
+
+    <link href="" rel="alternate" type="application/rss+xml" title="Peculiar" />
+    <link rel="shortcut icon" href="/favicon.png">
+
+    <link href="https://biexiang.github.io/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
+    <link href="https://biexiang.github.io/webfonts/source-code-pro/main.css" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="https://biexiang.github.io/css/style.css">
+
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    
+    <meta name="generator" content="Hugo 0.24.1" />
+</head>
+
+
+<body>
+<div id="container">
+    <header id="header">
+    <div id="header-outer" class="outer">
+        <div id="header-inner" class="inner">
+            <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
+            <a id="logo" class="logo-text" href="https://biexiang.github.io/">Peculiar</a>
+            <nav id="main-nav">
+                
+                <a class="main-nav-link" href="/archives">Archives</a>
+                
+                <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            <nav id="sub-nav">
+                <div id="search-form-wrap">
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+    <section id="main" class="outer">
+        <article class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        <header class="article-header">
+            <h1 class="article-title" itemprop="name">2018年第27周</h1>
+        </header>
+        
+        <div class="article-meta">
+            <a href="/post/week_27/" class="article-date">
+                <time datetime='2018-07-08T14:41:55.000&#43;08:00' itemprop="datePublished">2018-07-08</time>
+            </a>
+            
+            
+            
+        </div>
+        <div class="article-entry" itemprop="articleBody">
+            <p>Week 25 和 Week 26 主要在离开学校和租房</p>
+
+<p></p>
+
+<h2 id="想法">想法</h2>
+
+<blockquote>
+<p>我以前觉得去做疯狂的事情、纹身这些很酷。后来发现这些事情一点难度都没有，只要你愿意就能做到。更酷的应该是那些不容易做到的事情，比如读书、赚钱、学习某种技能这种煎熬耐力和其他能力的事情。</p>
+</blockquote>
+
+<p>上面这句话在推上看到，觉得很有趣就记录下来了。我最近好久一直比较喜欢玩刺激的东西，也想纹身，想去蹦迪之类的，因为真的觉得很酷，很爽。但是如上面那段话说的，这些事情其实很简单，只要你愿意就能做到。而读书、赚钱、学习技能在这个浮躁的生活里，确实变得越来越不容易了，这些事情本应该是😎的事情。</p>
+
+<p>同样是刷推，看到ruanyifeng的博客经常被人攻击，同时也一次一次的让他的博客服务变得更加坚固了。他是一个不在乎别人的评价的人，这一点我很佩服。可能是他博客的广告收益不是很好，他就让安装ADBLOCK的用户看不到他博客上文章的图片，很有趣，这也是一种很有趣的方式。虽然我不喜欢他。</p>
+
+<p>本来考虑学一门客户端开发的，但是认真看了一下，发现也是各种门派。Apple的Swift，可以写App也可以做服务端开发(少见)，但是目前OC的历史问题还很多，很多会混编，感觉不容易开始。而Android这边，去年出的Kotlin专门写Android，而今年又说用Dart开发Flutter是未来的方向，因为Flutter可以跨平台。跨平台还有Facebook那边的RN，还有Cordova&hellip;
+我觉得可能对于我来说还是比较泛的客户端开发比较OK，所以可能考虑Flutter可能好一点。</p>
+
+<h2 id="学习的">学习的</h2>
+
+<blockquote>
+<p>Yaf相关</p>
+</blockquote>
+
+<ul>
+<li>Yaf 配置application.ini 区段配置 [common]代表common配置  [product : common]代表product配置 集成自common配置</li>
+<li>在php.ini [yaf]区段内配置yaf_environ决定boot哪个配置启动程序</li>
+<li>Yaf\Registry是框架中的一个全局注册表，用于键值存储</li>
+<li>Yaf多模块 默认application/controller为Index模块 在application.ini配置中可以配置多模块 在application/modules里面建立对应的模块 在ini配置中进行配置</li>
+</ul>
+
+<blockquote>
+<p>Go相关</p>
+</blockquote>
+
+<ul>
+<li>Do not communicate by sharing memory; instead, share memory by communicating.</li>
+<li>第二次加锁时会因为锁已经被占用（不是递归锁）而阻塞</li>
+<li>互斥锁和原子操作一起进行。如果知道存在并发情况，可以优先考虑atomic原子操作，在多个协程中的顺序一致性内存模型可以考虑使用互斥锁和原子操作来解决。</li>
+<li>利用ch管道进行一个pubsub模型。订阅者就是一个管道，后台协程进行阻塞读取关注的信息，而关注的主题Topic可以进行函数可设置，生产者提供接口。生产者结构包含读取超时时间，一个订阅者 Map[订阅者管道]订阅者Topic回调 ，以及订阅者最大长度，和读写锁。提供被订阅、被取消订阅以及发送消息的方法。<a href="https://github.com/biexiang/Golang-Practice/tree/master/pubsub">代码</a></li>
+
+<li><p>控制住并发数，并发为3，如果大于则Enter时管道会阻塞，直到有Leave的情况。</p>
+
+<pre><code>var limit = make(chan int, 3)
+
+func main() {
+    for _, w := range work {
+        go func() {
+            limit &lt;- 1
+            w()
+            &lt;-limit
+        }()
+    }
+    select{}
+}
+</code></pre></li>
+
+<li><p>带缓存的ch进行并发控制、状态监控，通过for switch循环进行状态监控，在每一个状态输出不一样的东西。</p>
+
+<pre><code>type struct Vch {
+    CH chan bool 
+}
+
+func NewVch() Vch {
+    return &amp;Vch{
+        CH: make(chan bool,5),
+    }
+}
+
+func (vch Vch) Len() int {
+    return len(vch.CH)
+}
+func (vch Vch) Cap() int {
+    return cap(vch.CH)
+}
+func (vch Vch) Idle() bool {
+    return len(vch.CH) == 0
+}
+func (vch Vch) Busy() bool {
+    return len(vch.CH) == cap(vch.CH)
+}
+</code></pre></li>
+
+<li><p>并发安全的退出，close(ch)，配合互斥等待后台协程完成来结束。</p></li>
+
+<li><p>JobService 并发安全的任务队列和Worker <a href="https://github.com/biexiang/Golang-Practice/tree/master/jobservice">代码</a></p></li>
+
+<li><p>它们经常需要接入第三方的中间件。因为第三方的中间件是否存在BUG是否会抛出异常，Web框架本身是不能确定的。为了提高系统的稳定性，Web框架一般会通过recover来防御性地捕获所有处理流程中可能产生的异常，然后将异常转为普通的错误返回。</p></li>
+
+<li><p>Command - nc</p>
+
+<pre><code>echo -e '{&quot;method&quot;:&quot;POST&quot;}' | nc localhost 1111 #向1111端口发送json -e esacape
+nc -l 5000 -v #监听5000端口
+nc 127.0.0.1 5000 #tcp连接5000端口
+</code></pre></li>
+
+<li><p>net/rpc 注册的服务.函数 只能有两个参数 第二个为指针类型 返回值必须只是error</p></li>
+
+<li><p>压缩字典树 用于路由中减少层次 请求的Method作为树的root根节点</p></li>
+
+<li><p>中间件如何实现直接Use 完成一个中间件 <a href="https://github.com/biexiang/Golang-Practice/tree/master/router">代码</a></p>
+
+<pre><code>r = NewRouter()
+r.Use(logger)
+r.Use(timeout)
+r.Use(ratelimit)
+r.Add(&quot;/&quot;, helloHandler)
+</code></pre></li>
+
+<li><p>Guard Clauses vs hadoken 不要写Hadoken那样的代码，可以拆解为小if返回，或者if和switch情况过多，将他们加到一个map内(table Driven)，存储条件对应关系，简化代码。</p></li>
+
+<li><p>类似于net/http，可以考虑上层服务写到里面，接口等定义在外面。</p></li>
+
+<li><p>漏桶、令牌桶等解决办法用来解决限流问题。定义单位时间内最大的流量多少，超出后block住知道下一个时间段重新开始，可以作为中间件的一部分。使用HTTP工具进行测试。 <a href="https://github.com/biexiang/Golang-Practice/tree/master/ratelimiter/my">代码</a>。</p></li>
+
+<li><p>大型的互联网公司核心线上业务都会在代码中把 sql 放在显眼的位置提供给 dba review，以此来控制系统在数据层的风险</p></li>
+
+<li><p>CLD结构(Controller-Logic-Dao)CLD前面还有一层Protocol用于解决协议不统一的问题
+    首先协议层的结构体都有协议层相关的内容，需要将他们转换为协议层不相干的结构体传入Controller(Controller前可能要经历中间件)，Controller层解决的问题是参数合法并且解决转发，Logic拿到参数直接进行逻辑服务处理，Dao层负责提供数据接口不管底层对标的是MYSQL还是其他存储。</p></li>
+
+<li><p>项目代码定义了许多interface 麻烦在很难找到实现interface的结构体 反过来看到一个struct 也很难直接知道它实现了哪些interface 最好把实现的interface和结构体放在一个文件中</p></li>
+
+<li><p>EndPoint = ip + port 上游通过下游服务名称找到可以调用的Endpoint的过程叫做服务发现 类似于DNS解析过程(DNS挂了 服务就分开了) 下游服务故障节点摘除可以是主动摘除比如心跳包/投票 也可以是被动摘除 比如zk的实现。</p></li>
+
+<li><p>rand设置种子 不设置随机种子 每次的随机数一样 随机种子一般使用时间戳保证随机</p></li>
+
+<li><p>Git删除远程仓库的某一个分支: git push origin &ndash;delete hugo</p></li>
+</ul>
+        </div>
+
+        
+        
+        <div class="article-toc" style="display:none;">
+            <h3>Contents</h3>
+            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#想法">想法</a></li>
+<li><a href="#学习的">学习的</a></li>
+</ul></li>
+</ul>
+</nav>
+        </div>
+        
+        
+
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+        <script>
+            (function() {
+                var $toc = $('#TableOfContents');
+                if ($toc.length > 0) {
+                    var $window = $(window);
+
+                    function onScroll(){
+                        var currentScroll = $window.scrollTop();
+                        var h = $('.article-entry h1, .article-entry h2, .article-entry h3, .article-entry h4, .article-entry h5, .article-entry h6');
+                        var id = "";
+                        h.each(function (i, e) {
+                            e = $(e);
+                            if (e.offset().top - 10 <= currentScroll) {
+                                id = e.attr('id');
+                            }
+                        });
+                        var active = $toc.find('a.active');
+                        if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                        active.each(function (i, e) {
+                            $(e).removeClass('active').siblings('ul').hide();
+                        });
+                        $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                            $(e).children('a').addClass('active').siblings('ul').show();
+                        });
+                    }
+
+                    $window.on('scroll', onScroll);
+                    $(document).ready(function() {
+                        $toc.find('a').parent('li').find('ul').hide();
+                        onScroll();
+                        document.getElementsByClassName('article-toc')[0].style.display = '';
+                    });
+                }
+            })();
+        </script>
+        
+
+
+        
+        <footer class="article-footer">
+            <ul class="article-tag-list">
+                
+                <li class="article-tag-list-item">
+                    <a class="article-tag-list-link" href="https://biexiang.github.io//tags/%E5%91%A8%E8%AE%B0">周记
+                    </a>
+                </li>
+                
+            </ul>
+        </footer>
+        
+    </div>
+    <nav id="article-nav">
+    
+    
+    <a href="/post/week_24/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">2018年第24周&nbsp;<span>&gt;</span></div>
+    </a>
+    
+</nav>
+</article>
+
+        
+    </section>
+    <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 map[email:noreply#qq.com name:Poly]&nbsp;
+            Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
+        </div>
+    </div>
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/tomorrow-night.min.css" integrity="sha256-2wL88NKUqvJi/ExflDzkzUumjUM73mcK2gBvBBeLvTk=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js" integrity="sha256-KbfTjB0WZ8vvXngdpJGY3Yp3xKk+tttbqClO11anCIU=" crossorigin="anonymous"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js" integrity="sha256-ExtbCSBuYA7kq1Pz362ibde9nnsHYPt6JxuxYeZbU+c=" crossorigin="anonymous"></script>
+        <script>renderMathInElement(document.body);</script>
+    
+    <script>
+        document.getElementById('main-nav-toggle').addEventListener('click', function () {
+            var header = document.getElementById('header');
+            if (header.classList.contains('mobile-on')) {
+                header.classList.remove('mobile-on');
+            } else {
+                header.classList.add('mobile-on');
+            }
+        });
+    </script>
+</footer>
+</div>
+</body>
+</html>
