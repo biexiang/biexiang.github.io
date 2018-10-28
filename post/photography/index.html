@@ -174,12 +174,65 @@
 <li>拍摄需要注意采用LOG模式拍摄，获取更大的动态范围，保证后期的调色空间，一般微单相机都不具备拍摄RAW视频的能力，专业摄像机比如RED、BMPCC就可以。</li>
 </ul>
 
+<h2 id="关于超采和跳采">关于超采和跳采</h2>
+
+<ul>
+<li>一般现在拍摄照片都是超采的，1920*1080分辨率的总像素200w多，但是CMOS的规格拍摄出来的照片像素肯定大于这个量，比如1600w像素，就是8倍的超采</li>
+<li>拍摄视频时，超采样式CMOS全像素拍摄，再在机内缩图合成到最终输出大小的分辨率进行输出</li>
+<li>优点就是多个像素合成能够降低信噪比，提高画质，减轻摩尔纹</li>
+<li>将4K视频素材拖进1080P预设的FCPX，会自动超采样，提高画质</li>
+<li><a href="http://forum.xitek.com/thread-1441618-2-1-1.html">http://forum.xitek.com/thread-1441618-2-1-1.html</a></li>
+<li>跳采就是针对输出格式，部分CMOS进行采样</li>
+<li>眼下所有的瓶颈都在CMOS的输出能力和机内CPU的处理能力，做不到全画幅的全域电子快门，做不到高帧的全像素超采，做不到444无损，做不到机内压H265，做不到持续输出后的控温控噪</li>
+</ul>
+
+<h2 id="拜耳阵列">拜耳阵列</h2>
+
+<ul>
+<li><a href="https://zh.wikipedia.org/wiki/%E9%87%87%E6%A0%B7%E5%AE%9A%E7%90%86">https://zh.wikipedia.org/wiki/%E9%87%87%E6%A0%B7%E5%AE%9A%E7%90%86</a></li>
+</ul>
+
+<h2 id="帧间编码和帧内编码">帧间编码和帧内编码</h2>
+
+<ul>
+<li>Apple ProRes属于帧内压缩，所谓帧内压缩即压缩编码时只针对本帧数据进行压缩，压缩比相对较小，但在后期剪辑处理时计算机的计算量也相对较小，因此Apple ProRes的编码文件剪辑更流畅，更适合进行后期处理；</li>
+<li>H.264/H.265属于帧间压缩，所谓帧间压缩即压缩编码时通过算法将连续帧压缩为几个单帧，压缩比相对较大，但在后期剪辑处理时计算机的计算量也相对较大。因此经常会出现使用Apple ProRes编码的大体积文件剪辑时要比使用H.264/H.265编码的小文件更流畅。也因此H.264/H.265编码更适合视频的交付与传输使用。</li>
+<li>FCPX代理方式
+
+<ul>
+<li>监视器右上角显示下，勾选媒体代理</li>
+<li>对媒体进行转码 勾选代理</li>
+</ul></li>
+</ul>
+
+<h2 id="cmos规格都是一样的-为何可以调整拍摄的分辨率">CMOS规格都是一样的，为何可以调整拍摄的分辨率</h2>
+
+<h2 id="关于内录和输出录制">关于内录和输出录制</h2>
+
+<h2 id="为什么4k会有裁剪系数">为什么4K会有裁剪系数</h2>
+
+<h2 id="什么是机内h265">什么是机内H265</h2>
+
+<h2 id="prores-h264-h265的区别">Prores、H264、H265的区别</h2>
+
+<h2 id="420-422-444">420、422、444</h2>
+
+<ul>
+<li><a href="https://www.vmovier.com/45052">https://www.vmovier.com/45052</a></li>
+</ul>
+
 <h2 id="next">NEXT</h2>
 
 <ul>
 <li>考虑A6300(套头)</li>
 <li>稳定器</li>
 <li>适马16/1.4定焦头</li>
+</ul>
+
+<h2 id="视频程序员">视频程序员</h2>
+
+<ul>
+<li>READY TO GO</li>
 </ul>
         </div>
 
@@ -200,7 +253,17 @@
 <li><a href="#法兰距">法兰距</a></li>
 <li><a href="#双重曝光视频-照片">双重曝光视频/照片</a></li>
 <li><a href="#lut的使用">LUT的使用</a></li>
+<li><a href="#关于超采和跳采">关于超采和跳采</a></li>
+<li><a href="#拜耳阵列">拜耳阵列</a></li>
+<li><a href="#帧间编码和帧内编码">帧间编码和帧内编码</a></li>
+<li><a href="#cmos规格都是一样的-为何可以调整拍摄的分辨率">CMOS规格都是一样的，为何可以调整拍摄的分辨率</a></li>
+<li><a href="#关于内录和输出录制">关于内录和输出录制</a></li>
+<li><a href="#为什么4k会有裁剪系数">为什么4K会有裁剪系数</a></li>
+<li><a href="#什么是机内h265">什么是机内H265</a></li>
+<li><a href="#prores-h264-h265的区别">Prores、H264、H265的区别</a></li>
+<li><a href="#420-422-444">420、422、444</a></li>
 <li><a href="#next">NEXT</a></li>
+<li><a href="#视频程序员">视频程序员</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -277,7 +340,7 @@
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2018 map[email:noreply#qq.com name:Poly]&nbsp;
+            &copy; 2018 map[name:Poly email:noreply#qq.com]&nbsp;
             Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
         </div>
     </div>
