@@ -7,16 +7,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="ileopold" />
-  <meta property="og:url" content="https://www.ileopold.cn/about/" />
-  <meta content="关于我、自我介绍、Introduction" name="keywords">
-  <link rel="canonical" href="https://www.ileopold.cn/about/" />
+  <meta property="og:url" content="https://www.ileopold.cn/posts/golang-channel/" />
+  <meta content="Golang、Channel、源码阅读、dlv、delve" name="keywords">
+  <link rel="canonical" href="https://www.ileopold.cn/posts/golang-channel/" />
   <meta name="sogou_site_verification" content="2i7JohrE4G" /><link rel="dns-prefetch" href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static" /><link rel="apple-touch-icon" href="/logo.png" />
   <link rel="icon" href="/logo.png" />
-  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>About</title>
-  <meta property="og:title" content="About" />
+  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>Golang Channel 原理</title>
+  <meta property="og:title" content="Golang Channel 原理" />
   <meta property="og:type" content="article" />
-  <meta property="og:description" content="我是ileopold，很高兴认识你！" />
-  <meta name="description" content="我是ileopold，很高兴认识你！" />
+  <meta property="og:description" content="从使用角度分析Golang Channel的底层原理，通过源码阅读和代码测试验证自己的猜想" />
+  <meta name="description" content="从使用角度分析Golang Channel的底层原理，通过源码阅读和代码测试验证自己的猜想" />
   <meta property="og:locale" content="zh-cn" />
   
     <style>body{font-family:bree serif,sans-serif;-webkit-font-smoothing:antialiased;margin:0 20px}article{max-width:800px;margin-left:auto;margin-right:auto}a{color:#000;text-decoration:none}a:hover{font-weight:600;text-decoration:underline}.post-ads{margin:50px 0}.markdown-body{font-size:18px;max-width:100%}.markdown-body a{text-decoration:underline;text-decoration-color:#000}.markdown-body pre{padding:16px;overflow:auto;border-radius:10px}.markdown-body code{padding:.2em .4em;font-size:85%;background-color:#f6f8fa;border-radius:6px}.markdown-body pre>code{padding:0;font-size:100%;background-color:inherit;border:0}.Chinese .markdown-body{line-height:200%}.site-date-catalog{font-size:2rem}.header-title{font-size:2rem;font-weight:700;margin-top:32px;font-family:bungee shade,sans-serif}.header-title a{text-decoration:none}.header-subtitle{color:#666}.header-items{margin:10px 0}.header-item{margin:0 5px}.header-line{width:100%;border-width:2px;border-color:#482936;border-style:solid none none none}.lang-switch{font-weight:600}#posts-list{min-height:600px}.posts-line{font-size:1.2rem;margin:12px 0}.posts-categories{font-size:.8rem;margin:auto;text-align:center}.posts-category{padding:3px 0;border:#000 2px solid;border-radius:5px}.site-footer{margin-top:50px}.site-footer-item{margin-right:12px}.post-content img{max-width:100%;display:block;margin-right:auto;margin-top:12px}.post-header{margin-bottom:50px}.post-title{font-size:2rem;font-weight:600}.post-tags{display:inline;font-weight:600;padding:2px 5px;margin-right:6px;border:#000 2px solid;border-radius:5px}.post-date{font-weight:800;font-style:italic}.post-author{float:right;font-weight:600}.page-content{min-height:60%}.post-content{margin-bottom:50px}.post-content p{hyphens:auto;line-height:1.8;text-justify:ideographic;margin-bottom:1em}.related-content{border-width:3px;border-style:solid;border-color:#000;padding:0 10px;margin-bottom:50px;margin-top:100px}.related-content li{margin:5px 0}.taxonomy-term{font-size:3rem}.gallery-img{text-align:center}.gallery-img span{text-align:center}.gallery-img-desc{font-size:.8em;font-weight:800}#disqus_thread{position:relative}#disqus_thread:after{content:"";display:block;height:55px;width:100%;position:absolute;bottom:0;background:#fff}@media screen and (max-width:600px){.header-title,.header-subtitle,.header-items{text-align:center}.posts-line{font-size:16px}.markdown-body{font-size:16px}.post-title{font-size:2rem}.post-content p{letter-spacing:.05em}}@media screen and (max-width:48em){.posts-category{display:none}}</style>
@@ -100,6 +100,24 @@
 
         </div>
         <header class="post-header">
+          <h1 class="post-title">Golang Channel 原理</h1>
+          
+          <div class="row post-desc">
+            <div class="col-xs-6">
+              
+              <time class="post-date" datetime="2022-01-16 22:07:24 CST">
+                16 Jan 2022
+              </time>
+              
+            </div>
+            <div class="col-xs-6">
+              
+              <div class="post-author">
+                <a target="_blank" href="http://ileopold.cn/">@ileopold</a>
+              </div>
+              
+            </div>
+          </div>
           
         </header>
 
@@ -113,43 +131,361 @@
         marginheight="0"
         width=60%
         height=86
-        src="//music.163.com/outchain/player?type=2&id=28445534&auto=1&height=66">
+        src="//music.163.com/outchain/player?type=2&id=1299424231&auto=1&height=66">
     </iframe>
 
-<h2 id="关于小站">关于小站</h2>
-<!-- <blockquote class="quote">
-        <p>人生有两种苦，一种苦是自律的苦，一种苦是后悔的苦。自律的苦轻如鸿毛，后悔的苦重如泰山。</p></blockquote>  -->
 <blockquote class="quote">
-        <p>It&rsquo;s Okay to Not Be Okay</p></blockquote> 
-<p><del>小站用于从自身需求出发追踪记录自己的时间都花在哪些地方，量化自己，积累自己，作为自己的人生清单。</del></p>
-<hr>
-<h3 id="changelog">Changelog</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">✔ 增加网易云音乐 @2022-01-03
-✔ 增加评论 @2022-01-03
-✔ Github Action自动发布 @2022-01-03
-✔ 升级HTTPS @2022-01-04 Use Let&#39;s encrypt
-✔ 增加图床
-✘ 增加RSS
-✘ 增加bilibili
-✘ 增加Web编辑md工作流
-✘ 增加Web小游戏
-✘ 增加Leetcode刷题看板
-✘ 增加douban/collect
-✘ 增加Chrome小恐龙游戏自动运行
-</code></pre></div><h2 id="关于我">关于我</h2>
+        <p>Do not communicate by sharing memory; instead, share memory by communicating.</p></blockquote> 
+<h3 id="简单使用">简单使用</h3>
+<p>channel的创建、发送、接收、关闭的简单使用如下：</p>
+<script id="asciicast-463838" src="https://asciinema.org/a/463838.js" async></script>
+<p>通过dlv debug进行disass可以知道主要调用下面几个方法，本次也主要分析这些方法的调用。</p>
+<ul>
+<li>runtime.makechan，创建一个channel</li>
+<li>runtime.chansend1，发送数据</li>
+<li>runtime.chanrecv1，接收数据</li>
+<li>runtime.closechan，关闭channel</li>
+</ul>
+<h3 id="数据结构">数据结构</h3>
+<p>channel的数据结构
+<a href="https://github.com/golang/go/blob/0d0193409492b96881be6407ad50123e3557fdfb/src/runtime/chan.go#L33" target="_blank">hchan</a>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">type hchan struct {
+	qcount   uint               // chan队列长度
+	dataqsiz uint               // chan队列容量
+	buf      unsafe.Pointer     // 队列指针
+	sendx    uint               // 发送的当前索引
+	recvx    uint               // 接收的当前索引
+
+	elemsize uint16             // elem结构的大小，用于计算缓冲区所需的大小
+	elemtype *_type             // chan的数据类型
+
+	recvq    waitq              // 接收协程队列
+	sendq    waitq              // 发送协程队列
+
+	closed   uint32             // 是否关闭
+	lock mutex                  // 互斥锁
+}
+</code></pre></div><p>hchan里一共有三个队列，channel数据的缓冲区是循环队列，sendq和recvq是链表队列，都是FIFO。</p>
+<h4 id="创建">创建</h4>
+<p>在makechan的
+<a href="https://github.com/golang/go/blob/0d0193409492b96881be6407ad50123e3557fdfb/src/runtime/chan.go#L72" target="_blank">代码</a>中，分为检查和创建。</p>
+<p>检查包括：</p>
+<ul>
+<li>检查Element的大小，需要小于 1&laquo;16</li>
+<li>检查hchan的内存对齐</li>
+<li>计算Element的大小 * bufferSize 是否会溢出，并且获取需要分配的mem内存大小</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">	var c *hchan
+	switch {
+	case mem == 0:
+		// Queue or element size is zero.
+		c = (*hchan)(mallocgc(hchanSize, nil, true))
+		// Race detector uses this location for synchronization.
+		c.buf = c.raceaddr()
+	case elem.ptrdata == 0:
+		// Elements do not contain pointers.
+		// Allocate hchan and buf in one call.
+		c = (*hchan)(mallocgc(hchanSize+mem, nil, true))
+		c.buf = add(unsafe.Pointer(c), hchanSize)
+	default:
+		// Elements contain pointers.
+		c = new(hchan)
+		c.buf = mallocgc(mem, elem, true)
+	}
+</code></pre></div><p>创建包括：</p>
+<ul>
+<li>如果是无缓存chan，mem为0，则直接分配一个hchanSize的大小</li>
+<li>如果是有缓存且非指针类型的chan，则分配hchanSize+mem大小的内存，这里为连续内存(contiguous memory)</li>
+<li>如果是有缓存且指针类型的chan，则先分配hchanSize自身内存，再单独分配mem的缓冲区内存</li>
+</ul>
+<p>然后设置了elemsize、elemtype和dataqsiz。</p>
+<p><code>这里有个问题，为什么有缓存的指针类型不能分配连续内存呢？</code></p>
+<h4 id="关闭">关闭</h4>
+<p>在closechan的
+<a href="https://github.com/golang/go/blob/0d0193409492b96881be6407ad50123e3557fdfb/src/runtime/chan.go#L356" target="_blank">代码</a>中，分为检查和关闭。</p>
+<p>检查包括：</p>
+<ul>
+<li>chan是否为nil</li>
+<li>chan是否已经关闭</li>
+</ul>
+<p>关闭包括：</p>
+<ul>
+<li>释放接收协程队列</li>
+<li>释放发送协程队列</li>
+<li>唤醒所有等待的协程</li>
+</ul>
+<h3 id="发送数据">发送数据</h3>
+<p>
+<a href="https://github.com/golang/go/blob/0d0193409492b96881be6407ad50123e3557fdfb/src/runtime/chan.go#L159" target="_blank">chansend</a> 被调用有两种情况：</p>
+<ul>
+<li>情况一：<code>c &lt;- x</code>，block=true，对应函数 <code>chansend1</code></li>
+</ul>
+<p>如果同时chan是nil，往nil chan写东西，会调用<code>gopark</code>方法将当前协程休眠，一直阻塞下去。下面示例代码会阻塞3秒后，因为没有其他alive的协程了而报错退出（fatal error: all goroutines are asleep - deadlock!）。</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> main
 
-<span style="color:#f00">import</span> <span style="color:#87ceeb">&#34;log&#34;</span>
+<span style="color:#f00">import</span> (
+	<span style="color:#87ceeb">&#34;time&#34;</span>
+)
 
 <span style="color:#f00">func</span> <span style="color:#ff0">main</span>() {
-	log.<span style="color:#ff0">Println</span>(<span style="color:#87ceeb">&#34;Welcome to my playground...&#34;</span>)
+	<span style="color:#f00">var</span> ch <span style="color:#f00">chan</span>&lt;- <span style="color:#f00">struct</span>{} = <span style="color:#f00">nil</span>
+	<span style="color:#f00">go</span> <span style="color:#f00">func</span>() {
+		time.<span style="color:#ff0">Sleep</span>(time.Second * <span style="color:#f60">3</span>)
+	}()
+	ch &lt;- <span style="color:#f00">struct</span>{}{}
 }
-</code></pre></div><h3 id="工作">工作</h3>
-<p>服务端程序员，主要写Go、PHP，也曾有过其他技术栈的尝试。</p>
-<h3 id="爱好">爱好</h3>
-<p>刷剧、游戏，2022年会增加看书和旅行。</p>
-<h3 id="find-me">Find me</h3>
-<p>全平台都叫 ileopold。</p>
+</code></pre></div><ul>
+<li>情况二：<code>select { case c &lt;- v: ... }</code>，block=false，对应函数 <code>selectnbsend</code></li>
+</ul>
+<p>差不多的示例代码，在select case下就不会阻塞，因为block=false会直接返回。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> main
+
+<span style="color:#f00">import</span> (
+	<span style="color:#87ceeb">&#34;time&#34;</span>
+)
+
+<span style="color:#f00">func</span> <span style="color:#ff0">main</span>() {
+	<span style="color:#f00">var</span> ch <span style="color:#f00">chan</span>&lt;- <span style="color:#f00">struct</span>{} = <span style="color:#f00">nil</span>
+	<span style="color:#f00">go</span> <span style="color:#f00">func</span>() {
+		time.<span style="color:#ff0">Sleep</span>(time.Second * <span style="color:#f60">3</span>)
+	}()
+	<span style="color:#f00">select</span> {
+	<span style="color:#f00">case</span> ch &lt;- <span style="color:#f00">struct</span>{}{}:
+	<span style="color:#f00">default</span>:
+	}
+}
+</code></pre></div><h4 id="直接发送">直接发送</h4>
+<p>如果等待接收的队列里有协程在等待，直接出队，将要发送的数据拷贝到等待协程的elem指针指向的地址上，然后将elem指针置空，唤醒该等待的协程。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">if sg := c.recvq.dequeue(); sg != nil {
+    send(c, sg, ep, func() { unlock(&amp;c.lock) }, 3)
+    return true
+}
+
+...
+
+func send(c *hchan, sg *sudog, ep unsafe.Pointer, unlockf func(), skip int) {
+    ...
+    if sg.elem != nil {
+        sendDirect(c.elemtype, sg, ep)
+        sg.elem = nil
+    }
+    goready(gp, skip+1)
+}
+
+func sendDirect(t *_type, sg *sudog, src unsafe.Pointer) {
+    dst := sg.elem
+    typeBitsBulkBarrier(t, uintptr(dst), uintptr(src), t.size)
+    memmove(dst, src, t.size)
+}
+
+</code></pre></div><h4 id="缓冲区">缓冲区</h4>
+<p>如果等待队列为空，缓冲区不为空，通过 <code>chanbuf</code> 函数计算当前sendx基于buf的具体内存地址，将发送指针指向的数据拷贝到 <code>chanbuf</code> 计算出来的内存地址上，其他的就是 
+<a href="https://www.ileopold.cn/posts/ring-buffer/">RingBuffer</a> 的内容了。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">if c.qcount &lt; c.dataqsiz {
+    qp := chanbuf(c, c.sendx)
+    if raceenabled {
+        racenotify(c, c.sendx, nil)
+    }
+    typedmemmove(c.elemtype, qp, ep)
+    c.sendx++
+    if c.sendx == c.dataqsiz {
+        c.sendx = 0
+    }
+    c.qcount++
+    unlock(&amp;c.lock)
+    return true
+}
+</code></pre></div><h4 id="阻塞发送">阻塞发送</h4>
+<p>前面两种都没走进去，就只能暂存了，通过 <code>getg()</code> 获取当前协程指针，生成一个状态对象 <code>sudog</code>，记录 要发送的数据ep、协程指针gp、ch等，然后将 <code>sudog</code> 入队到sendq中，并且告诉调度器，当前协程要进入阻塞状态了。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">gp := getg()
+mysg := acquireSudog()
+mysg.releasetime = 0
+if t0 != 0 {
+    mysg.releasetime = -1
+}
+
+mysg.elem = ep
+mysg.waitlink = nil
+mysg.g = gp
+mysg.isSelect = false
+mysg.c = c
+gp.waiting = mysg
+gp.param = nil
+c.sendq.enqueue(mysg)
+
+atomic.Store8(&amp;gp.parkingOnChan, 1)
+gopark(chanparkcommit, unsafe.Pointer(&amp;c.lock), waitReasonChanSend, traceEvGoBlockSend, 2)
+
+KeepAlive(ep)
+
+if mysg != gp.waiting {
+    throw(&#34;G waiting list is corrupted&#34;)
+}
+gp.waiting = nil
+gp.activeStackChans = false
+closed := !mysg.success
+gp.param = nil
+if mysg.releasetime &gt; 0 {
+    blockevent(mysg.releasetime-t0, 2)
+}
+mysg.c = nil
+releaseSudog(mysg)
+if closed {
+    if c.closed == 0 {
+        throw(&#34;chansend: spurious wakeup&#34;)
+    }
+    panic(plainError(&#34;send on closed channel&#34;))
+}
+return true
+</code></pre></div><h3 id="接收数据">接收数据</h3>
+<p>
+<a href="https://github.com/golang/go/blob/0d0193409492b96881be6407ad50123e3557fdfb/src/runtime/chan.go#L455" target="_blank">chanrecv</a> 被调用是三种情况：</p>
+<ul>
+<li><code>x &lt;- c</code>，对应函数 <code>chanrecv1</code>，仅返回数据</li>
+<li><code>x, ok := &lt;- c</code>，对应函数 <code>chanrecv2</code>，返回数据和状态</li>
+<li><code>select { case v, ok = &lt;-c:</code>，对应函数 <code>selectnbrecv</code>，返回数据和状态</li>
+</ul>
+<p>和发送数据类似，<code>chanrecv1</code> 和 <code>chanrecv2</code> 对于nil channel会强阻塞，调用<code>gopark</code>休眠当前协程，select case则直接返回。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool) {
+    ...
+    if c == nil {
+        if !block {
+            return
+        }
+        gopark(nil, nil, waitReasonChanReceiveNilChan, traceEvGoStop, 2)
+        throw(&#34;unreachable&#34;)
+    }
+    ...
+}
+</code></pre></div><p>下面具体分析 <code>chanrecv</code> 的内容。</p>
+<h4 id="直接接收">直接接收</h4>
+<p>如果发送队列里有<code>sudog</code>，调用recv进行传输，这里分为两种情况：</p>
+<ul>
+<li>情况一：当channel是无缓存队列，直接将<code>sudog</code>中的element挪到待接收的地址ep</li>
+<li>情况二：当channel是有缓存队列，<code>前情提要：接收数据时能从sendq中dequeue到待发送sudog说明buf队列已经满了，即qcount=dataqsiz</code>，因为要保证队列的整体的FIFO,所以首先拿recvx计算当前接收的buf缓存队列地址qp，将qp地址的数据挪到待接收地址ep，再将<code>sudog</code>里的element数据挪到qp地址，因为recvx内存块的已经发送给ep了，所以recvx自增1，同时判断是否euql dataqsiz，实现Turn arround。</li>
+</ul>
+<p>情况二里，至于为什么 <code>c.sendx = c.recvx</code>？发挥一下想象力，当前buf缓存是满的，如果不进行上面的赋值，当sendq为空了，从buf中再取出一次，recvx++，buf缓存不是满的了，再接收一次，sendx会把有效数据给覆盖了，如果赋值了，后续接收覆盖的都是已经发送过的数据内存地址。</p>
+<p>然后将<code>sudog</code>的elem置为nil，唤醒该<code>sudog</code> 关联的协程。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">if sg := c.sendq.dequeue(); sg != nil {
+    recv(c, sg, ep, func() { unlock(&amp;c.lock) }, 3)
+    return true, true
+}
+
+func recv(c *hchan, sg *sudog, ep unsafe.Pointer, unlockf func(), skip int) {
+	if c.dataqsiz == 0 {
+		if raceenabled {
+			racesync(c, sg)
+		}
+		if ep != nil {
+			// copy data from sender
+			recvDirect(c.elemtype, sg, ep)
+		}
+	} else {
+		// Queue is full. Take the item at the
+		// head of the queue. Make the sender enqueue
+		// its item at the tail of the queue. Since the
+		// queue is full, those are both the same slot.
+		qp := chanbuf(c, c.recvx)
+		if raceenabled {
+			racenotify(c, c.recvx, nil)
+			racenotify(c, c.recvx, sg)
+		}
+		// copy data from queue to receiver
+		if ep != nil {
+			typedmemmove(c.elemtype, ep, qp)
+		}
+		// copy data from sender to queue
+		typedmemmove(c.elemtype, qp, sg.elem)
+		c.recvx++
+		if c.recvx == c.dataqsiz {
+			c.recvx = 0
+		}
+		c.sendx = c.recvx // c.sendx = (c.sendx+1) % c.dataqsiz
+	}
+	sg.elem = nil
+	gp := sg.g
+	unlockf()
+	gp.param = unsafe.Pointer(sg)
+	sg.success = true
+	if sg.releasetime != 0 {
+		sg.releasetime = cputicks()
+	}
+	goready(gp, skip+1)
+}
+
+</code></pre></div><h4 id="缓冲区-1">缓冲区</h4>
+<p>和发送类似，调用<code>chanbuf</code>计算当前接收索引qp（读），将当前接收索引qp的数据拷贝到ep指针，并且清空当前qp指针的数据，其他的也类似 
+<a href="https://www.ileopold.cn/posts/ring-buffer/">RingBuffer</a>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">if c.qcount &gt; 0 {
+    // Receive directly from queue
+    qp := chanbuf(c, c.recvx)
+    if raceenabled {
+        racenotify(c, c.recvx, nil)
+    }
+    if ep != nil {
+        typedmemmove(c.elemtype, ep, qp)
+    }
+    typedmemclr(c.elemtype, qp)
+    c.recvx++
+    if c.recvx == c.dataqsiz {
+        c.recvx = 0
+    }
+    c.qcount--
+    unlock(&amp;c.lock)
+    return true, true
+}
+</code></pre></div><h4 id="阻塞接收">阻塞接收</h4>
+<p>和发送类似，获取当前协程指针和<code>sudog</code>，给<code>sudog</code>赋值当前接收的ep地址、当前协程地址以及chan，然后将<code>sudog</code>入队到recv q中，调用gopark休眠当前协程。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">gp := getg()
+mysg := acquireSudog()
+mysg.releasetime = 0
+if t0 != 0 {
+    mysg.releasetime = -1
+}
+
+mysg.elem = ep
+mysg.waitlink = nil
+gp.waiting = mysg
+mysg.g = gp
+mysg.isSelect = false
+mysg.c = c
+gp.param = nil
+c.recvq.enqueue(mysg)
+
+atomic.Store8(&amp;gp.parkingOnChan, 1)
+gopark(chanparkcommit, unsafe.Pointer(&amp;c.lock), waitReasonChanReceive, traceEvGoBlockRecv, 2)
+
+// someone woke us up
+if mysg != gp.waiting {
+    throw(&#34;G waiting list is corrupted&#34;)
+}
+gp.waiting = nil
+gp.activeStackChans = false
+if mysg.releasetime &gt; 0 {
+    blockevent(mysg.releasetime-t0, 2)
+}
+success := mysg.success
+gp.param = nil
+mysg.c = nil
+releaseSudog(mysg)
+return true, success
+</code></pre></div><h3 id="总结">总结</h3>
+<p>待解决前面的问题：</p>
+<ul>
+<li>
+<a href="https://www.ileopold.cn/posts/golang-channel/#创建">为什么有缓存的指针类型不能分配连续内存呢？</a></li>
+</ul>
+<h3 id="reference">Reference</h3>
+<ul>
+<li>
+<a href="https://blog.frognew.com/2021/11/read-go-sources-channel-make.html" target="_blank">channel底层的数据结构是什么</a></li>
+<li>
+<a href="https://paulzhn.me/posts/go-channel.html" target="_blank">Go 的并发：Channel 源码浅析</a></li>
+<li>
+<a href="https://blog.csdn.net/u010853261/article/details/85887948" target="_blank">Golang-gopark函数和goready函数原理分析</a></li>
+<li>
+<a href="https://chai2010.cn/advanced-go-programming-book/ch3-asm/ch3-09-debug.html" target="_blank">Delve调试器</a></li>
+</ul>
 
         </div>
 
@@ -158,6 +494,57 @@
             
           </div>
         </div>
+        
+          <div class="row">
+            <div class="col-xs-12">
+              
+            </div>
+          </div>
+
+          
+
+<div class="related-content">
+  <h3>Related Posts</h3>
+  <ul>
+    
+    <li><a href="/posts/golang-database-sql/">Golang database/sql 源码分享</a></li>
+    
+    <li><a href="/posts/ring-buffer/">Ring Buffer 介绍</a></li>
+    
+    <li><a href="/posts/lru-and-lfu/">关于LRU和LFU算法</a></li>
+    
+  </ul>
+</div>
+
+
+
+          
+          
+          <div style="height: 50px;"></div>
+          
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+<script>
+  window.addEventListener("load", () => {
+    (function() {
+      
+      var d = document,
+        s = d.createElement("script");
+      s.src = "https://ileopold.disqus.com/embed.js";
+      s.setAttribute("data-timestamp", +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  });
+</script>
+<noscript
+  >Please enable JavaScript to view the
+  <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  ></noscript
+>
+
+          </div>
+          
         
 
         <div class="site-footer">

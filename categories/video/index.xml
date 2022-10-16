@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Video on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
+    <link>https://www.ileopold.cn/categories/video/</link>
+    <description>Recent content in Video on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 04 Jan 2022 22:31:49 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/video/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>支持B站视频和图片</title>
+      <link>https://www.ileopold.cn/posts/show-video-img/</link>
+      <pubDate>Tue, 04 Jan 2022 22:31:49 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/show-video-img/</guid>
+      <description>图片 下面图片使用 路过图床，因为担心图床突然关闭，还是需要一个稳定点的图床，可支持迁移导出。其次图片还需要增加一个shortCode支持展示Exif信息，和图片的小图展示，点击放大功能。 
+视频 之前剪辑的快银和女巫的视频 .aspect-ratio {position: relative;width: 100%;height: 0;padding-bottom: 75%;}.aspect-ratio iframe {position: absolute;width: 100%;height: 100%;left: 0;top: 0;}shortcodes如下：
+// layouts/shortcodes/bilibili.html &amp;lt;style&amp;gt; .aspect-ratio { position: relative; width: 100%; height: 0; padding-bottom: 75%; } .aspect-ratio iframe { position: absolute; width: 100%; height: 100%; left: 0; top: 0; } &amp;lt;/style&amp;gt; &amp;lt;div align=center class=&amp;#34;aspect-ratio&amp;#34;&amp;gt; &amp;lt;iframe src=&amp;#34;https://player.bilibili.com/player.html?aid={{ index .</description>
+    </item>
+    
+  </channel>
+</rss>

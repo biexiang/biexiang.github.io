@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Hugo 0.91.2" />
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="ileopold" />
+  <meta property="og:url" content="https://www.ileopold.cn/posts/golang-slice/" />
+  <meta content="Golang、slice、源码阅读、深入解析Golang Slice底层实现、切片、高级用法" name="keywords">
+  <link rel="canonical" href="https://www.ileopold.cn/posts/golang-slice/" />
+  <meta name="sogou_site_verification" content="2i7JohrE4G" /><link rel="dns-prefetch" href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static" /><link rel="apple-touch-icon" href="/logo.png" />
+  <link rel="icon" href="/logo.png" />
+  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>关于 Golang Slice，你知道的不多</title>
+  <meta property="og:title" content="关于 Golang Slice，你知道的不多" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="Golang slice切片的高级用法有哪些？使用上有什么坑？底层结构是什么样子？如何实现扩容？如何实现拷贝？什么时候使用数组，不使用切片？深入解析Golang Slice底层实现，源码阅读" />
+  <meta name="description" content="Golang slice切片的高级用法有哪些？使用上有什么坑？底层结构是什么样子？如何实现扩容？如何实现拷贝？什么时候使用数组，不使用切片？深入解析Golang Slice底层实现，源码阅读" />
+  <meta property="og:locale" content="zh-cn" />
+  
+    <style>body{font-family:bree serif,sans-serif;-webkit-font-smoothing:antialiased;margin:0 20px}article{max-width:800px;margin-left:auto;margin-right:auto}a{color:#000;text-decoration:none}a:hover{font-weight:600;text-decoration:underline}.post-ads{margin:50px 0}.markdown-body{font-size:18px;max-width:100%}.markdown-body a{text-decoration:underline;text-decoration-color:#000}.markdown-body pre{padding:16px;overflow:auto;border-radius:10px}.markdown-body code{padding:.2em .4em;font-size:85%;background-color:#f6f8fa;border-radius:6px}.markdown-body pre>code{padding:0;font-size:100%;background-color:inherit;border:0}.Chinese .markdown-body{line-height:200%}.site-date-catalog{font-size:2rem}.header-title{font-size:2rem;font-weight:700;margin-top:32px;font-family:bungee shade,sans-serif}.header-title a{text-decoration:none}.header-subtitle{color:#666}.header-items{margin:10px 0}.header-item{margin:0 5px}.header-line{width:100%;border-width:2px;border-color:#482936;border-style:solid none none none}.lang-switch{font-weight:600}#posts-list{min-height:600px}.posts-line{font-size:1.2rem;margin:12px 0}.posts-categories{font-size:.8rem;margin:auto;text-align:center}.posts-category{padding:3px 0;border:#000 2px solid;border-radius:5px}.site-footer{margin-top:50px}.site-footer-item{margin-right:12px}.post-content img{max-width:100%;display:block;margin-right:auto;margin-top:12px}.post-header{margin-bottom:50px}.post-title{font-size:2rem;font-weight:600}.post-tags{display:inline;font-weight:600;padding:2px 5px;margin-right:6px;border:#000 2px solid;border-radius:5px}.post-date{font-weight:800;font-style:italic}.post-author{float:right;font-weight:600}.page-content{min-height:60%}.post-content{margin-bottom:50px}.post-content p{hyphens:auto;line-height:1.8;text-justify:ideographic;margin-bottom:1em}.related-content{border-width:3px;border-style:solid;border-color:#000;padding:0 10px;margin-bottom:50px;margin-top:100px}.related-content li{margin:5px 0}.taxonomy-term{font-size:3rem}.gallery-img{text-align:center}.gallery-img span{text-align:center}.gallery-img-desc{font-size:.8em;font-weight:800}#disqus_thread{position:relative}#disqus_thread:after{content:"";display:block;height:55px;width:100%;position:absolute;bottom:0;background:#fff}@media screen and (max-width:600px){.header-title,.header-subtitle,.header-items{text-align:center}.posts-line{font-size:16px}.markdown-body{font-size:16px}.post-title{font-size:2rem}.post-content p{letter-spacing:.05em}}@media screen and (max-width:48em){.posts-category{display:none}}</style>
+  
+  
+    <style>.container,.container-fluid{margin-right:auto;margin-left:auto}.container-fluid{padding-right:2rem;padding-left:2rem}.row{box-sizing:border-box;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-flex:0;-ms-flex:0 1 auto;flex:initial;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-direction:row;flex-direction:row;-ms-flex-wrap:wrap;flex-wrap:wrap;margin-right:-.5rem;margin-left:-.5rem}.row.reverse{-webkit-box-orient:horizontal;-webkit-box-direction:reverse;-ms-flex-direction:row-reverse;flex-direction:row-reverse}.col.reverse{-webkit-box-orient:vertical;-webkit-box-direction:reverse;-ms-flex-direction:column-reverse;flex-direction:column-reverse}.col-xs,.col-xs-1,.col-xs-10,.col-xs-11,.col-xs-12,.col-xs-2,.col-xs-3,.col-xs-4,.col-xs-5,.col-xs-6,.col-xs-7,.col-xs-8,.col-xs-9,.col-xs-offset-0,.col-xs-offset-1,.col-xs-offset-10,.col-xs-offset-11,.col-xs-offset-12,.col-xs-offset-2,.col-xs-offset-3,.col-xs-offset-4,.col-xs-offset-5,.col-xs-offset-6,.col-xs-offset-7,.col-xs-offset-8,.col-xs-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-xs{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-xs-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-xs-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-xs-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-xs-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-xs-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-xs-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-xs-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-xs-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-xs-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-xs-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-xs-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-xs-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-xs-offset-0{margin-left:0}.col-xs-offset-1{margin-left:8.33333333%}.col-xs-offset-2{margin-left:16.66666667%}.col-xs-offset-3{margin-left:25%}.col-xs-offset-4{margin-left:33.33333333%}.col-xs-offset-5{margin-left:41.66666667%}.col-xs-offset-6{margin-left:50%}.col-xs-offset-7{margin-left:58.33333333%}.col-xs-offset-8{margin-left:66.66666667%}.col-xs-offset-9{margin-left:75%}.col-xs-offset-10{margin-left:83.33333333%}.col-xs-offset-11{margin-left:91.66666667%}.start-xs{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-xs{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-xs{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-xs{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-xs{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-xs{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-xs{-ms-flex-pack:distribute;justify-content:space-around}.between-xs{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-xs{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-xs{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}@media only screen and (min-width:48em){.container{width:49rem}.col-sm,.col-sm-1,.col-sm-10,.col-sm-11,.col-sm-12,.col-sm-2,.col-sm-3,.col-sm-4,.col-sm-5,.col-sm-6,.col-sm-7,.col-sm-8,.col-sm-9,.col-sm-offset-0,.col-sm-offset-1,.col-sm-offset-10,.col-sm-offset-11,.col-sm-offset-12,.col-sm-offset-2,.col-sm-offset-3,.col-sm-offset-4,.col-sm-offset-5,.col-sm-offset-6,.col-sm-offset-7,.col-sm-offset-8,.col-sm-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-sm{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-sm-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-sm-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-sm-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-sm-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-sm-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-sm-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-sm-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-sm-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-sm-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-sm-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-sm-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-sm-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-sm-offset-0{margin-left:0}.col-sm-offset-1{margin-left:8.33333333%}.col-sm-offset-2{margin-left:16.66666667%}.col-sm-offset-3{margin-left:25%}.col-sm-offset-4{margin-left:33.33333333%}.col-sm-offset-5{margin-left:41.66666667%}.col-sm-offset-6{margin-left:50%}.col-sm-offset-7{margin-left:58.33333333%}.col-sm-offset-8{margin-left:66.66666667%}.col-sm-offset-9{margin-left:75%}.col-sm-offset-10{margin-left:83.33333333%}.col-sm-offset-11{margin-left:91.66666667%}.start-sm{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-sm{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-sm{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-sm{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-sm{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-sm{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-sm{-ms-flex-pack:distribute;justify-content:space-around}.between-sm{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-sm{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-sm{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}@media only screen and (min-width:64em){.container{width:65rem}.col-md,.col-md-1,.col-md-10,.col-md-11,.col-md-12,.col-md-2,.col-md-3,.col-md-4,.col-md-5,.col-md-6,.col-md-7,.col-md-8,.col-md-9,.col-md-offset-0,.col-md-offset-1,.col-md-offset-10,.col-md-offset-11,.col-md-offset-12,.col-md-offset-2,.col-md-offset-3,.col-md-offset-4,.col-md-offset-5,.col-md-offset-6,.col-md-offset-7,.col-md-offset-8,.col-md-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-md{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-md-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-md-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-md-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-md-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-md-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-md-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-md-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-md-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-md-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-md-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-md-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-md-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-md-offset-0{margin-left:0}.col-md-offset-1{margin-left:8.33333333%}.col-md-offset-2{margin-left:16.66666667%}.col-md-offset-3{margin-left:25%}.col-md-offset-4{margin-left:33.33333333%}.col-md-offset-5{margin-left:41.66666667%}.col-md-offset-6{margin-left:50%}.col-md-offset-7{margin-left:58.33333333%}.col-md-offset-8{margin-left:66.66666667%}.col-md-offset-9{margin-left:75%}.col-md-offset-10{margin-left:83.33333333%}.col-md-offset-11{margin-left:91.66666667%}.start-md{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-md{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-md{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-md{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-md{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-md{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-md{-ms-flex-pack:distribute;justify-content:space-around}.between-md{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-md{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-md{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}@media only screen and (min-width:75em){.container{width:76rem}.col-lg,.col-lg-1,.col-lg-10,.col-lg-11,.col-lg-12,.col-lg-2,.col-lg-3,.col-lg-4,.col-lg-5,.col-lg-6,.col-lg-7,.col-lg-8,.col-lg-9,.col-lg-offset-0,.col-lg-offset-1,.col-lg-offset-10,.col-lg-offset-11,.col-lg-offset-12,.col-lg-offset-2,.col-lg-offset-3,.col-lg-offset-4,.col-lg-offset-5,.col-lg-offset-6,.col-lg-offset-7,.col-lg-offset-8,.col-lg-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-lg{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-lg-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-lg-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-lg-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-lg-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-lg-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-lg-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-lg-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-lg-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-lg-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-lg-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-lg-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-lg-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-lg-offset-0{margin-left:0}.col-lg-offset-1{margin-left:8.33333333%}.col-lg-offset-2{margin-left:16.66666667%}.col-lg-offset-3{margin-left:25%}.col-lg-offset-4{margin-left:33.33333333%}.col-lg-offset-5{margin-left:41.66666667%}.col-lg-offset-6{margin-left:50%}.col-lg-offset-7{margin-left:58.33333333%}.col-lg-offset-8{margin-left:66.66666667%}.col-lg-offset-9{margin-left:75%}.col-lg-offset-10{margin-left:83.33333333%}.col-lg-offset-11{margin-left:91.66666667%}.start-lg{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-lg{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-lg{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-lg{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-lg{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-lg{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-lg{-ms-flex-pack:distribute;justify-content:space-around}.between-lg{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-lg{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-lg{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}</style>
+  
+
+  
+    <style>@charset "UTF-8";blockquote.quote{position:relative;margin:2em auto;padding-left:3em;border:none}blockquote.quote::before{position:absolute;left:0;content:'“';color:var(--color-contrast-low);font-family:jetbrains mono,amstelvar,noto serif sc,serif;font-size:3em;font-weight:700;line-height:1}blockquote.quote.poetry{display:table;padding:0}blockquote.quote.poetry::before{left:-1em}blockquote.quote.poetry p:last-child{margin:0}blockquote.quote.en p{line-height:1.618;text-align:left;hyphens:auto;-webkit-hyphens:auto;-moz-hyphens:auto}</style>
+  
+
+  
+
+  <link href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static/index.xml" rel="alternate" type="application/rss+xml"
+    title="妈妈说只要名字长就有笨比跟着念-服务端技术分享">
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.font.im/css?family=Bree+Serif|Bungee+Shade" rel="stylesheet">
+
+  
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JV86B54BT8"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'G-JV86B54BT8');
+</script> 
+  
+
+  
+</head>
+
+
+<body>
+  <article class="post 简体中文" id="article">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="site-header">
+          
+<header>
+  <div class="header-title">
+    <a href="/"
+      >Headbanger</a
+    >
+  </div>
+  <div class="header-subtitle">For self tracking and make progress</div>
+</header>
+<div class="row end-md center-xs header-items">
+  
+  <div class="header-item">
+    <a href="https://steamcommunity.com/id/ileopold0524/games/?tab=all" target="_blank">Game</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="https://movie.douban.com/people/ileopold/collect" target="_blank">Movie</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="https://book.douban.com/people/ileopold/collect" target="_blank">Book</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="/404/" target="_blank">Travel</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="/about" target="_blank">About</a>
+  </div>
+  
+</div>
+<div class="row end-xs">
+   
+</div>
+<div class="header-line"></div>
+
+        </div>
+        <header class="post-header">
+          <h1 class="post-title">关于 Golang Slice，你知道的不多</h1>
+          
+          <div class="row post-desc">
+            <div class="col-xs-6">
+              
+              <time class="post-date" datetime="2022-01-30 17:18:44 CST">
+                30 Jan 2022
+              </time>
+              
+            </div>
+            <div class="col-xs-6">
+              
+              <div class="post-author">
+                <a target="_blank" href="http://ileopold.cn/">@ileopold</a>
+              </div>
+              
+            </div>
+          </div>
+          
+        </header>
+
+        <div class="post-content markdown-body">
+          
+          
+    <iframe
+        frameborder="no"
+        border="0"
+        marginwidth="0"
+        marginheight="0"
+        width=60%
+        height=86
+        src="//music.163.com/outchain/player?type=2&id=1386055858&auto=1&height=66">
+    </iframe>
+
+<h2 id="前言">前言</h2>
+<p>切片是Golang中的一等公民，业务代码中广泛使用，这里记录下以下几个问题：</p>
+<ul>
+<li>切片的数据结构是什么？如何实现扩容？</li>
+<li>切片有哪些少见的高级用法？</li>
+<li>什么时候应该使用数组，而不是切片？</li>
+</ul>
+<h2 id="数据结构">数据结构</h2>
+<p>编译期类型为 
+<a href="https://github.com/golang/go/blob/3b2a578166bdedd94110698c971ba8990771eb89/src/cmd/compile/internal/types/type.go#L346" target="_blank">Slice</a>，运行期为 
+<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/reflect/value.go#L1994" target="_blank">SliceHeader</a>，具体结构如下：
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">type</span> SliceHeader <span style="color:#f00">struct</span> {
+	Data <span style="color:#ee82ee">uintptr</span>
+	Len  <span style="color:#ee82ee">int</span>
+	Cap  <span style="color:#ee82ee">int</span>
+}</code></pre></td></tr></table>
+</div>
+</div></p>
+<h3 id="初始化">初始化</h3>
+<h4 id="使用下标初始化">使用下标初始化</h4>
+<script id="asciicast-466323" src="https://asciinema.org/a/466323.js" async></script>
+<p>./ssa.html 如下：
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#ff0">v11</span> (<span style="color:#f60">8</span>) = Load &lt;*[<span style="color:#f60">3</span>]<span style="color:#ee82ee">int</span>&gt; v10 <span style="color:#ff0">v9</span> (&amp;arr[*[<span style="color:#f60">3</span>]<span style="color:#ee82ee">int</span>])
+<span style="color:#ff0">v25</span> (<span style="color:#f60">9</span>) = Const64 &lt;<span style="color:#ee82ee">int</span>&gt; [<span style="color:#f60">1</span>]
+<span style="color:#ff0">v26</span> (<span style="color:#f60">9</span>) = Const64 &lt;<span style="color:#ee82ee">int</span>&gt; [<span style="color:#f60">3</span>]
+<span style="color:#ff0">v27</span> (<span style="color:#f60">9</span>) = SliceMake &lt;[]<span style="color:#ee82ee">int</span>&gt; v11 v25 v26</code></pre></td></tr></table>
+</div>
+</div></p>
+<p>通过编译期的中间代码，<code>SliceMake</code> 主要涉及四个参数：元素类型、数组指针、切片大小和容量，这些运行期的 <code>SliceHeader</code> 字段定义相似。使用下标初始化会创建一个指向原数组的切片结构体，并不会拷贝原数据。</p>
+<h4 id="通过字面量初始化">通过字面量初始化</h4>
+<p>大部分工作都在编译器完成，比如 <code>[]int{1, 2, 3}</code>，底层会创建一个长度为3的数组，并且创建一个数组指针指向这块数组，通过<code>[:]</code>操作符初始化切片。</p>
+<h4 id="关键字make创建切片">关键字make创建切片</h4>
+<p><code>make</code>函数除了类型，还接收len和cap两个参数，
+<a href="https://github.com/golang/go/blob/da54dfb6a1f3bef827b9ec3780c98fde77a97d11/src/cmd/compile/internal/gc/typecheck.go#L326" target="_blank">类型检查期</a>会检查len和cap设置的合理性。<br>
+中间代码生成的
+<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/cmd/compile/internal/gc/walk.go#L411" target="_blank">walkexpr</a>函数会根据切片的大小和是否发生逃逸（逃逸分析参考
+<a href="https://www.ileopold.cn/posts/golang-escape-analysis/">escape-analysis</a>）决定初始化的方式：</p>
+<ul>
+<li>当切片非常小且不会发生逃逸时，直接在编译阶段初始化数组，通过下标初始化切片，转成前面提到的<code>SliceMake</code>调用，这部分都是在栈上或者静态存储区完成</li>
+<li>当切片非常大或者发生逃逸时，通过运行时
+<a href="https://github.com/golang/go/blob/3b2a578166bdedd94110698c971ba8990771eb89/src/runtime/slice.go#L83" target="_blank">makeslice</a>在堆上初始化切片</li>
+</ul>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">func</span> <span style="color:#ff0">makeslice</span>(et *_type, len, cap <span style="color:#ee82ee">int</span>) unsafe.Pointer {
+	mem, overflow := math.<span style="color:#ff0">MulUintptr</span>(et.size, uintptr(cap))
+	<span style="color:#f00">if</span> overflow || mem &gt; maxAlloc || len &lt; <span style="color:#f60">0</span> || len &gt; cap {
+		mem, overflow := math.<span style="color:#ff0">MulUintptr</span>(et.size, uintptr(len))
+		<span style="color:#f00">if</span> overflow || mem &gt; maxAlloc || len &lt; <span style="color:#f60">0</span> {
+			<span style="color:#ff0">panicmakeslicelen</span>()
+		}
+		<span style="color:#ff0">panicmakeslicecap</span>()
+	}
+	<span style="color:#f00">return</span> <span style="color:#ff0">mallocgc</span>(mem, et, <span style="color:#f00">true</span>)
+}</code></pre></td></tr></table>
+</div>
+</div>
+<h3 id="如何扩容">如何扩容</h3>
+<p>如下面代码，在对长度为0的切片进行append的时候，中间代码会调用
+<a href="https://github.com/golang/go/blob/ac0ba6707c1655ea4316b41d06571a0303cc60eb/src/runtime/slice.go#L125" target="_blank">runtime.growslice</a>方法，下面分开来看这个扩容方法。
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">func</span> <span style="color:#ff0">newSlice</span>() []<span style="color:#ee82ee">int</span> {
+	slice := make([]<span style="color:#ee82ee">int</span>, <span style="color:#f60">0</span>)
+	slice = append(slice,<span style="color:#f60">1</span>)
+	<span style="color:#f00">return</span> slice
+}
+
+<span style="color:#0f0">// v34 (9) = StaticCall &lt;mem&gt; {runtime.growslice} [64] v33
+</span></code></pre></td></tr></table>
+</div>
+</div></p>
+<p>代码和计算新容量的公式如下：</p>
+<ul>
+<li>若预期新CAP大于两倍的老CAP，则新的容量就是预期新CAP</li>
+<li>若预期新CAP小于等于两倍的老CAP，并且老CAP小于1024，则新CAP等于两倍的老CAP（新CAP &lt; 2048）</li>
+<li>若预期新CAP小于等于两倍的老CAP，并且老CAP大于等于1024，则老CAP按照自身的25%逐步自增，知道大于预期新CAP，得到新CAP值</li>
+</ul>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">23
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#0f0">// It is passed the slice element type, the old slice, and the desired new minimum capacity
+</span><span style="color:#0f0"></span><span style="color:#f00">func</span> <span style="color:#ff0">growslice</span>(et *_type, old slice, cap <span style="color:#ee82ee">int</span>) slice {
+...
+newcap := old.cap
+doublecap := newcap + newcap
+<span style="color:#f00">if</span> cap &gt; doublecap {
+    newcap = cap
+} <span style="color:#f00">else</span> {
+    <span style="color:#f00">if</span> old.cap &lt; <span style="color:#f60">1024</span> {
+        newcap = doublecap
+    } <span style="color:#f00">else</span> {
+        <span style="color:#0f0">// Check 0 &lt; newcap to detect overflow
+</span><span style="color:#0f0"></span>        <span style="color:#0f0">// and prevent an infinite loop.
+</span><span style="color:#0f0"></span>        <span style="color:#f00">for</span> <span style="color:#f60">0</span> &lt; newcap &amp;&amp; newcap &lt; cap {
+            newcap += newcap / <span style="color:#f60">4</span>
+        }
+        <span style="color:#0f0">// Set newcap to the requested cap when
+</span><span style="color:#0f0"></span>        <span style="color:#0f0">// the newcap calculation overflowed.
+</span><span style="color:#0f0"></span>        <span style="color:#f00">if</span> newcap &lt;= <span style="color:#f60">0</span> {
+            newcap = cap
+        }
+    }
+}</code></pre></td></tr></table>
+</div>
+</div>
+<p>有了前面计算的新CAP值后，还需要根据切片里元素的大小进行内存对齐，再调整下新CAP值，这部分实现可以看代码，这里不展开。
+然后判断了是否溢出，需要分配的内存是否超出最大值，没问题的话就进行内存分配，并且<code>memmove</code>开始挪数据。</p>
+<h2 id="少见的高级用法">少见的高级用法</h2>
+<p>下面列出几个相对少见的用法。</p>
+<h3 id="三下标形式初始化">三下标形式初始化</h3>
+<p>假设 baseContainer 是一个切片或者数组，则有下面两种初始化派生切片方式，派生切片的长度为 high - low、容量为 max - low ：
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go">baseContainer[low : high : max] <span style="color:#0f0">// 三下标形式
+</span><span style="color:#0f0"></span>baseContainer[low : high]       <span style="color:#0f0">// 双下标形式，等价于 baseContainer[low : high : cap(baseContainer)]
+</span></code></pre></td></tr></table>
+</div>
+</div></p>
+<p>省略规则如下：</p>
+<ul>
+<li>如果下标low为零，则它可被省略。此条规则同时适用于双下标形式和三下标形式</li>
+<li>如果下标high等于len(baseContainer)，则它可被省略。此条规则同时只适用于双下标形式</li>
+<li>三下标形式中的下标max在任何情况下都不可被省略</li>
+</ul>
+<p>具体例子，
+<a href="https://www.ileopold.cn/posts/golang-database-sql/">database/sql</a> 里计算过期连接的切片使用如下：
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go">closing = db.freeConn[:i:i]
+db.freeConn = db.freeConn[i:]</code></pre></td></tr></table>
+</div>
+</div></p>
+<p><code>db.freeConn[:i:i]</code> 因为low下标为0可以被忽略，所以这里代表的是len=i且cap=i的派生切片，实际测试如下：
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">18
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> main
+
+<span style="color:#f00">import</span> <span style="color:#87ceeb">&#34;log&#34;</span>
+
+<span style="color:#f00">func</span> <span style="color:#ff0">main</span>() {
+	<span style="color:#f00">var</span> a = [...]<span style="color:#ee82ee">int</span>{<span style="color:#f60">0</span>, <span style="color:#f60">1</span>, <span style="color:#f60">2</span>, <span style="color:#f60">3</span>, <span style="color:#f60">4</span>, <span style="color:#f60">5</span>, <span style="color:#f60">6</span>, <span style="color:#f60">7</span>}
+	a0 := a[:]
+	a1 := a0[<span style="color:#f60">1</span>:<span style="color:#f60">3</span>]
+	a2 := a0[<span style="color:#f60">1</span>:<span style="color:#f60">5</span>:<span style="color:#f60">6</span>]
+	log.<span style="color:#ff0">Println</span>(a0, len(a0), cap(a0))
+	log.<span style="color:#ff0">Println</span>(a1, len(a1), cap(a1))
+	log.<span style="color:#ff0">Println</span>(a2, len(a2), cap(a2))
+}
+
+<span style="color:#0f0">// 运行结果
+</span><span style="color:#0f0">// 2022/02/03 14:11:21 [0 1 2 3 4 5 6 7] 8 8
+</span><span style="color:#0f0">// 2022/02/03 14:11:21 [1 2] 2 7
+</span><span style="color:#0f0">// 2022/02/03 14:11:21 [1 2 3 4] 4 5
+</span></code></pre></td></tr></table>
+</div>
+</div></p>
+<h3 id="切片拷贝的方式">切片拷贝的方式</h3>
+<p>可以直接使用<code>copy</code>函数，也可以通过<code>append</code>函数实现：
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#0f0">// 假设元素类型为T。
+</span><span style="color:#0f0"></span><span style="color:#f00">func</span> <span style="color:#ff0">Copy</span>(dest, src []T) <span style="color:#ee82ee">int</span> {
+	<span style="color:#f00">if</span> len(dest) &lt; len(src) {
+		_ = append(dest[:<span style="color:#f60">0</span>], src[:len(dest)]...)
+		<span style="color:#f00">return</span> len(dest)
+	} <span style="color:#f00">else</span> {
+		_ = append(dest[:<span style="color:#f60">0</span>], src...)
+		<span style="color:#f00">return</span> len(src)
+	}
+}</code></pre></td></tr></table>
+</div>
+</div></p>
+<h3 id="切片克隆的方式">切片克隆的方式</h3>
+<ul>
+<li>通过自动扩容来克隆，缺点是自动扩容申请了额外可能不需要的空间</li>
+</ul>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> main
+
+<span style="color:#f00">import</span> <span style="color:#87ceeb">&#34;log&#34;</span>
+
+<span style="color:#f00">func</span> <span style="color:#ff0">main</span>() {
+	<span style="color:#f00">var</span> a = [...]<span style="color:#ee82ee">int</span>{<span style="color:#f60">0</span>, <span style="color:#f60">1</span>, <span style="color:#f60">2</span>, <span style="color:#f60">3</span>, <span style="color:#f60">4</span>, <span style="color:#f60">5</span>, <span style="color:#f60">6</span>, <span style="color:#f60">7</span>}
+	a0 := a[:]
+	log.<span style="color:#ff0">Printf</span>(<span style="color:#87ceeb">&#34;%v , %p , %d , %d&#34;</span>, a0, &amp;a0, len(a0), cap(a0))
+	aClone := append(a0[:<span style="color:#f60">0</span>:<span style="color:#f60">0</span>], a0...)
+	log.<span style="color:#ff0">Printf</span>(<span style="color:#87ceeb">&#34;%v , %p , %d , %d&#34;</span>, aClone, &amp;aClone, len(aClone), cap(aClone))
+}
+
+<span style="color:#0f0">// 运行结果
+</span><span style="color:#0f0">// 2022/02/03 14:54:34 [0 1 2 3 4 5 6 7] , 0xc00000c0a0 , 8 , 8
+</span><span style="color:#0f0">// 2022/02/03 14:54:34 [0 1 2 3 4 5 6 7] , 0xc00000c0e0 , 8 , 8
+</span></code></pre></td></tr></table>
+</div>
+</div>
+<ul>
+<li>make + copy，最新版本存在优化 ✅</li>
+</ul>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go">sClone := make([]T, len(s))
+copy(sClone, s)</code></pre></td></tr></table>
+</div>
+</div>
+<ul>
+<li>make + append</li>
+</ul>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go">sClone := append(make([]T, <span style="color:#f60">0</span>, len(s)), s...)</code></pre></td></tr></table>
+</div>
+</div>
+<h3 id="字符串展开成切片">字符串展开成切片</h3>
+<p>据说是个语法糖，字符串的<code>...</code>展开。</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> main
+
+<span style="color:#f00">import</span> <span style="color:#87ceeb">&#34;fmt&#34;</span>
+
+<span style="color:#f00">func</span> <span style="color:#ff0">main</span>() {
+	hello := []byte(<span style="color:#87ceeb">&#34;Hello &#34;</span>)
+	world := <span style="color:#87ceeb">&#34;world!&#34;</span>
+
+	helloWorld := append(hello, world...) <span style="color:#0f0">// 语法糖
+</span><span style="color:#0f0"></span>	fmt.<span style="color:#ff0">Println</span>(string(helloWorld))
+
+	helloWorld2 := make([]<span style="color:#ee82ee">byte</span>, len(hello)+len(world))
+	copy(helloWorld2, hello)
+	copy(helloWorld2[len(hello):], world) <span style="color:#0f0">// 语法糖
+</span><span style="color:#0f0"></span>	fmt.<span style="color:#ff0">Println</span>(string(helloWorld2))
+}</code></pre></td></tr></table>
+</div>
+</div>
+<h3 id="删除切片中的一个元素">删除切片中的一个元素</h3>
+<ul>
+<li>append，保证顺序</li>
+</ul>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go">s = append(s[:i], s[i+<span style="color:#f60">1</span>:]...)</code></pre></td></tr></table>
+</div>
+</div>
+<ul>
+<li>copy，保证顺序，<code>copy</code>返回最终拷贝了几个元素</li>
+</ul>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go">s = s[:i + copy(s[i:], s[i+<span style="color:#f60">1</span>:])]</code></pre></td></tr></table>
+</div>
+</div>
+<ul>
+<li>删除最后一个元素，不保证顺序，
+<a href="https://www.ileopold.cn/posts/golang-database-sql/">database/sql</a> 就是这么用的</li>
+</ul>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go">s[i] = s[len(s)-<span style="color:#f60">1</span>]
+s = s[:len(s)-<span style="color:#f60">1</span>]</code></pre></td></tr></table>
+</div>
+</div>
+<h3 id="带条件删除切片中的元素">带条件删除切片中的元素</h3>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#0f0">// 假设T是一个小尺寸类型。
+</span><span style="color:#0f0"></span><span style="color:#f00">func</span> <span style="color:#ff0">DeleteElements</span>(s []T, keep <span style="color:#f00">func</span>(T) <span style="color:#ee82ee">bool</span>, clear <span style="color:#ee82ee">bool</span>) []T {
+	<span style="color:#0f0">// result := make([]T, 0, len(s))
+</span><span style="color:#0f0"></span>	result := s[:<span style="color:#f60">0</span>] <span style="color:#0f0">// 无须开辟内存
+</span><span style="color:#0f0"></span>	<span style="color:#f00">for</span> _, v := <span style="color:#f00">range</span> s {
+		<span style="color:#f00">if</span> <span style="color:#ff0">keep</span>(v) {
+			result = append(result, v)
+		}
+	}
+	<span style="color:#f00">if</span> clear { <span style="color:#0f0">// 避免暂时性的内存泄露。
+</span><span style="color:#0f0"></span>		temp := s[len(result):]
+		<span style="color:#f00">for</span> i := <span style="color:#f00">range</span> temp {
+			temp[i] = t0 <span style="color:#0f0">// t0是类型T的零值
+</span><span style="color:#0f0"></span>		}
+	}
+	<span style="color:#f00">return</span> result
+}</code></pre></td></tr></table>
+</div>
+</div>
+<h3 id="其他用法">其他用法</h3>
+<ul>
+<li>因为<code>for-range</code>出来的val是拷贝出来的，如果切片元素比较大，可以减少拷贝，使用<code>for</code>循环通过索引去取</li>
+</ul>
+<h2 id="什么时候用数组而不是切片">什么时候用数组而不是切片</h2>
+<p>数组相比切片有如下特点：</p>
+<ul>
+<li>数组是可比较类型，可以进行 <code>a1 == a2</code> 的判断，而切片则不支持</li>
+<li>编译安全，数组必须声明大小，即便是 <code>[...]array</code> 也会在编译器推断出大小，如果对于数组的使用越界了，编译期报错，而切片使用如果越界了，编译器没问题，只能到运行时panic了</li>
+<li>数组的长度是类型声明的一部分，可以有语义的表达一些类型，比如 <code>type RGB [3]byte</code> 可以表达颜色</li>
+<li>规划内存布局，简单来说，方便定义结构体的时候占坑</li>
+</ul>
+<p>虽然业务代码里大量用切片，但是可以根据实际情况，使用数组可能会有更好的效果。</p>
+<h2 id="reference">Reference</h2>
+<ul>
+<li>
+<a href="https://draveness.me/golang/docs/part2-foundation/ch03-datastructure/golang-array-and-slice/" target="_blank">切片</a></li>
+<li>
+<a href="https://gfw.go101.org/article/container.html" target="_blank">数组、切片和映射</a></li>
+<li>
+<a href="https://linux.cn/article-12350-1.html" target="_blank">在 Go 中如何转储一个方法的 GOSSAFUNC 图</a></li>
+<li>
+<a href="https://developer.51cto.com/article/661996.html" target="_blank">Go 数组比切片好在哪？</a></li>
+<li>
+<a href="https://xiaomi-info.github.io/2019/11/13/golang-compiler-principle/" target="_blank">Go 编译器原理</a></li>
+</ul>
+
+        </div>
+
+        <div class="row middle-xs">
+          <div class="col-xs-12">
+            
+          </div>
+        </div>
+        
+          <div class="row">
+            <div class="col-xs-12">
+              
+            </div>
+          </div>
+
+          
+
+<div class="related-content">
+  <h3>Related Posts</h3>
+  <ul>
+    
+    <li><a href="/posts/golang-unsafe-pointer/">Golang unsafe Pointer 怎么用</a></li>
+    
+    <li><a href="/posts/golang-channel/">Golang Channel 原理</a></li>
+    
+    <li><a href="/posts/golang-database-sql/">Golang database/sql 源码分享</a></li>
+    
+  </ul>
+</div>
+
+
+
+          
+          
+          <div style="height: 50px;"></div>
+          
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+<script>
+  window.addEventListener("load", () => {
+    (function() {
+      
+      var d = document,
+        s = d.createElement("script");
+      s.src = "https://ileopold.disqus.com/embed.js";
+      s.setAttribute("data-timestamp", +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  });
+</script>
+<noscript
+  >Please enable JavaScript to view the
+  <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  ></noscript
+>
+
+          </div>
+          
+        
+
+        <div class="site-footer">
+  <div class="site-footer-item" style="text-align: center;">
+    <a href="https://beian.miit.gov.cn/" target="_blank">京ICP备18045353号-2</a>
+  </div>
+  <br><br>
+</div>
+
+      </div>
+    </div>
+  </article>
+
+  
+<script src="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static/js/lazyload.min.js"></script>
+<script>
+  var lazyImage = new LazyLoad({
+    container: document.getElementById('article')
+  });
+</script>
+
+<script>
+  
+  
+    
+    
+  
+</script>
+
+  
+
+</body>
+
+</html>

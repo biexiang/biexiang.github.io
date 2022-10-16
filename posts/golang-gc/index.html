@@ -7,16 +7,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="ileopold" />
-  <meta property="og:url" content="https://www.ileopold.cn/" />
-  <meta content="" name="keywords">
-  <link rel="canonical" href="https://www.ileopold.cn/" />
+  <meta property="og:url" content="https://www.ileopold.cn/posts/golang-gc/" />
+  <meta content="Golang、源码阅读" name="keywords">
+  <link rel="canonical" href="https://www.ileopold.cn/posts/golang-gc/" />
   <meta name="sogou_site_verification" content="2i7JohrE4G" /><link rel="dns-prefetch" href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static" /><link rel="apple-touch-icon" href="/logo.png" />
   <link rel="icon" href="/logo.png" />
-  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
-  <meta property="og:title" content="妈妈说只要名字长就有笨比跟着念-服务端技术分享" />
-  <meta property="og:type" content="website" />
-  <meta property="og:description" content="For self tracking and make progress" />
-  <meta name="description" content="For self tracking and make progress" />
+  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>Golang 垃圾回收</title>
+  <meta property="og:title" content="Golang 垃圾回收" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="垃圾回收分为哪些，优缺点是什么？Golang垃圾回收的历史是什么？三色标记&#43;混合写屏障的原理，为什么减少了STW的时间？" />
+  <meta name="description" content="垃圾回收分为哪些，优缺点是什么？Golang垃圾回收的历史是什么？三色标记&#43;混合写屏障的原理，为什么减少了STW的时间？" />
   <meta property="og:locale" content="zh-cn" />
   
     <style>body{font-family:bree serif,sans-serif;-webkit-font-smoothing:antialiased;margin:0 20px}article{max-width:800px;margin-left:auto;margin-right:auto}a{color:#000;text-decoration:none}a:hover{font-weight:600;text-decoration:underline}.post-ads{margin:50px 0}.markdown-body{font-size:18px;max-width:100%}.markdown-body a{text-decoration:underline;text-decoration-color:#000}.markdown-body pre{padding:16px;overflow:auto;border-radius:10px}.markdown-body code{padding:.2em .4em;font-size:85%;background-color:#f6f8fa;border-radius:6px}.markdown-body pre>code{padding:0;font-size:100%;background-color:inherit;border:0}.Chinese .markdown-body{line-height:200%}.site-date-catalog{font-size:2rem}.header-title{font-size:2rem;font-weight:700;margin-top:32px;font-family:bungee shade,sans-serif}.header-title a{text-decoration:none}.header-subtitle{color:#666}.header-items{margin:10px 0}.header-item{margin:0 5px}.header-line{width:100%;border-width:2px;border-color:#482936;border-style:solid none none none}.lang-switch{font-weight:600}#posts-list{min-height:600px}.posts-line{font-size:1.2rem;margin:12px 0}.posts-categories{font-size:.8rem;margin:auto;text-align:center}.posts-category{padding:3px 0;border:#000 2px solid;border-radius:5px}.site-footer{margin-top:50px}.site-footer-item{margin-right:12px}.post-content img{max-width:100%;display:block;margin-right:auto;margin-top:12px}.post-header{margin-bottom:50px}.post-title{font-size:2rem;font-weight:600}.post-tags{display:inline;font-weight:600;padding:2px 5px;margin-right:6px;border:#000 2px solid;border-radius:5px}.post-date{font-weight:800;font-style:italic}.post-author{float:right;font-weight:600}.page-content{min-height:60%}.post-content{margin-bottom:50px}.post-content p{hyphens:auto;line-height:1.8;text-justify:ideographic;margin-bottom:1em}.related-content{border-width:3px;border-style:solid;border-color:#000;padding:0 10px;margin-bottom:50px;margin-top:100px}.related-content li{margin:5px 0}.taxonomy-term{font-size:3rem}.gallery-img{text-align:center}.gallery-img span{text-align:center}.gallery-img-desc{font-size:.8em;font-weight:800}#disqus_thread{position:relative}#disqus_thread:after{content:"";display:block;height:55px;width:100%;position:absolute;bottom:0;background:#fff}@media screen and (max-width:600px){.header-title,.header-subtitle,.header-items{text-align:center}.posts-line{font-size:16px}.markdown-body{font-size:16px}.post-title{font-size:2rem}.post-content p{letter-spacing:.05em}}@media screen and (max-width:48em){.posts-category{display:none}}</style>
@@ -57,10 +57,11 @@
 
 
 <body>
-  <article class="posts">
+  <article class="post 简体中文" id="article">
     <div class="row">
       <div class="col-xs-12">
-        
+        <div class="site-header">
+          
 <header>
   <div class="header-title">
     <a href="/"
@@ -97,401 +98,198 @@
 </div>
 <div class="header-line"></div>
 
-        <div id="posts-list">
-          <section>
-            <h1 class="site-date-catalog">2022</h1>
-
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-08-08 23:03:00 CST">Aug 08</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/go-ast/">Go Ast</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-07-01 22:07:24 CST">Jul 01</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/work-learning/">知识补充区</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/work/"><strong>work</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-06-01 18:07:48 CST">Jun 01</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/camera/">相机记录</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/camera/"><strong>Camera</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-05-28 18:07:41 CST">May 28</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/interview/interview/">面试系列</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/interview/"><strong>Interview</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-            
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-03-05 16:52:36 CST">Mar 05</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-map/">Golang Map 源码分析</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-03-02 23:11:39 CST">Mar 02</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-tricky/">你可能不知道的Golang用法</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-02-23 21:44:07 CST">Feb 23</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-gc/">Golang 垃圾回收</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-02-13 18:45:24 CST">Feb 13</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/leetcode-courses/">Leetcode Courses Problem</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/algorithm/"><strong>Algorithm</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-            
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-30 17:30:52 CST">Jan 30</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-escape-analysis/">Golang 逃逸分析</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-30 17:18:44 CST">Jan 30</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-slice/">关于 Golang Slice，你知道的不多</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-23 16:00:23 CST">Jan 23</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-unsafe-pointer/">Golang unsafe Pointer 怎么用</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-16 22:07:24 CST">Jan 16</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-channel/">Golang Channel 原理</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-16 21:58:21 CST">Jan 16</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/ring-buffer/">Ring Buffer 介绍</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/algorithm/"><strong>Algorithm</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-09 14:37:13 CST">Jan 09</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/lru-and-lfu/">关于LRU和LFU算法</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/algorithm/"><strong>Algorithm</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-04 22:31:49 CST">Jan 04</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/show-video-img/">支持B站视频和图片</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/video/"><strong>Video</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-03 21:42:02 CST">Jan 03</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/2022-plan/">2022 Plan</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/plan/"><strong>Plan</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-          </section>
-          <section>
-            <h1 class="site-date-catalog">2021</h1>
-
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2021-12-23 16:19:36 CST">Dec 23</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-database-sql/">Golang database/sql 源码分享</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-          </section>
-          
         </div>
+        <header class="post-header">
+          <h1 class="post-title">Golang 垃圾回收</h1>
+          
+          <div class="row post-desc">
+            <div class="col-xs-6">
+              
+              <time class="post-date" datetime="2022-02-23 21:44:07 CST">
+                23 Feb 2022
+              </time>
+              
+            </div>
+            <div class="col-xs-6">
+              
+              <div class="post-author">
+                <a target="_blank" href="http://ileopold.cn/">@ileopold</a>
+              </div>
+              
+            </div>
+          </div>
+          
+        </header>
+
+        <div class="post-content markdown-body">
+          
+          
+    <iframe
+        frameborder="no"
+        border="0"
+        marginwidth="0"
+        marginheight="0"
+        width=60%
+        height=86
+        src="//music.163.com/outchain/player?type=2&id=521169592&auto=1&height=66">
+    </iframe>
+
+<h2 id="垃圾回收历史">垃圾回收历史</h2>
+<p>目前提供GC的语言有Python、PHP、Java、Javascript&hellip;，同时比如C、C++被设计为手动管理内存，但是也可以自行实现GC，还有Rust可以在编译器，依靠编译器插入清理代码的方式，精准清理。</p>
+<h3 id="golang-gc-changelog">Golang GC Changelog</h3>
+<ul>
+<li>Go 1：单线程版的标记清扫，全过程STW</li>
+<li>Go 1.3：标记阶段STW, 清扫阶段并行执行，停顿时间在约几百毫秒</li>
+<li>Go 1.5：三色标记，标记和清扫可以并行执行，但是标记阶段的前后需要STW来做GC的准备，停顿时间在一百毫秒以内</li>
+<li><del>Go 1.6：使用 bitmap 来记录回收内存的位置，大幅优化垃圾回收器自身消耗的内存，停顿时间在十毫秒以内</del></li>
+<li><del>Go 1.7：独立栈收缩，停顿时间控制在两毫秒以内</del></li>
+<li>Go 1.8：混合写屏障，停顿时间在半毫秒左右</li>
+<li><del>Go 1.9：彻底移除了栈的重扫描过程</del></li>
+<li><del>Go 1.12：整合了两个阶段的 Mark Termination</del></li>
+<li><del>Go 1.13：着手解决向操作系统归还内存的，提出了新的 Scavenger</del></li>
+<li><del>Go 1.14：替代了仅存活了一个版本的 scavenger，全新的页分配器，优化分配内存过程的速率与现有的扩展性问题，并引入了异步抢占，解决了由于密集循环导致的 STW 时间过长的问题</del></li>
+</ul>
+<h2 id="gc-策略">GC 策略</h2>
+<h3 id="golang使用的策略">Golang使用的策略</h3>
+<blockquote class="quote">
+        <p>The GC runs concurrently with mutator threads, is type accurate (aka precise), allows multiple GC thread to run in parallel. It is a concurrent mark and sweep that uses a write barrier. It is non-generational and non-compacting. Allocation is done using size segregated per P allocation areas to minimize fragmentation while eliminating locks in the common case.</p></blockquote> 
+<p>Go的GC使用的是一种非分代的没有整理过程的Concurrent Mark and Sweep算法（CMS算法），类似于Java的CMS GC。</p>
+<p>通常，垃圾回收器的执行过程可根据代码的行为被划分为两个半独立的组件：赋值器（Mutator）和回收器（Collector）。赋值器一词最早由Dijkstra引入，意指用户态代码。因为对垃圾回收器而言，需要回收的内存是由用户态的代码产生的，用户态代码仅仅只是在修改对象之间的引用关系进行操作。回收器即为程序运行时负责执行垃圾回收的代码。</p>
+<h3 id="标记清扫">标记清扫</h3>
+<p>aka <code>Mark-Sweep</code>，Golang早期使用这种朴素的策略，策略分为标记追踪和清扫回收两个步骤，因为回收器执行时，并发执行的赋值器要挂起，出现STW。如果回收器和赋值器并发执行，就会产生程序的正确性问题：<code>如何保证回收器不会将存活的对象回收，同时赋值器访问到的对象都是重新整理和移动过的新对象</code>。</p>
+<h3 id="三色标记">三色标记</h3>
+<p>从垃圾回收器的视角来看，三色抽象规定了三种不同类型的对象，并用不同的颜色相称：<br>
+
+<a href="https://imgtu.com/i/bno2AU" target="_blank"><img src="https://s4.ax1x.com/2022/02/27/bno2AU.png" alt="bno2AU.png"></a></p>
+<ul>
+<li>白色对象：未被回收器访问到的对象。在回收开始阶段，所有对象均为白色，当回收结束后，白色对象均不可达</li>
+<li>灰色对象：已被回收器访问到的对象，但回收器需要对其中的一个或多个指针进行扫描，因为他们可能还指向白色对象</li>
+<li>黑色对象：已被回收器访问到的对象，其中所有字段都已被扫描，黑色对象中任何一个指针都不可能直接指向白色对象</li>
+</ul>
+<p>当垃圾回收开始时，只有白色对象。随着标记过程开始进行时，灰色对象开始出现，这时候波面便开始扩大。当一个对象的所有子节点均完成扫描时，会被着色为黑色。当整个堆遍历完成时，只剩下黑色和白色对象，这时的黑色对象为可达对象，即存活；而白色对象为不可达对象，即死亡。这个过程可以视为以灰色对象为波面，将黑色对象和白色对象分离，使波面不断向前推进，直到所有可达的灰色对象都变为黑色对象为止的过程。</p>
+<h4 id="go-15">Go 1.5</h4>
+<p>该版本的处理流程如下：</p>
+<ul>
+<li>Sweep Termination: 收集根对象，清理上一轮未清扫完的span，启用写屏障和辅助GC，辅助GC将一定量的标记和清扫工作交给用户Goroutine来执行</li>
+<li>Mark: 扫描所有根对象和通过根对象可达的对象，并标记它们</li>
+<li>Mark Termination: 完成标记工作，重新扫描部分根对象(要求STW)，关闭写屏障和辅助GC</li>
+<li>Sweep: 按标记结果清理对象</li>
+</ul>
+<p>同时因为并行标记清理产生了如下问题：
+<blockquote class="quote">
+        <p>假设某个灰色对象A指向白色对象B，而此时赋值器并发的将黑色对象C指向（ref3）了白色对象B，并将灰色对象A对白色对象B的引用移除（ref2），则在继续扫描的过程中，白色对象B永远不会被标记为黑色对象了（回收器不会重新扫描黑色对象），进而产生被错误回收的对象B。</p></blockquote> </p>
+<p>可以证明，当以下两个条件同时满足时会破坏垃圾回收器的正确性：</p>
+<ul>
+<li>条件1: 赋值器修改对象图，导致某一黑色对象引用白色对象</li>
+<li>条件2: 从灰色对象出发，到达白色对象的、未经访问过的路径被赋值器破坏</li>
+</ul>
+<p>由此得出两个不变式：</p>
+<ul>
+<li>强三色不变式：不允许黑色对象引用白色对象</li>
+<li>弱三色不变式：黑色对象可以引用白色对象，但是白色对象的上游必须存在灰色对象</li>
+</ul>
+<p>为了实现上面的不变式，引入了赋值器屏障，赋值器屏障作为一种同步机制，使赋值器在进行指针写操作时，能够<code>通</code>知回收器，进而不会破坏弱三色不变性，一共有两种赋值器屏障：</p>
+<ul>
+<li>Dijkstra 插入写屏障，如果某一对象的引用被插入到已经被标记为黑色的对象中（黑色不会重新扫描了），这类屏障会保守地将其作为非白色存活对象，以满足强三色不变性</li>
+<li>Yuasa 删除写屏障，在删除引用时，如果被删除引用的对象自身为灰色或者白色，那么被标记为灰色，满足弱三色不变式，灰色对象到白色对象的路径不会断</li>
+</ul>
+<p>插入写屏障和删除写屏障各有优缺点，插入写屏障在标记开始时无需STW，可直接开始，并发进行，但结束时需要STW来重新扫描栈，标记栈上引用的白色对象的存活；删除写屏障则需要在GC开始时STW扫描堆栈来记录初始快照，这个过程会记录开始时刻的所有存活对象，但结束时无需STW。</p>
+<p>Go 1.5使用的Dijkstra 插入屏障实现。</p>
+<h4 id="go-18">Go 1.8</h4>
+<p>1.8版本引入混合写屏障机制，核心定义如下：</p>
+<ul>
+<li>GC刚开始的时候，将栈上的可达对象全部标为黑色</li>
+<li>GC期间，任何在栈上新创建的对象，均为黑色</li>
+<li>堆上被删除的对象标记为灰色</li>
+<li>堆上新添加的对象标记为灰色</li>
+</ul>
+<h3 id="其他策略">其他策略</h3>
+<h4 id="引用计数">引用计数</h4>
+<p>aka <code>Reference-Counting</code>，脚本语言常见，Python、PHP。常见问题是需要每个变量都需要额外空间存储引用次数，而且存在循环引用问题。比如PHP里，因为循环引用变量变成垃圾后，就只能等根缓存区存满了后触发GC或者运行时调用函数<code>gc_collect_cycles()</code>进行垃圾回收。</p>
+<h4 id="分代回收">分代回收</h4>
+<p>aka <code>Generational Collection</code>，Java和NodeJs V8在用的策略，核心是将对象分为新生代、老生代、永久代进行管理和收集，根据每个分代的特点采用不同的垃圾回收算法。因为Golang存在编译期的逃逸分析，大部分简单关系的新生对象都会分配到栈上，那些需要长期存在的对象才会被分配到需要垃圾回收的堆上，所以没有使用分代回收。</p>
+<!-- #### 标记压缩
+AKA `Mark-Compact`，为什么不选择标记压缩
+相比标记清扫，有一些成本，比如 压缩需要计算成本、实现复杂和CPU缓存等。 -->
+<h2 id="调步算法">调步算法</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">// src/runtime/debug
+func SetGCPercent(percent int) int
+</code></pre></div><p>默认情况下，<code>percent</code>等于100，含义比如：最后一次垃圾完成后正在使用中的堆内存是2MB。由于GC百分比设置为100％，因此下一次收集会在在增加2MB为4MB堆内存时启动。</p>
+<p>调步算法理解需要结合具体测试用例和<code>go tool trace</code>等工具来分析，以后补充。</p>
+<p>
+<a href="https://imgtu.com/i/bGRjG8" target="_blank"><img src="https://s4.ax1x.com/2022/03/02/bGRjG8.png" alt="bGRjG8.png"></a></p>
+<p>BTW，<code>go tool trace</code> 工具确定可以，和Final Cut Pro X一样的手感，比如上图25%的P进行GC，也有MARK ASSIST。</p>
+<h2 id="reference">Reference</h2>
+<ul>
+<li>
+<a href="https://draveness.me/golang/docs/part3-runtime/ch07-memory/golang-garbage-collector/" target="_blank">Go语言垃圾收集器的实现原理</a></li>
+<li>
+<a href="https://golang.design/under-the-hood/zh-cn/part2runtime/ch08gc/basic/" target="_blank">垃圾回收</a></li>
+<li>
+<a href="https://studygolang.com/articles/31431" target="_blank">关于Golang GC的一些误解</a></li>
+<li>
+<a href="https://juejin.cn/post/7040737998014513183" target="_blank">一文弄懂 Golang GC、三色标记、混合写屏障机制</a></li>
+</ul>
+
+        </div>
+
+        <div class="row middle-xs">
+          <div class="col-xs-12">
+            
+          </div>
+        </div>
+        
+          <div class="row">
+            <div class="col-xs-12">
+              
+            </div>
+          </div>
+
+          
+
+<div class="related-content">
+  <h3>Related Posts</h3>
+  <ul>
+    
+    <li><a href="/posts/golang-escape-analysis/">Golang 逃逸分析</a></li>
+    
+    <li><a href="/posts/golang-slice/">关于 Golang Slice，你知道的不多</a></li>
+    
+    <li><a href="/posts/golang-unsafe-pointer/">Golang unsafe Pointer 怎么用</a></li>
+    
+  </ul>
+</div>
+
+
+
+          
+          
+          <div style="height: 50px;"></div>
+          
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+<script>
+  window.addEventListener("load", () => {
+    (function() {
+      
+      var d = document,
+        s = d.createElement("script");
+      s.src = "https://ileopold.disqus.com/embed.js";
+      s.setAttribute("data-timestamp", +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  });
+</script>
+<noscript
+  >Please enable JavaScript to view the
+  <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  ></noscript
+>
+
+          </div>
+          
+        
 
         <div class="site-footer">
   <div class="site-footer-item" style="text-align: center;">
@@ -505,6 +303,12 @@
   </article>
 
   
+<script src="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static/js/lazyload.min.js"></script>
+<script>
+  var lazyImage = new LazyLoad({
+    container: document.getElementById('article')
+  });
+</script>
 
 <script>
   
@@ -513,6 +317,8 @@
     
   
 </script>
+
+  
 
 </body>
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Interview on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
+    <link>https://www.ileopold.cn/categories/interview/</link>
+    <description>Recent content in Interview on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 28 May 2022 18:07:41 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/interview/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>面试系列</title>
+      <link>https://www.ileopold.cn/posts/interview/interview/</link>
+      <pubDate>Sat, 28 May 2022 18:07:41 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/interview/interview/</guid>
+      <description>持续补充自己缺失的知识点，保证面试不怂。
+ 常见问题 CAP理论   </description>
+    </item>
+    
+    <item>
+      <title>【面试系列】CAP理论</title>
+      <link>https://www.ileopold.cn/posts/interview/interview-cap/</link>
+      <pubDate>Sat, 28 May 2022 16:51:57 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/interview/interview-cap/</guid>
+      <description>持续补充自己缺失的知识点，保证面试不怂。
+ 常见问题 CAP理论   什么是CAP理论 Consistency、Availability、Partition tolerance，aka CAP &amp;hellip; 一般分布式系统会聊到这个理论，因为部署在不同的机器上，所以分区容错上是必须保证的，在出现分区错误时，决定了C和A只能选择其中一个，即 CA or CP &amp;hellip;
+ 一文看懂｜分布式系统之CAP理论 分布式系统的“脑裂”到底是个什么玩意？  MySQL的CAP应用  CAP定理的平衡：从MySQL主从到集群  NOSQL的CAP应用  redis的三种模式以及涉及到的CAP理论  </description>
+    </item>
+    
+    <item>
+      <title>面试常见问题</title>
+      <link>https://www.ileopold.cn/posts/interview/my-interview/</link>
+      <pubDate>Sun, 17 Apr 2022 22:54:18 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/interview/my-interview/</guid>
+      <description>持续补充自己缺失的知识点，保证面试不怂。
+ 常见问题 CAP理论   MySQL  MySQL八股文连环45问（背诵版） MyISAM与InnoDB 数据结构的区别 聚簇索引和辅助索引 Mysql存储引擎&amp;ndash;MyISAM与InnoDB的底层数据结构 Mysql中数据类型括号中的数字代表的含义 MySQL 性能优化神器 Explain 使用分析 布隆过滤器/HyperLogLog/位图 为什么 MySQL 使用 B+ 树 什么是 MySQL 的全局锁、表锁、行锁 MySQL各种“Buffer”之Change Buffer MySQL事务隔离级别和实现原理 五分钟搞懂MySQL索引下推 Mysql - 范围查询过程分析底层的锁实现机制 平衡二叉树、B树、B+树、B*树 理解其中一种你就都明白了 数据库IO性能，及InnoDB与MyISAM引擎对比 Innodb 中 RR 隔离级别能否防止幻读? 分库分表常见玩法及跨库查询/事务等问题 关于电商平台订单分库分表那些事 B树、B+树、LSM树以及其典型应用场景  Redis  Redis，八股文！ Redis 通过巧妙地使用数据结构节省内存空间 redis的事务和watch Redis 管道、事务、Lua 脚本对比 如何应对缓存问题 《面试八股文》之 Redis 16卷 5个基础数据结构的实现原理 为什么 Redis 选择单线程模型 为什么Redis要比Memcached更火？ Redis为什么用跳表而不用平衡树？、redis为什么选择了跳跃表而不是红黑树 说一说Redis事务是否满足ACID以及WATCH监视命令的作用 Redis中的hash扩容渐进式rehash过程  Nginx  都是事件驱动，为什么Nginx的性能远高于Redis？ 深入剖析Nginx负载均衡算法  ElasticSearch  倒排/全文索引 跳表(SkipList)原理篇  Kafka  《面试八股文》之kafka21卷 怎么理解 Kafka 消费者与消费组之间的关系?</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Hugo 0.91.2" />
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="ileopold" />
+  <meta property="og:url" content="https://www.ileopold.cn/posts/golang-escape-analysis/" />
+  <meta content="Golang、escape analysis、源码阅读、逃逸分析、data-flow-analysis" name="keywords">
+  <link rel="canonical" href="https://www.ileopold.cn/posts/golang-escape-analysis/" />
+  <meta name="sogou_site_verification" content="2i7JohrE4G" /><link rel="dns-prefetch" href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static" /><link rel="apple-touch-icon" href="/logo.png" />
+  <link rel="icon" href="/logo.png" />
+  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>Golang 逃逸分析</title>
+  <meta property="og:title" content="Golang 逃逸分析" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="什么是逃逸分析？栈和堆相比优势在哪？逃逸分析中的data-flow-analysis如何运行？哪些场景有逃逸分析？如何判断是否内联？" />
+  <meta name="description" content="什么是逃逸分析？栈和堆相比优势在哪？逃逸分析中的data-flow-analysis如何运行？哪些场景有逃逸分析？如何判断是否内联？" />
+  <meta property="og:locale" content="zh-cn" />
+  
+    <style>body{font-family:bree serif,sans-serif;-webkit-font-smoothing:antialiased;margin:0 20px}article{max-width:800px;margin-left:auto;margin-right:auto}a{color:#000;text-decoration:none}a:hover{font-weight:600;text-decoration:underline}.post-ads{margin:50px 0}.markdown-body{font-size:18px;max-width:100%}.markdown-body a{text-decoration:underline;text-decoration-color:#000}.markdown-body pre{padding:16px;overflow:auto;border-radius:10px}.markdown-body code{padding:.2em .4em;font-size:85%;background-color:#f6f8fa;border-radius:6px}.markdown-body pre>code{padding:0;font-size:100%;background-color:inherit;border:0}.Chinese .markdown-body{line-height:200%}.site-date-catalog{font-size:2rem}.header-title{font-size:2rem;font-weight:700;margin-top:32px;font-family:bungee shade,sans-serif}.header-title a{text-decoration:none}.header-subtitle{color:#666}.header-items{margin:10px 0}.header-item{margin:0 5px}.header-line{width:100%;border-width:2px;border-color:#482936;border-style:solid none none none}.lang-switch{font-weight:600}#posts-list{min-height:600px}.posts-line{font-size:1.2rem;margin:12px 0}.posts-categories{font-size:.8rem;margin:auto;text-align:center}.posts-category{padding:3px 0;border:#000 2px solid;border-radius:5px}.site-footer{margin-top:50px}.site-footer-item{margin-right:12px}.post-content img{max-width:100%;display:block;margin-right:auto;margin-top:12px}.post-header{margin-bottom:50px}.post-title{font-size:2rem;font-weight:600}.post-tags{display:inline;font-weight:600;padding:2px 5px;margin-right:6px;border:#000 2px solid;border-radius:5px}.post-date{font-weight:800;font-style:italic}.post-author{float:right;font-weight:600}.page-content{min-height:60%}.post-content{margin-bottom:50px}.post-content p{hyphens:auto;line-height:1.8;text-justify:ideographic;margin-bottom:1em}.related-content{border-width:3px;border-style:solid;border-color:#000;padding:0 10px;margin-bottom:50px;margin-top:100px}.related-content li{margin:5px 0}.taxonomy-term{font-size:3rem}.gallery-img{text-align:center}.gallery-img span{text-align:center}.gallery-img-desc{font-size:.8em;font-weight:800}#disqus_thread{position:relative}#disqus_thread:after{content:"";display:block;height:55px;width:100%;position:absolute;bottom:0;background:#fff}@media screen and (max-width:600px){.header-title,.header-subtitle,.header-items{text-align:center}.posts-line{font-size:16px}.markdown-body{font-size:16px}.post-title{font-size:2rem}.post-content p{letter-spacing:.05em}}@media screen and (max-width:48em){.posts-category{display:none}}</style>
+  
+  
+    <style>.container,.container-fluid{margin-right:auto;margin-left:auto}.container-fluid{padding-right:2rem;padding-left:2rem}.row{box-sizing:border-box;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-flex:0;-ms-flex:0 1 auto;flex:initial;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-direction:row;flex-direction:row;-ms-flex-wrap:wrap;flex-wrap:wrap;margin-right:-.5rem;margin-left:-.5rem}.row.reverse{-webkit-box-orient:horizontal;-webkit-box-direction:reverse;-ms-flex-direction:row-reverse;flex-direction:row-reverse}.col.reverse{-webkit-box-orient:vertical;-webkit-box-direction:reverse;-ms-flex-direction:column-reverse;flex-direction:column-reverse}.col-xs,.col-xs-1,.col-xs-10,.col-xs-11,.col-xs-12,.col-xs-2,.col-xs-3,.col-xs-4,.col-xs-5,.col-xs-6,.col-xs-7,.col-xs-8,.col-xs-9,.col-xs-offset-0,.col-xs-offset-1,.col-xs-offset-10,.col-xs-offset-11,.col-xs-offset-12,.col-xs-offset-2,.col-xs-offset-3,.col-xs-offset-4,.col-xs-offset-5,.col-xs-offset-6,.col-xs-offset-7,.col-xs-offset-8,.col-xs-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-xs{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-xs-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-xs-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-xs-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-xs-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-xs-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-xs-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-xs-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-xs-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-xs-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-xs-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-xs-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-xs-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-xs-offset-0{margin-left:0}.col-xs-offset-1{margin-left:8.33333333%}.col-xs-offset-2{margin-left:16.66666667%}.col-xs-offset-3{margin-left:25%}.col-xs-offset-4{margin-left:33.33333333%}.col-xs-offset-5{margin-left:41.66666667%}.col-xs-offset-6{margin-left:50%}.col-xs-offset-7{margin-left:58.33333333%}.col-xs-offset-8{margin-left:66.66666667%}.col-xs-offset-9{margin-left:75%}.col-xs-offset-10{margin-left:83.33333333%}.col-xs-offset-11{margin-left:91.66666667%}.start-xs{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-xs{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-xs{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-xs{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-xs{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-xs{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-xs{-ms-flex-pack:distribute;justify-content:space-around}.between-xs{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-xs{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-xs{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}@media only screen and (min-width:48em){.container{width:49rem}.col-sm,.col-sm-1,.col-sm-10,.col-sm-11,.col-sm-12,.col-sm-2,.col-sm-3,.col-sm-4,.col-sm-5,.col-sm-6,.col-sm-7,.col-sm-8,.col-sm-9,.col-sm-offset-0,.col-sm-offset-1,.col-sm-offset-10,.col-sm-offset-11,.col-sm-offset-12,.col-sm-offset-2,.col-sm-offset-3,.col-sm-offset-4,.col-sm-offset-5,.col-sm-offset-6,.col-sm-offset-7,.col-sm-offset-8,.col-sm-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-sm{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-sm-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-sm-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-sm-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-sm-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-sm-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-sm-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-sm-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-sm-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-sm-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-sm-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-sm-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-sm-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-sm-offset-0{margin-left:0}.col-sm-offset-1{margin-left:8.33333333%}.col-sm-offset-2{margin-left:16.66666667%}.col-sm-offset-3{margin-left:25%}.col-sm-offset-4{margin-left:33.33333333%}.col-sm-offset-5{margin-left:41.66666667%}.col-sm-offset-6{margin-left:50%}.col-sm-offset-7{margin-left:58.33333333%}.col-sm-offset-8{margin-left:66.66666667%}.col-sm-offset-9{margin-left:75%}.col-sm-offset-10{margin-left:83.33333333%}.col-sm-offset-11{margin-left:91.66666667%}.start-sm{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-sm{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-sm{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-sm{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-sm{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-sm{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-sm{-ms-flex-pack:distribute;justify-content:space-around}.between-sm{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-sm{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-sm{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}@media only screen and (min-width:64em){.container{width:65rem}.col-md,.col-md-1,.col-md-10,.col-md-11,.col-md-12,.col-md-2,.col-md-3,.col-md-4,.col-md-5,.col-md-6,.col-md-7,.col-md-8,.col-md-9,.col-md-offset-0,.col-md-offset-1,.col-md-offset-10,.col-md-offset-11,.col-md-offset-12,.col-md-offset-2,.col-md-offset-3,.col-md-offset-4,.col-md-offset-5,.col-md-offset-6,.col-md-offset-7,.col-md-offset-8,.col-md-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-md{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-md-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-md-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-md-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-md-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-md-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-md-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-md-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-md-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-md-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-md-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-md-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-md-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-md-offset-0{margin-left:0}.col-md-offset-1{margin-left:8.33333333%}.col-md-offset-2{margin-left:16.66666667%}.col-md-offset-3{margin-left:25%}.col-md-offset-4{margin-left:33.33333333%}.col-md-offset-5{margin-left:41.66666667%}.col-md-offset-6{margin-left:50%}.col-md-offset-7{margin-left:58.33333333%}.col-md-offset-8{margin-left:66.66666667%}.col-md-offset-9{margin-left:75%}.col-md-offset-10{margin-left:83.33333333%}.col-md-offset-11{margin-left:91.66666667%}.start-md{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-md{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-md{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-md{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-md{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-md{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-md{-ms-flex-pack:distribute;justify-content:space-around}.between-md{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-md{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-md{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}@media only screen and (min-width:75em){.container{width:76rem}.col-lg,.col-lg-1,.col-lg-10,.col-lg-11,.col-lg-12,.col-lg-2,.col-lg-3,.col-lg-4,.col-lg-5,.col-lg-6,.col-lg-7,.col-lg-8,.col-lg-9,.col-lg-offset-0,.col-lg-offset-1,.col-lg-offset-10,.col-lg-offset-11,.col-lg-offset-12,.col-lg-offset-2,.col-lg-offset-3,.col-lg-offset-4,.col-lg-offset-5,.col-lg-offset-6,.col-lg-offset-7,.col-lg-offset-8,.col-lg-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-lg{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-lg-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-lg-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-lg-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-lg-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-lg-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-lg-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-lg-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-lg-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-lg-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-lg-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-lg-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-lg-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-lg-offset-0{margin-left:0}.col-lg-offset-1{margin-left:8.33333333%}.col-lg-offset-2{margin-left:16.66666667%}.col-lg-offset-3{margin-left:25%}.col-lg-offset-4{margin-left:33.33333333%}.col-lg-offset-5{margin-left:41.66666667%}.col-lg-offset-6{margin-left:50%}.col-lg-offset-7{margin-left:58.33333333%}.col-lg-offset-8{margin-left:66.66666667%}.col-lg-offset-9{margin-left:75%}.col-lg-offset-10{margin-left:83.33333333%}.col-lg-offset-11{margin-left:91.66666667%}.start-lg{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-lg{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-lg{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-lg{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-lg{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-lg{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-lg{-ms-flex-pack:distribute;justify-content:space-around}.between-lg{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-lg{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-lg{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}</style>
+  
+
+  
+    <style>@charset "UTF-8";blockquote.quote{position:relative;margin:2em auto;padding-left:3em;border:none}blockquote.quote::before{position:absolute;left:0;content:'“';color:var(--color-contrast-low);font-family:jetbrains mono,amstelvar,noto serif sc,serif;font-size:3em;font-weight:700;line-height:1}blockquote.quote.poetry{display:table;padding:0}blockquote.quote.poetry::before{left:-1em}blockquote.quote.poetry p:last-child{margin:0}blockquote.quote.en p{line-height:1.618;text-align:left;hyphens:auto;-webkit-hyphens:auto;-moz-hyphens:auto}</style>
+  
+
+  
+
+  <link href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static/index.xml" rel="alternate" type="application/rss+xml"
+    title="妈妈说只要名字长就有笨比跟着念-服务端技术分享">
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.font.im/css?family=Bree+Serif|Bungee+Shade" rel="stylesheet">
+
+  
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JV86B54BT8"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'G-JV86B54BT8');
+</script> 
+  
+
+  
+</head>
+
+
+<body>
+  <article class="post 简体中文" id="article">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="site-header">
+          
+<header>
+  <div class="header-title">
+    <a href="/"
+      >Headbanger</a
+    >
+  </div>
+  <div class="header-subtitle">For self tracking and make progress</div>
+</header>
+<div class="row end-md center-xs header-items">
+  
+  <div class="header-item">
+    <a href="https://steamcommunity.com/id/ileopold0524/games/?tab=all" target="_blank">Game</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="https://movie.douban.com/people/ileopold/collect" target="_blank">Movie</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="https://book.douban.com/people/ileopold/collect" target="_blank">Book</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="/404/" target="_blank">Travel</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="/about" target="_blank">About</a>
+  </div>
+  
+</div>
+<div class="row end-xs">
+   
+</div>
+<div class="header-line"></div>
+
+        </div>
+        <header class="post-header">
+          <h1 class="post-title">Golang 逃逸分析</h1>
+          
+          <div class="row post-desc">
+            <div class="col-xs-6">
+              
+              <time class="post-date" datetime="2022-01-30 17:30:52 CST">
+                30 Jan 2022
+              </time>
+              
+            </div>
+            <div class="col-xs-6">
+              
+              <div class="post-author">
+                <a target="_blank" href="http://ileopold.cn/">@ileopold</a>
+              </div>
+              
+            </div>
+          </div>
+          
+        </header>
+
+        <div class="post-content markdown-body">
+          
+          
+    <iframe
+        frameborder="no"
+        border="0"
+        marginwidth="0"
+        marginheight="0"
+        width=60%
+        height=86
+        src="//music.163.com/outchain/player?type=2&id=1413863166&auto=1&height=66">
+    </iframe>
+
+<p>通过<code>GopherCon TW 2020</code>的分享来理解下逃逸分析。</p>
+<style>
+.aspect-ratio {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 75%;
+    }
+        
+.aspect-ratio iframe {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    }
+</style>
+        
+
+<div align=center class="aspect-ratio">
+    <iframe src="https://player.bilibili.com/player.html?aid=544231107&&page=1&as_wide=1&high_quality=1&danmaku=0" 
+    scrolling="no" 
+    border="0" 
+    frameborder="no" 
+    framespacing="0" 
+    allowfullscreen="true"> 
+    </iframe>
+</div>
+
+<h2 id="什么是逃逸分析">什么是逃逸分析</h2>
+<p>C/C++没有垃圾回收机制，都是开发人员进行内存分配，要么分配到栈，要么分配到堆上，同时堆内存对象的生命周期管理给开发人员带来了心智负担，为了降低这方面的心智负担，有的编程语言比如Go、Java就支持了垃圾回收，当分配到堆上的对象不再被引用时，就会被回收。<br>
+垃圾回收带来了便利，但是也带来了性能损耗，堆内存对象过多会给垃圾回收带来压力，所以需要尽量减少在堆上的内存分配。     <br>
+逃逸分析（escape analysis）就是在程序编译阶段根据程序代码中的数据流，对代码中哪些变量需要在栈上分配，哪些变量需要在堆上分配进行静态分析的方法。</p>
+<h2 id="栈-vs-堆">栈 vs 堆</h2>
+<p>Go中声明变量的具体分配策略如下：</p>
+<ul>
+<li>堆上
+<ul>
+<li>全局存储空间</li>
+<li>共享的存储对象</li>
+<li>被GC管理的存储对象</li>
+</ul>
+</li>
+<li>栈上
+<ul>
+<li>函数内部的本地存储空间</li>
+<li>协程自己的栈帧</li>
+<li>私有的存储对象</li>
+<li>帧生命周期内的存储对象</li>
+</ul>
+</li>
+</ul>
+<p>从变量声明角度，堆和栈的差异：</p>
+<ul>
+<li>在栈上分配的对象比在堆上快很多</li>
+<li>协程可以完全控制自己的栈帧</li>
+<li>栈上，没有锁，没有GC，开销少</li>
+</ul>
+<p>下面通过Benchmark来证明栈的优势，具体代码参考
+<a href="https://github.com/biexiang/code-snippet/blob/main/escape_analysis/bench/escape_analysis_bench_test.go" target="_blank">escape_analysis_test.go</a>：</p>
+<script id="asciicast-467861" src="https://asciinema.org/a/467861.js" async></script>
+<h2 id="逃逸分析如何运行">逃逸分析如何运行</h2>
+<h3 id="基本概念">基本概念</h3>
+<ul>
+<li>逃逸分析在源码库中的代码：
+<a href="https://github.com/golang/go/blob/master/src/cmd/compile/internal/escape/escape.go" target="_blank">escape.go</a>，编译器所处的阶段如下图所示：</li>
+</ul>
+<p>
+<a href="https://imgtu.com/i/HGc7QO" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HGc7QO.png" alt="HGc7QO.png"></a></p>
+<ul>
+<li>逃逸的概念
+<ul>
+<li>逃逸会分析声明变量之间的赋值关系</li>
+<li>通常一个变量在以下情况下逃逸
+<ul>
+<li>被<code>&amp;</code>取地址</li>
+<li>至少一个相关的变量已经发生逃逸</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="如何判断释放逃逸">如何判断释放逃逸</h3>
+<p>判断是否逃逸，通过 <code>data-flow-analysis</code> 或者其他的基本规则。</p>
+<h4 id="数据流分析">数据流分析</h4>
+<p>数据流分析是个有向无环图，它被用来基于AST分析变量之间的转换关系，有以下概念：</p>
+<ul>
+<li>点
+<ul>
+<li>展示所有被声明的变量</li>
+</ul>
+</li>
+<li>边
+<ul>
+<li>代表变量之间的赋值逻辑</li>
+<li>每条边都有权重，代表取地址/被引用的次数</li>
+</ul>
+</li>
+</ul>
+<p>具体例子如下图所示：
+
+<a href="https://imgtu.com/i/HGIBFg" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HGIBFg.png" alt="HGIBFg.png"></a></p>
+<p>数据流分析的具体处理流程：</p>
+<ul>
+<li>收集所有函数声明的变量，产出点</li>
+</ul>
+<p>
+<a href="https://imgtu.com/i/HGTos1" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HGTos1.png" alt="HGTos1.png"></a></p>
+<ul>
+<li>收集所有变量的赋值逻辑，产出边</li>
+</ul>
+<p>
+<a href="https://imgtu.com/i/HGTjRH" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HGTjRH.png" alt="HGTjRH.png"></a></p>
+<ul>
+<li>开始分析和遍历
+<ul>
+<li>从每个点开始分析</li>
+<li>如果关联的源数据点已经逃逸，并且关联的边路径权重为-1，则当前变量也标识为逃逸</li>
+<li>对于已经逃逸的变量，停止扩张分析</li>
+</ul>
+</li>
+</ul>
+<p>
+<a href="https://imgtu.com/i/HG7SsI" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HG7SsI.png" alt="HG7SsI.png"></a></p>
+<p>
+<a href="https://imgtu.com/i/HG7CeP" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HG7CeP.png" alt="HG7CeP.png"></a></p>
+<p>
+<a href="https://imgtu.com/i/HG7kFS" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HG7kFS.png" alt="HG7kFS.png"></a></p>
+<p>
+<a href="https://imgtu.com/i/HG7QoT" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HG7QoT.png" alt="HG7QoT.png"></a></p>
+<p>
+<a href="https://imgtu.com/i/HG7wTK" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HG7wTK.png" alt="HG7wTK.png"></a></p>
+<ul>
+<li>遍历所有变量，收集已逃逸变量的逃逸原因</li>
+</ul>
+<p>
+<a href="https://imgtu.com/i/HG76ld" target="_blank"><img src="https://s4.ax1x.com/2022/02/09/HG76ld.png" alt="HG76ld.png"></a></p>
+<h4 id="其他基本规则">其他基本规则</h4>
+<ul>
+<li>大对象
+<ul>
+<li><code>var</code> or <code>:=</code> 直接声明的变量，大小如果超过10MB，则分配到堆上</li>
+<li>隐式声明，大小超过64KB，则分配到堆上，比如make指定CAP值</li>
+</ul>
+</li>
+<li>切片，若切片通过<code>make</code>关键字初始化，并且CAP值传的非常量，则分配到堆上，一定要常量！</li>
+<li>映射，如果一个变量被<code>map</code>的key or value引用，则分配到堆上</li>
+<li>函数入参，若函数入参泄露，则入参逃逸到堆上，Injecting changes to the passed parameters instead of return values back！</li>
+<li>闭包外的变量，被闭包内变量取地址赋值使用，闭包内使用的参数一定要显示传进去!</li>
+</ul>
+<p>上面规则的具体测试代码：
+<a href="https://github.com/biexiang/code-snippet/blob/main/escape_analysis/test/escape_analysis.go" target="_blank">escape_analysis.go</a>，通过<code>-gcflag</code>参数进行逃逸分析检查：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback"> go build -gcflags &#39;-l -m&#39; escape_analysis.go
+</code></pre></div><div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">85
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> main
+
+<span style="color:#f00">type</span> HugeExplicitT <span style="color:#f00">struct</span> {
+	a [<span style="color:#f60">3</span> * <span style="color:#f60">1000</span> * <span style="color:#f60">1000</span>]<span style="color:#ee82ee">int32</span> <span style="color:#0f0">// 12MB
+</span><span style="color:#0f0"></span>}
+
+<span style="color:#f00">var</span> vCapSize = <span style="color:#f60">10</span>
+
+<span style="color:#f00">const</span> cCapSize = <span style="color:#f60">10</span>
+
+<span style="color:#f00">func</span> <span style="color:#ff0">f0</span>() {
+	<span style="color:#0f0">// moved to heap: t1
+</span><span style="color:#0f0"></span>	t1 := HugeExplicitT{}
+
+	<span style="color:#0f0">// make([]int32, 0, 17 * 1000) escapes to heap
+</span><span style="color:#0f0"></span>	t2 := make([]<span style="color:#ee82ee">int32</span>, <span style="color:#f60">0</span>, <span style="color:#f60">17</span>*<span style="color:#f60">1000</span>)
+
+	<span style="color:#0f0">// make([]int32, vCapSize, vCapSize) escapes to heap
+</span><span style="color:#0f0"></span>	t3 := make([]<span style="color:#ee82ee">int32</span>, vCapSize, vCapSize)
+
+	<span style="color:#0f0">// make([]int32, cCapSize, cCapSize) does not escape
+</span><span style="color:#0f0"></span>	t4 := make([]<span style="color:#ee82ee">int32</span>, cCapSize, cCapSize)
+
+	<span style="color:#0f0">// make([]int32, 10, 10) does not escape
+</span><span style="color:#0f0"></span>	t5 := make([]<span style="color:#ee82ee">int32</span>, <span style="color:#f60">10</span>, <span style="color:#f60">10</span>)
+
+	<span style="color:#0f0">// make([]int32, vCapSize) escapes to heap
+</span><span style="color:#0f0"></span>	t6 := make([]<span style="color:#ee82ee">int32</span>, vCapSize)
+
+	<span style="color:#0f0">//  make(map[*int]*int) does not escape
+</span><span style="color:#0f0"></span>	t7 := make(<span style="color:#f00">map</span>[*<span style="color:#ee82ee">int</span>]*<span style="color:#ee82ee">int</span>)
+	<span style="color:#0f0">// moved to heap: k1
+</span><span style="color:#0f0"></span>	<span style="color:#0f0">// moved to heap: v1
+</span><span style="color:#0f0"></span>	k1, v1 := <span style="color:#f60">0</span>, <span style="color:#f60">0</span>
+	t7[&amp;k1] = &amp;v1
+
+	_, _, _, _, _, _ = t1, t2, t3, t4, t5, t6
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">f1</span>() <span style="color:#f00">map</span>[<span style="color:#ee82ee">string</span>]<span style="color:#ee82ee">int</span> {
+	<span style="color:#0f0">//  make(map[string]int) escapes to heap
+</span><span style="color:#0f0"></span>	v := make(<span style="color:#f00">map</span>[<span style="color:#ee82ee">string</span>]<span style="color:#ee82ee">int</span>)
+	<span style="color:#f00">return</span> v
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">f2</span>() []<span style="color:#ee82ee">int</span> {
+	<span style="color:#0f0">// make([]int, 0, 10) escapes to heap
+</span><span style="color:#0f0"></span>	v := make([]<span style="color:#ee82ee">int</span>, <span style="color:#f60">0</span>, <span style="color:#f60">10</span>)
+	<span style="color:#f00">return</span> v
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">f3</span>() *<span style="color:#ee82ee">int</span> {
+	<span style="color:#0f0">// moved to heap: t
+</span><span style="color:#0f0"></span>	t := <span style="color:#f60">0</span>
+	<span style="color:#f00">return</span> &amp;t
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">f4</span>(v1 *<span style="color:#ee82ee">int</span>) **<span style="color:#ee82ee">int</span> {
+	<span style="color:#0f0">// moved to heap: v1
+</span><span style="color:#0f0"></span>	<span style="color:#f00">return</span> &amp;v1
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">main</span>() {
+	<span style="color:#0f0">// 大小超出、切片、映射
+</span><span style="color:#0f0"></span>	<span style="color:#ff0">f0</span>()
+
+	<span style="color:#0f0">// 返回值情况
+</span><span style="color:#0f0"></span>	_, _, _, _ = <span style="color:#ff0">f1</span>(), <span style="color:#ff0">f2</span>(), <span style="color:#ff0">f3</span>(), <span style="color:#ff0">f4</span>(&amp;vCapSize)
+
+	<span style="color:#f00">var</span> x1 *<span style="color:#ee82ee">int</span>
+	fn1 := <span style="color:#f00">func</span>() {
+		<span style="color:#0f0">// moved to heap: y
+</span><span style="color:#0f0"></span>		y := <span style="color:#f60">1</span>
+		x1 = &amp;y
+	}
+	<span style="color:#ff0">fn1</span>()
+
+	<span style="color:#f00">var</span> x2 *<span style="color:#ee82ee">int</span>
+	fn2 := <span style="color:#f00">func</span>(input *<span style="color:#ee82ee">int</span>) {
+		<span style="color:#0f0">// input does not escape
+</span><span style="color:#0f0"></span>		y := <span style="color:#f60">1</span>
+		input = &amp;y
+	}
+	<span style="color:#ff0">fn2</span>(x2)
+}</code></pre></td></tr></table>
+</div>
+</div>
+<h2 id="关于内联">关于内联</h2>
+<p>上面逃逸分析命令中，<code>-gcflags &quot;-m -l&quot;</code>的 -l 就是全局禁止内联的含义，所以什么是内联呢，和前端CSS的内联样式一样吗。</p>
+<h3 id="什么是内联">什么是内联</h3>
+<p>在Go中，一个协程会有一个单独的栈，栈又会包含多个栈帧，栈帧是函数调用时在栈上为函数所分配的区域。但其实，函数调用是存在一些固定开销的，例如维护帧指针寄存器BP、栈溢出检测等。因此，对于一些代码行比较少的函数，编译器倾向于将它们在编译期展开从而消除函数调用，这种行为就是内联。</p>
+<h3 id="是否内联性能对比">是否内联性能对比</h3>
+<p>函数非内联可以添加<code>//go:noinline</code>注释来实现，从下面的Benchmark可以看出来内联可以带来性能提升。</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">39
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> inline_optimize
+
+<span style="color:#f00">import</span> <span style="color:#87ceeb">&#34;testing&#34;</span>
+
+<span style="color:#0f0">//go:noinline
+</span><span style="color:#0f0"></span><span style="color:#f00">func</span> <span style="color:#ff0">maxNoInline</span>(a, b <span style="color:#ee82ee">int</span>) <span style="color:#ee82ee">int</span> {
+	<span style="color:#f00">if</span> a &lt; b {
+		<span style="color:#f00">return</span> b
+	}
+	<span style="color:#f00">return</span> a
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">maxInline</span>(a, b <span style="color:#ee82ee">int</span>) <span style="color:#ee82ee">int</span> {
+	<span style="color:#f00">if</span> a &lt; b {
+		<span style="color:#f00">return</span> b
+	}
+	<span style="color:#f00">return</span> a
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">BenchmarkNoInline</span>(b *testing.B) {
+	x, y := <span style="color:#f60">1</span>, <span style="color:#f60">2</span>
+	b.<span style="color:#ff0">ResetTimer</span>()
+	b.<span style="color:#ff0">ReportAllocs</span>()
+	<span style="color:#f00">for</span> i := <span style="color:#f60">0</span>; i &lt; b.N; i++ {
+		_ = <span style="color:#ff0">maxNoInline</span>(x, y)
+	}
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">BenchmarkInline</span>(b *testing.B) {
+	x, y := <span style="color:#f60">1</span>, <span style="color:#f60">2</span>
+	b.<span style="color:#ff0">ResetTimer</span>()
+	b.<span style="color:#ff0">ReportAllocs</span>()
+	<span style="color:#f00">for</span> i := <span style="color:#f60">0</span>; i &lt; b.N; i++ {
+		_ = <span style="color:#ff0">maxInline</span>(x, y)
+	}
+}
+
+<span style="color:#0f0">// BenchmarkNoInline-12            1000000000               1.135 ns/op           0 B/op          0 allocs/op
+</span><span style="color:#0f0">// BenchmarkInline-12              1000000000               0.2419 ns/op          0 B/op          0 allocs/op
+</span></code></pre></td></tr></table>
+</div>
+</div>
+<p>通过<code>-gcflags=&quot;-m -m&quot;</code>参数，可以查看编译器的优化策略，搜索<code>unhandled op</code>关键字可以在
+<a href="https://github.com/golang/go/blob/b38ab0ac5f78ac03a38052018ff629c03e36b864/src/cmd/compile/internal/inline/inl.go#L366" target="_blank">源码inl.go</a>中发现目前只有下面几个关键字不支持内联：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">case ir.OSELECT,
+	ir.OGO,
+	ir.ODEFER,
+	ir.ODCLTYPE, // can&#39;t print yet
+	ir.OTAILCALL:
+	v.reason = &#34;unhandled op &#34; + n.Op().String()
+	return true
+</code></pre></div><p>同时内联还要求具体代码量不要太多。</p>
+<h3 id="什么情况下不应该内联">什么情况下不应该内联</h3>
+<p>源码里有蛮多<code>//go:noinline</code>注释，目前还没理解什么情况下不应该内联。</p>
+<h2 id="reference">Reference</h2>
+<ul>
+<li>
+<a href="https://segmentfault.com/a/1190000039146279" target="_blank">详解Go内联优化</a></li>
+<li>
+<a href="https://medium.com/a-journey-with-go/go-inlining-strategy-limitation-6b6d7fc3b1be" target="_blank">Go: Inlining Strategy &amp; Limitation</a></li>
+</ul>
+
+        </div>
+
+        <div class="row middle-xs">
+          <div class="col-xs-12">
+            
+          </div>
+        </div>
+        
+          <div class="row">
+            <div class="col-xs-12">
+              
+            </div>
+          </div>
+
+          
+
+<div class="related-content">
+  <h3>Related Posts</h3>
+  <ul>
+    
+    <li><a href="/posts/golang-slice/">关于 Golang Slice，你知道的不多</a></li>
+    
+    <li><a href="/posts/golang-unsafe-pointer/">Golang unsafe Pointer 怎么用</a></li>
+    
+    <li><a href="/posts/golang-channel/">Golang Channel 原理</a></li>
+    
+  </ul>
+</div>
+
+
+
+          
+          
+          <div style="height: 50px;"></div>
+          
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+<script>
+  window.addEventListener("load", () => {
+    (function() {
+      
+      var d = document,
+        s = d.createElement("script");
+      s.src = "https://ileopold.disqus.com/embed.js";
+      s.setAttribute("data-timestamp", +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  });
+</script>
+<noscript
+  >Please enable JavaScript to view the
+  <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  ></noscript
+>
+
+          </div>
+          
+        
+
+        <div class="site-footer">
+  <div class="site-footer-item" style="text-align: center;">
+    <a href="https://beian.miit.gov.cn/" target="_blank">京ICP备18045353号-2</a>
+  </div>
+  <br><br>
+</div>
+
+      </div>
+    </div>
+  </article>
+
+  
+<script src="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static/js/lazyload.min.js"></script>
+<script>
+  var lazyImage = new LazyLoad({
+    container: document.getElementById('article')
+  });
+</script>
+
+<script>
+  
+  
+    
+    
+  
+</script>
+
+  
+
+</body>
+
+</html>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Share on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
+    <link>https://www.ileopold.cn/categories/share/</link>
+    <description>Recent content in Share on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 05 Mar 2022 16:52:36 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/share/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Golang Map 源码分析</title>
+      <link>https://www.ileopold.cn/posts/golang-map/</link>
+      <pubDate>Sat, 05 Mar 2022 16:52:36 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/golang-map/</guid>
+      <description>目标 需要弄懂下面的问题：
+ map的基本数据结构定义 map的增、删、改、查的实现 扩容机制 range map为什么是无序的 map为什么不安全，以及sync.Map为什么安全  工具 go tool compile -S main.go 通过上面命令可以输出汇编指令，方便获取实际调用的方法。
+数据结构 map对应的数据结构为hmap： 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38  const ( bucketCntBits = 3 bucketCnt = 1 &amp;lt;&amp;lt; bucketCntBits ) type hmap struct { count int // 指map的count数量 	flags uint8 // 迭代map或者对map进行写操作的时候，会记录该标志位，用于一些并发场景的检测校验 	B uint8 // 存放当前map存放的bucket数组长度的对数，即len(buckets) == 2^B 	noverflow uint16 // 溢出的bucket数量 	hash0 uint32 // hash函数种子  buckets unsafe.</description>
+    </item>
+    
+    <item>
+      <title>你可能不知道的Golang用法</title>
+      <link>https://www.ileopold.cn/posts/golang-tricky/</link>
+      <pubDate>Wed, 02 Mar 2022 23:11:39 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/golang-tricky/</guid>
+      <description>记录比较奇怪的Golang用法。
+#1 Defer 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21  func main(){ f1() } func f1(){ defer trace_leave(trace_enter(&amp;#34;f1()&amp;#34;)) fmt.Println(&amp;#34;f1()程序逻辑&amp;#34;) } func trace_enter(msg string) string{ fmt.Println(&amp;#34;enter: &amp;#34;,msg) return msg } func trace_leave(msg string) { fmt.Println(&amp;#34;leave: &amp;#34;,msg) } // enter: f1() // f1()程序逻辑 // leave: f1()    如上代码片段所示，会先首先执行trace_enter，再处理逻辑代码，最后trace_leave。</description>
+    </item>
+    
+    <item>
+      <title>Golang 垃圾回收</title>
+      <link>https://www.ileopold.cn/posts/golang-gc/</link>
+      <pubDate>Wed, 23 Feb 2022 21:44:07 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/golang-gc/</guid>
+      <description>垃圾回收历史 目前提供GC的语言有Python、PHP、Java、Javascript&amp;hellip;，同时比如C、C++被设计为手动管理内存，但是也可以自行实现GC，还有Rust可以在编译器，依靠编译器插入清理代码的方式，精准清理。
+Golang GC Changelog  Go 1：单线程版的标记清扫，全过程STW Go 1.3：标记阶段STW, 清扫阶段并行执行，停顿时间在约几百毫秒 Go 1.5：三色标记，标记和清扫可以并行执行，但是标记阶段的前后需要STW来做GC的准备，停顿时间在一百毫秒以内 Go 1.6：使用 bitmap 来记录回收内存的位置，大幅优化垃圾回收器自身消耗的内存，停顿时间在十毫秒以内 Go 1.7：独立栈收缩，停顿时间控制在两毫秒以内 Go 1.8：混合写屏障，停顿时间在半毫秒左右 Go 1.9：彻底移除了栈的重扫描过程 Go 1.12：整合了两个阶段的 Mark Termination Go 1.13：着手解决向操作系统归还内存的，提出了新的 Scavenger Go 1.14：替代了仅存活了一个版本的 scavenger，全新的页分配器，优化分配内存过程的速率与现有的扩展性问题，并引入了异步抢占，解决了由于密集循环导致的 STW 时间过长的问题  GC 策略 Golang使用的策略 The GC runs concurrently with mutator threads, is type accurate (aka precise), allows multiple GC thread to run in parallel. It is a concurrent mark and sweep that uses a write barrier.</description>
+    </item>
+    
+    <item>
+      <title>Golang 逃逸分析</title>
+      <link>https://www.ileopold.cn/posts/golang-escape-analysis/</link>
+      <pubDate>Sun, 30 Jan 2022 17:30:52 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/golang-escape-analysis/</guid>
+      <description>通过GopherCon TW 2020的分享来理解下逃逸分析。
+.aspect-ratio {position: relative;width: 100%;height: 0;padding-bottom: 75%;}.aspect-ratio iframe {position: absolute;width: 100%;height: 100%;left: 0;top: 0;}什么是逃逸分析 C/C++没有垃圾回收机制，都是开发人员进行内存分配，要么分配到栈，要么分配到堆上，同时堆内存对象的生命周期管理给开发人员带来了心智负担，为了降低这方面的心智负担，有的编程语言比如Go、Java就支持了垃圾回收，当分配到堆上的对象不再被引用时，就会被回收。
+垃圾回收带来了便利，但是也带来了性能损耗，堆内存对象过多会给垃圾回收带来压力，所以需要尽量减少在堆上的内存分配。 逃逸分析（escape analysis）就是在程序编译阶段根据程序代码中的数据流，对代码中哪些变量需要在栈上分配，哪些变量需要在堆上分配进行静态分析的方法。
+栈 vs 堆 Go中声明变量的具体分配策略如下：
+ 堆上  全局存储空间 共享的存储对象 被GC管理的存储对象   栈上  函数内部的本地存储空间 协程自己的栈帧 私有的存储对象 帧生命周期内的存储对象    从变量声明角度，堆和栈的差异：
+ 在栈上分配的对象比在堆上快很多 协程可以完全控制自己的栈帧 栈上，没有锁，没有GC，开销少  下面通过Benchmark来证明栈的优势，具体代码参考escape_analysis_test.go：
+逃逸分析如何运行 基本概念  逃逸分析在源码库中的代码：escape.</description>
+    </item>
+    
+    <item>
+      <title>关于 Golang Slice，你知道的不多</title>
+      <link>https://www.ileopold.cn/posts/golang-slice/</link>
+      <pubDate>Sun, 30 Jan 2022 17:18:44 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/golang-slice/</guid>
+      <description>前言 切片是Golang中的一等公民，业务代码中广泛使用，这里记录下以下几个问题：
+ 切片的数据结构是什么？如何实现扩容？ 切片有哪些少见的高级用法？ 什么时候应该使用数组，而不是切片？  数据结构 编译期类型为 Slice，运行期为 SliceHeader，具体结构如下： 1 2 3 4 5  type SliceHeader struct { Data uintptr Len int Cap int }  
+初始化 使用下标初始化 ./ssa.html 如下： 1 2 3 4  v11 (8) = Load &amp;lt;*[3]int&amp;gt; v10 v9 (&amp;amp;arr[*[3]int]) v25 (9) = Const64 &amp;lt;int&amp;gt; [1] v26 (9) = Const64 &amp;lt;int&amp;gt; [3] v27 (9) = SliceMake &amp;lt;[]int&amp;gt; v11 v25 v26</description>
+    </item>
+    
+    <item>
+      <title>Golang unsafe Pointer 怎么用</title>
+      <link>https://www.ileopold.cn/posts/golang-unsafe-pointer/</link>
+      <pubDate>Sun, 23 Jan 2022 16:00:23 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/golang-unsafe-pointer/</guid>
+      <description>起源 Golang官方库strings.Builder，高效处理字符串，最小化内存拷贝，其中获取字符串方法里，使用了unsafe.Pointer进行字节数组到字符串的转换：
+func (b *Builder) String() string { return *(*string)(unsafe.Pointer(&amp;amp;b.buf)) } 既然官方都这么用了，写了个[]byte和string互相转换的benchmark，测试结果如下：
+goos: darwin goarch: amd64 pkg: github.com/biexiang/code-snippet/str_byte BenchmarkStrByte/NormalBenchmarkStr2Byte-4 100000000	12.1 ns/op	0 B/op	0 allocs/op BenchmarkStrByte/UnsafeBenchmarkStr2Byte-4 1000000000	0.322 ns/op	0 B/op	0 allocs/op BenchmarkStrByte/NormalBenchmarkByte2Str-4 204761924	5.75 ns/op	0 B/op	0 allocs/op BenchmarkStrByte/UnsafeBenchmarkByte2Str-4 1000000000	0.317 ns/op	0 B/op	0 allocs/op PASS 可见，时间效率提升确实很高，但是包名叫unsafe，就很迷惑，我们到底什么时候可以用这个包呢？😂
+简单介绍 Golang里的指针分为类型安全指针和非类型安全指针，前者就是*T这种基类型为T的指针，后者就是这里提到的unsafe.Pointer。
+类型安全指针有以下限制：
+ 不支持算术运算 不能被随意转换为另一个指针类型 不能和其他任一指针类型的值进行比较 不能被赋值给其他任意类型的指针值  非类型安全指针刚好支持如下操作：
+ 任何类型的指针都可以转为unsafe.Pointer unsafe.Pointer可以转为任何类型的指针值 uintptr可以转为unsafe.Pointer unsafe.</description>
+    </item>
+    
+    <item>
+      <title>Golang Channel 原理</title>
+      <link>https://www.ileopold.cn/posts/golang-channel/</link>
+      <pubDate>Sun, 16 Jan 2022 22:07:24 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/golang-channel/</guid>
+      <description>Do not communicate by sharing memory; instead, share memory by communicating.
+ 简单使用 channel的创建、发送、接收、关闭的简单使用如下：
+通过dlv debug进行disass可以知道主要调用下面几个方法，本次也主要分析这些方法的调用。
+ runtime.makechan，创建一个channel runtime.chansend1，发送数据 runtime.chanrecv1，接收数据 runtime.closechan，关闭channel  数据结构 channel的数据结构hchan如下：
+type hchan struct { qcount uint // chan队列长度 dataqsiz uint // chan队列容量 buf unsafe.Pointer // 队列指针 sendx uint // 发送的当前索引 recvx uint // 接收的当前索引 elemsize uint16 // elem结构的大小，用于计算缓冲区所需的大小 elemtype *_type // chan的数据类型 recvq waitq // 接收协程队列 sendq waitq // 发送协程队列 closed uint32 // 是否关闭 lock mutex // 互斥锁 } hchan里一共有三个队列，channel数据的缓冲区是循环队列，sendq和recvq是链表队列，都是FIFO。</description>
+    </item>
+    
+    <item>
+      <title>Golang database/sql 源码分享</title>
+      <link>https://www.ileopold.cn/posts/golang-database-sql/</link>
+      <pubDate>Thu, 23 Dec 2021 16:19:36 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/golang-database-sql/</guid>
+      <description>起因，同事组织部门分享，于是有了这次的分享，分享形式是 PPT + oneNote 看源码。因为之前从来没有做过技术的分享，还算有趣的体验，这种被定了deadline的模式，感觉可以推动自己去学习进步。
+PPT： Google Slide
+benchmark：go-sql-test
+oneNote：read code</description>
+    </item>
+    
+  </channel>
+</rss>

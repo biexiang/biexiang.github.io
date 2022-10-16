@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
-    <link>https://www.ileopold.cn/</link>
-    <description>Recent content on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
+    <title>Posts on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
+    <link>https://www.ileopold.cn/posts/</link>
+    <description>Recent content in Posts on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Mon, 08 Aug 2022 23:03:00 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 08 Aug 2022 23:03:00 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Go Ast</title>
       <link>https://www.ileopold.cn/posts/go-ast/</link>
@@ -262,29 +262,6 @@ package cache import ( &amp;#34;container/list&amp;#34; &amp;#34;log&amp;#34; ) 
 Go源码阅读 从 官方src 里挑选下面几个：
  channel slice map sort timer sync context bytes bufio fmt log net  参考 database/sql，需要产出相对应的markdown文章，详细调查和并且记录暂时无法理解的部分。
  书单    书名 进度 豆瓣 读后感     深入浅出Rust 0% 8.2    代码整洁之道 0% 8.6    也许你该找个人聊聊 0% 9.0    蛤蟆先生去看心理医生 100% 8.5 摘录   非暴力沟通 5% 9.1    亲密关系 0% 9.1     需要产出读后感和个人思考。</description>
-    </item>
-    
-    <item>
-      <title>About</title>
-      <link>https://www.ileopold.cn/about/</link>
-      <pubDate>Sun, 02 Jan 2022 19:08:29 +0800</pubDate>
-      
-      <guid>https://www.ileopold.cn/about/</guid>
-      <description>关于小站 人生有两种苦，一种苦是自律的苦，一种苦是后悔的苦。自律的苦轻如鸿毛，后悔的苦重如泰山。
- --It&amp;rsquo;s Okay to Not Be Okay
- 小站用于从自身需求出发追踪记录自己的时间都花在哪些地方，量化自己，积累自己，作为自己的人生清单。
- Changelog ✔ 增加网易云音乐 @2022-01-03 ✔ 增加评论 @2022-01-03 ✔ Github Action自动发布 @2022-01-03 ✔ 升级HTTPS @2022-01-04 Use Let&amp;#39;s encrypt ✔ 增加图床 ✘ 增加RSS ✘ 增加bilibili ✘ 增加Web编辑md工作流 ✘ 增加Web小游戏 ✘ 增加Leetcode刷题看板 ✘ 增加douban/collect ✘ 增加Chrome小恐龙游戏自动运行 关于我 package main import &amp;#34;log&amp;#34; func main() { log.Println(&amp;#34;Welcome to my playground...&amp;#34;) } 工作 服务端程序员，主要写Go、PHP，也曾有过其他技术栈的尝试。
-爱好 刷剧、游戏，2022年会增加看书和旅行。
-Find me 全平台都叫 ileopold。</description>
-    </item>
-    
-    <item>
-      <title>估计是坑还没有填</title>
-      <link>https://www.ileopold.cn/404/</link>
-      <pubDate>Sun, 02 Jan 2022 19:08:29 +0800</pubDate>
-      
-      <guid>https://www.ileopold.cn/404/</guid>
-      <description>.post-content img {display: inline;}</description>
     </item>
     
     <item>

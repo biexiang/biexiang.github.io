@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Hugo 0.91.2" />
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="ileopold" />
+  <meta property="og:url" content="https://www.ileopold.cn/posts/interview/my-interview/" />
+  <meta content="" name="keywords">
+  <link rel="canonical" href="https://www.ileopold.cn/posts/interview/my-interview/" />
+  <meta name="sogou_site_verification" content="2i7JohrE4G" /><link rel="dns-prefetch" href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static" /><link rel="apple-touch-icon" href="/logo.png" />
+  <link rel="icon" href="/logo.png" />
+  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>面试常见问题</title>
+  <meta property="og:title" content="面试常见问题" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="持续补充自己缺失的知识点，保证面试不怂。
+ 常见问题 CAP理论   MySQL  MySQL八股文连环45问（背诵版） MyISAM与InnoDB 数据结构的区别 聚簇索引和辅助索引 Mysql存储引擎&amp;ndash;MyISAM与InnoDB的底层数据结构 Mysql中数据类型括号中的数字代表的含义 MySQL 性能优化神器 Explain 使用分析 布隆过滤器/HyperLogLog/位图 为什么 MySQL 使用 B&#43; 树 什么是 MySQL 的全局锁、表锁、行锁 MySQL各种“Buffer”之Change Buffer MySQL事务隔离级别和实现原理 五分钟搞懂MySQL索引下推 Mysql - 范围查询过程分析底层的锁实现机制 平衡二叉树、B树、B&#43;树、B*树 理解其中一种你就都明白了 数据库IO性能，及InnoDB与MyISAM引擎对比 Innodb 中 RR 隔离级别能否防止幻读? 分库分表常见玩法及跨库查询/事务等问题 关于电商平台订单分库分表那些事 B树、B&#43;树、LSM树以及其典型应用场景  Redis  Redis，八股文！ Redis 通过巧妙地使用数据结构节省内存空间 redis的事务和watch Redis 管道、事务、Lua 脚本对比 如何应对缓存问题 《面试八股文》之 Redis 16卷 5个基础数据结构的实现原理 为什么 Redis 选择单线程模型 为什么Redis要比Memcached更火？ Redis为什么用跳表而不用平衡树？、redis为什么选择了跳跃表而不是红黑树 说一说Redis事务是否满足ACID以及WATCH监视命令的作用 Redis中的hash扩容渐进式rehash过程  Nginx  都是事件驱动，为什么Nginx的性能远高于Redis？ 深入剖析Nginx负载均衡算法  ElasticSearch  倒排/全文索引 跳表(SkipList)原理篇  Kafka  《面试八股文》之kafka21卷 怎么理解 Kafka 消费者与消费组之间的关系?" />
+  <meta name="description" content="持续补充自己缺失的知识点，保证面试不怂。
+ 常见问题 CAP理论   MySQL  MySQL八股文连环45问（背诵版） MyISAM与InnoDB 数据结构的区别 聚簇索引和辅助索引 Mysql存储引擎&amp;ndash;MyISAM与InnoDB的底层数据结构 Mysql中数据类型括号中的数字代表的含义 MySQL 性能优化神器 Explain 使用分析 布隆过滤器/HyperLogLog/位图 为什么 MySQL 使用 B&#43; 树 什么是 MySQL 的全局锁、表锁、行锁 MySQL各种“Buffer”之Change Buffer MySQL事务隔离级别和实现原理 五分钟搞懂MySQL索引下推 Mysql - 范围查询过程分析底层的锁实现机制 平衡二叉树、B树、B&#43;树、B*树 理解其中一种你就都明白了 数据库IO性能，及InnoDB与MyISAM引擎对比 Innodb 中 RR 隔离级别能否防止幻读? 分库分表常见玩法及跨库查询/事务等问题 关于电商平台订单分库分表那些事 B树、B&#43;树、LSM树以及其典型应用场景  Redis  Redis，八股文！ Redis 通过巧妙地使用数据结构节省内存空间 redis的事务和watch Redis 管道、事务、Lua 脚本对比 如何应对缓存问题 《面试八股文》之 Redis 16卷 5个基础数据结构的实现原理 为什么 Redis 选择单线程模型 为什么Redis要比Memcached更火？ Redis为什么用跳表而不用平衡树？、redis为什么选择了跳跃表而不是红黑树 说一说Redis事务是否满足ACID以及WATCH监视命令的作用 Redis中的hash扩容渐进式rehash过程  Nginx  都是事件驱动，为什么Nginx的性能远高于Redis？ 深入剖析Nginx负载均衡算法  ElasticSearch  倒排/全文索引 跳表(SkipList)原理篇  Kafka  《面试八股文》之kafka21卷 怎么理解 Kafka 消费者与消费组之间的关系?" />
+  <meta property="og:locale" content="zh-cn" />
+  
+    <style>body{font-family:bree serif,sans-serif;-webkit-font-smoothing:antialiased;margin:0 20px}article{max-width:800px;margin-left:auto;margin-right:auto}a{color:#000;text-decoration:none}a:hover{font-weight:600;text-decoration:underline}.post-ads{margin:50px 0}.markdown-body{font-size:18px;max-width:100%}.markdown-body a{text-decoration:underline;text-decoration-color:#000}.markdown-body pre{padding:16px;overflow:auto;border-radius:10px}.markdown-body code{padding:.2em .4em;font-size:85%;background-color:#f6f8fa;border-radius:6px}.markdown-body pre>code{padding:0;font-size:100%;background-color:inherit;border:0}.Chinese .markdown-body{line-height:200%}.site-date-catalog{font-size:2rem}.header-title{font-size:2rem;font-weight:700;margin-top:32px;font-family:bungee shade,sans-serif}.header-title a{text-decoration:none}.header-subtitle{color:#666}.header-items{margin:10px 0}.header-item{margin:0 5px}.header-line{width:100%;border-width:2px;border-color:#482936;border-style:solid none none none}.lang-switch{font-weight:600}#posts-list{min-height:600px}.posts-line{font-size:1.2rem;margin:12px 0}.posts-categories{font-size:.8rem;margin:auto;text-align:center}.posts-category{padding:3px 0;border:#000 2px solid;border-radius:5px}.site-footer{margin-top:50px}.site-footer-item{margin-right:12px}.post-content img{max-width:100%;display:block;margin-right:auto;margin-top:12px}.post-header{margin-bottom:50px}.post-title{font-size:2rem;font-weight:600}.post-tags{display:inline;font-weight:600;padding:2px 5px;margin-right:6px;border:#000 2px solid;border-radius:5px}.post-date{font-weight:800;font-style:italic}.post-author{float:right;font-weight:600}.page-content{min-height:60%}.post-content{margin-bottom:50px}.post-content p{hyphens:auto;line-height:1.8;text-justify:ideographic;margin-bottom:1em}.related-content{border-width:3px;border-style:solid;border-color:#000;padding:0 10px;margin-bottom:50px;margin-top:100px}.related-content li{margin:5px 0}.taxonomy-term{font-size:3rem}.gallery-img{text-align:center}.gallery-img span{text-align:center}.gallery-img-desc{font-size:.8em;font-weight:800}#disqus_thread{position:relative}#disqus_thread:after{content:"";display:block;height:55px;width:100%;position:absolute;bottom:0;background:#fff}@media screen and (max-width:600px){.header-title,.header-subtitle,.header-items{text-align:center}.posts-line{font-size:16px}.markdown-body{font-size:16px}.post-title{font-size:2rem}.post-content p{letter-spacing:.05em}}@media screen and (max-width:48em){.posts-category{display:none}}</style>
+  
+  
+    <style>.container,.container-fluid{margin-right:auto;margin-left:auto}.container-fluid{padding-right:2rem;padding-left:2rem}.row{box-sizing:border-box;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-flex:0;-ms-flex:0 1 auto;flex:initial;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-direction:row;flex-direction:row;-ms-flex-wrap:wrap;flex-wrap:wrap;margin-right:-.5rem;margin-left:-.5rem}.row.reverse{-webkit-box-orient:horizontal;-webkit-box-direction:reverse;-ms-flex-direction:row-reverse;flex-direction:row-reverse}.col.reverse{-webkit-box-orient:vertical;-webkit-box-direction:reverse;-ms-flex-direction:column-reverse;flex-direction:column-reverse}.col-xs,.col-xs-1,.col-xs-10,.col-xs-11,.col-xs-12,.col-xs-2,.col-xs-3,.col-xs-4,.col-xs-5,.col-xs-6,.col-xs-7,.col-xs-8,.col-xs-9,.col-xs-offset-0,.col-xs-offset-1,.col-xs-offset-10,.col-xs-offset-11,.col-xs-offset-12,.col-xs-offset-2,.col-xs-offset-3,.col-xs-offset-4,.col-xs-offset-5,.col-xs-offset-6,.col-xs-offset-7,.col-xs-offset-8,.col-xs-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-xs{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-xs-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-xs-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-xs-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-xs-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-xs-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-xs-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-xs-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-xs-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-xs-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-xs-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-xs-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-xs-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-xs-offset-0{margin-left:0}.col-xs-offset-1{margin-left:8.33333333%}.col-xs-offset-2{margin-left:16.66666667%}.col-xs-offset-3{margin-left:25%}.col-xs-offset-4{margin-left:33.33333333%}.col-xs-offset-5{margin-left:41.66666667%}.col-xs-offset-6{margin-left:50%}.col-xs-offset-7{margin-left:58.33333333%}.col-xs-offset-8{margin-left:66.66666667%}.col-xs-offset-9{margin-left:75%}.col-xs-offset-10{margin-left:83.33333333%}.col-xs-offset-11{margin-left:91.66666667%}.start-xs{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-xs{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-xs{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-xs{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-xs{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-xs{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-xs{-ms-flex-pack:distribute;justify-content:space-around}.between-xs{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-xs{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-xs{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}@media only screen and (min-width:48em){.container{width:49rem}.col-sm,.col-sm-1,.col-sm-10,.col-sm-11,.col-sm-12,.col-sm-2,.col-sm-3,.col-sm-4,.col-sm-5,.col-sm-6,.col-sm-7,.col-sm-8,.col-sm-9,.col-sm-offset-0,.col-sm-offset-1,.col-sm-offset-10,.col-sm-offset-11,.col-sm-offset-12,.col-sm-offset-2,.col-sm-offset-3,.col-sm-offset-4,.col-sm-offset-5,.col-sm-offset-6,.col-sm-offset-7,.col-sm-offset-8,.col-sm-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-sm{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-sm-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-sm-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-sm-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-sm-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-sm-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-sm-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-sm-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-sm-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-sm-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-sm-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-sm-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-sm-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-sm-offset-0{margin-left:0}.col-sm-offset-1{margin-left:8.33333333%}.col-sm-offset-2{margin-left:16.66666667%}.col-sm-offset-3{margin-left:25%}.col-sm-offset-4{margin-left:33.33333333%}.col-sm-offset-5{margin-left:41.66666667%}.col-sm-offset-6{margin-left:50%}.col-sm-offset-7{margin-left:58.33333333%}.col-sm-offset-8{margin-left:66.66666667%}.col-sm-offset-9{margin-left:75%}.col-sm-offset-10{margin-left:83.33333333%}.col-sm-offset-11{margin-left:91.66666667%}.start-sm{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-sm{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-sm{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-sm{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-sm{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-sm{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-sm{-ms-flex-pack:distribute;justify-content:space-around}.between-sm{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-sm{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-sm{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}@media only screen and (min-width:64em){.container{width:65rem}.col-md,.col-md-1,.col-md-10,.col-md-11,.col-md-12,.col-md-2,.col-md-3,.col-md-4,.col-md-5,.col-md-6,.col-md-7,.col-md-8,.col-md-9,.col-md-offset-0,.col-md-offset-1,.col-md-offset-10,.col-md-offset-11,.col-md-offset-12,.col-md-offset-2,.col-md-offset-3,.col-md-offset-4,.col-md-offset-5,.col-md-offset-6,.col-md-offset-7,.col-md-offset-8,.col-md-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-md{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-md-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-md-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-md-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-md-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-md-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-md-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-md-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-md-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-md-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-md-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-md-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-md-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-md-offset-0{margin-left:0}.col-md-offset-1{margin-left:8.33333333%}.col-md-offset-2{margin-left:16.66666667%}.col-md-offset-3{margin-left:25%}.col-md-offset-4{margin-left:33.33333333%}.col-md-offset-5{margin-left:41.66666667%}.col-md-offset-6{margin-left:50%}.col-md-offset-7{margin-left:58.33333333%}.col-md-offset-8{margin-left:66.66666667%}.col-md-offset-9{margin-left:75%}.col-md-offset-10{margin-left:83.33333333%}.col-md-offset-11{margin-left:91.66666667%}.start-md{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-md{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-md{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-md{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-md{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-md{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-md{-ms-flex-pack:distribute;justify-content:space-around}.between-md{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-md{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-md{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}@media only screen and (min-width:75em){.container{width:76rem}.col-lg,.col-lg-1,.col-lg-10,.col-lg-11,.col-lg-12,.col-lg-2,.col-lg-3,.col-lg-4,.col-lg-5,.col-lg-6,.col-lg-7,.col-lg-8,.col-lg-9,.col-lg-offset-0,.col-lg-offset-1,.col-lg-offset-10,.col-lg-offset-11,.col-lg-offset-12,.col-lg-offset-2,.col-lg-offset-3,.col-lg-offset-4,.col-lg-offset-5,.col-lg-offset-6,.col-lg-offset-7,.col-lg-offset-8,.col-lg-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-lg{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-lg-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-lg-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-lg-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-lg-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-lg-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-lg-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-lg-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-lg-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-lg-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-lg-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-lg-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-lg-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-lg-offset-0{margin-left:0}.col-lg-offset-1{margin-left:8.33333333%}.col-lg-offset-2{margin-left:16.66666667%}.col-lg-offset-3{margin-left:25%}.col-lg-offset-4{margin-left:33.33333333%}.col-lg-offset-5{margin-left:41.66666667%}.col-lg-offset-6{margin-left:50%}.col-lg-offset-7{margin-left:58.33333333%}.col-lg-offset-8{margin-left:66.66666667%}.col-lg-offset-9{margin-left:75%}.col-lg-offset-10{margin-left:83.33333333%}.col-lg-offset-11{margin-left:91.66666667%}.start-lg{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-lg{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-lg{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-lg{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-lg{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-lg{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-lg{-ms-flex-pack:distribute;justify-content:space-around}.between-lg{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-lg{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-lg{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}</style>
+  
+
+  
+    <style>@charset "UTF-8";blockquote.quote{position:relative;margin:2em auto;padding-left:3em;border:none}blockquote.quote::before{position:absolute;left:0;content:'“';color:var(--color-contrast-low);font-family:jetbrains mono,amstelvar,noto serif sc,serif;font-size:3em;font-weight:700;line-height:1}blockquote.quote.poetry{display:table;padding:0}blockquote.quote.poetry::before{left:-1em}blockquote.quote.poetry p:last-child{margin:0}blockquote.quote.en p{line-height:1.618;text-align:left;hyphens:auto;-webkit-hyphens:auto;-moz-hyphens:auto}</style>
+  
+
+  
+
+  <link href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static/index.xml" rel="alternate" type="application/rss+xml"
+    title="妈妈说只要名字长就有笨比跟着念-服务端技术分享">
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.font.im/css?family=Bree+Serif|Bungee+Shade" rel="stylesheet">
+
+  
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JV86B54BT8"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'G-JV86B54BT8');
+</script> 
+  
+
+  
+</head>
+
+
+<body>
+  <article class="post 简体中文" id="article">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="site-header">
+          
+<header>
+  <div class="header-title">
+    <a href="/"
+      >Headbanger</a
+    >
+  </div>
+  <div class="header-subtitle">For self tracking and make progress</div>
+</header>
+<div class="row end-md center-xs header-items">
+  
+  <div class="header-item">
+    <a href="https://steamcommunity.com/id/ileopold0524/games/?tab=all" target="_blank">Game</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="https://movie.douban.com/people/ileopold/collect" target="_blank">Movie</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="https://book.douban.com/people/ileopold/collect" target="_blank">Book</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="/404/" target="_blank">Travel</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="/about" target="_blank">About</a>
+  </div>
+  
+</div>
+<div class="row end-xs">
+   
+</div>
+<div class="header-line"></div>
+
+        </div>
+        <header class="post-header">
+          <h1 class="post-title">面试常见问题</h1>
+          
+          <div class="row post-desc">
+            <div class="col-xs-6">
+              
+              <time class="post-date" datetime="2022-04-17 22:54:18 CST">
+                17 Apr 2022
+              </time>
+              
+            </div>
+            <div class="col-xs-6">
+              
+              <div class="post-author">
+                <a target="_blank" href="http://ileopold.cn/">@ileopold</a>
+              </div>
+              
+            </div>
+          </div>
+          
+        </header>
+
+        <div class="post-content markdown-body">
+          
+          <p><em><strong>持续补充自己缺失的知识点，保证面试不怂。</strong></em></p>
+<ul>
+<li><a href="https://ileopold.cn/posts/interview/my-interview">常见问题</a></li>
+<li><a href="https://ileopold.cn/posts/interview/interview-cap">CAP理论</a></li>
+</ul>
+<hr>
+<h3 id="mysql">MySQL</h3>
+<ul>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/403656116" target="_blank">MySQL八股文连环45问（背诵版）</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/343746709" target="_blank">MyISAM与InnoDB 数据结构的区别</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/371167166" target="_blank">聚簇索引和辅助索引</a></li>
+<li>
+<a href="https://www.cnblogs.com/zhangdanyang95/p/11384785.html" target="_blank">Mysql存储引擎&ndash;MyISAM与InnoDB的底层数据结构</a></li>
+<li>
+<a href="https://www.cnblogs.com/loren-yang/p/7512258.html" target="_blank">Mysql中数据类型括号中的数字代表的含义</a></li>
+<li>
+<a href="https://segmentfault.com/a/1190000008131735" target="_blank">MySQL 性能优化神器 Explain 使用分析</a></li>
+<li>
+<a href="https://hogwartsrico.github.io/2020/06/08/BloomFilter-HyperLogLog-BitMap/index.html" target="_blank">布隆过滤器/HyperLogLog/位图</a></li>
+<li>
+<a href="https://draveness.me/whys-the-design-mysql-b-plus-tree/" target="_blank">为什么 MySQL 使用 B+ 树</a></li>
+<li>
+<a href="https://segmentfault.com/a/1190000039848201" target="_blank">什么是 MySQL 的全局锁、表锁、行锁</a></li>
+<li>
+<a href="https://www.modb.pro/db/112469" target="_blank">MySQL各种“Buffer”之Change Buffer</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/117476959" target="_blank">MySQL事务隔离级别和实现原理</a></li>
+<li>
+<a href="https://www.cnblogs.com/three-fighter/p/15246577.html" target="_blank">五分钟搞懂MySQL索引下推</a></li>
+<li>
+<a href="https://blog.csdn.net/it_lihongmin/article/details/115337587" target="_blank">Mysql - 范围查询过程分析底层的锁实现机制</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/27700617" target="_blank">平衡二叉树、B树、B+树、B*树 理解其中一种你就都明白了</a></li>
+<li>
+<a href="https://blog.csdn.net/weixin_38744051/article/details/86466908" target="_blank">数据库IO性能，及InnoDB与MyISAM引擎对比</a></li>
+<li>
+<a href="https://github.com/Yhzhtk/note/issues/42" target="_blank">Innodb 中 RR 隔离级别能否防止幻读?</a></li>
+<li>
+<a href="https://www.jianshu.com/p/6f5662908dae" target="_blank">分库分表常见玩法及跨库查询/事务等问题</a></li>
+<li>
+<a href="https://www.cnblogs.com/ZJOE80/p/15763170.html" target="_blank">关于电商平台订单分库分表那些事</a></li>
+<li>
+<a href="https://blog.csdn.net/u010853261/article/details/78217823" target="_blank">B树、B+树、LSM树以及其典型应用场景</a></li>
+</ul>
+<h3 id="redis">Redis</h3>
+<ul>
+<li>
+<a href="https://jishuin.proginn.com/p/763bfbd66f14" target="_blank">Redis，八股文！</a></li>
+<li>
+<a href="https://blog.csdn.net/qq_39751320/article/details/108862584" target="_blank">Redis 通过巧妙地使用数据结构节省内存空间</a></li>
+<li>
+<a href="https://www.jianshu.com/p/361cb9cd13d5" target="_blank">redis的事务和watch</a></li>
+<li>
+<a href="https://blog.csdn.net/qq_35787138/article/details/113741467" target="_blank">Redis 管道、事务、Lua 脚本对比</a></li>
+<li>
+<a href="https://gongfukangee.github.io/2019/04/02/Cache/#%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F" target="_blank">如何应对缓存问题</a></li>
+<li>
+<a href="https://juejin.cn/post/6989153296808149029" target="_blank">《面试八股文》之 Redis 16卷</a></li>
+<li>
+<a href="">5个基础数据结构的实现原理</a></li>
+<li>
+<a href="https://draveness.me/whys-the-design-redis-single-thread/" target="_blank">为什么 Redis 选择单线程模型</a></li>
+<li>
+<a href="https://cloud.tencent.com/developer/article/1697819" target="_blank">为什么Redis要比Memcached更火？</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/23370124" target="_blank">Redis为什么用跳表而不用平衡树？</a>、
+<a href="https://blog.csdn.net/qq9808/article/details/104865385" target="_blank">redis为什么选择了跳跃表而不是红黑树</a></li>
+<li>
+<a href="https://blog.csdn.net/qq_39794062/article/details/120426301" target="_blank">说一说Redis事务是否满足ACID以及WATCH监视命令的作用</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/400625895" target="_blank">Redis中的hash扩容渐进式rehash过程</a></li>
+</ul>
+<h3 id="nginx">Nginx</h3>
+<ul>
+<li>
+<a href="https://www.taohui.tech/2020/12/14/nginx/%E9%83%BD%E6%98%AF%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88nginx%E7%9A%84%E6%80%A7%E8%83%BD%E8%BF%9C%E9%AB%98%E4%BA%8Eredis%EF%BC%9F/" target="_blank">都是事件驱动，为什么Nginx的性能远高于Redis？</a></li>
+<li>
+<a href="https://www.taohui.tech/2021/02/08/nginx/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90Nginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AE%97%E6%B3%95/" target="_blank">深入剖析Nginx负载均衡算法</a></li>
+</ul>
+<h3 id="elasticsearch">ElasticSearch</h3>
+<ul>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/33671444" target="_blank">倒排/全文索引</a></li>
+<li>
+<a href="https://www.cnblogs.com/Laymen/p/14084664.html" target="_blank">跳表(SkipList)原理篇</a></li>
+</ul>
+<h3 id="kafka">Kafka</h3>
+<ul>
+<li>
+<a href="https://juejin.cn/post/6982851330234646565" target="_blank">《面试八股文》之kafka21卷</a></li>
+<li>
+<a href="https://segmentfault.com/a/1190000039125247" target="_blank">怎么理解 Kafka 消费者与消费组之间的关系?</a></li>
+<li>
+<a href="https://segmentfault.com/a/1190000039385874" target="_blank">图解 ZooKeeper 的选举机制</a></li>
+<li>
+<a href="https://www.cnblogs.com/xiaolincoding/p/13719610.html" target="_blank">原来 8 张图，就可以搞懂「零拷贝」了</a></li>
+<li>
+<a href="https://www.cfanz.cn/mobile/resource/detail/lBAxElXWnQjmO" target="_blank">kafka的副本同步机制 HW和LEO</a></li>
+<li>
+<a href="https://juejin.cn/post/6844904000098140173" target="_blank">消息队列面试热点：如何保证消息的顺序性？</a></li>
+<li>
+<a href="https://blog.51cto.com/u_15281317/3007783" target="_blank">kafka如何解决重复消费问题</a></li>
+<li>
+<a href="https://juejin.cn/post/6988344277654847501" target="_blank">kafka新增topic对应的partition数如何决策</a></li>
+<li>
+<a href="https://blog.csdn.net/penggerhe/article/details/108404243" target="_blank">图解削峰限流技术，RabbitMq 消息队列解决高并发，高并发下削峰限流技术，主流消息队列对比</a>、
+<a href="https://blog.csdn.net/qq_36390914/article/details/108359791" target="_blank">消息队列 解耦、异步、削峰、限流</a>、
+<a href="https://developer.51cto.com/article/676653.html?edm" target="_blank">削峰填谷，你只知道消息队列？</a></li>
+</ul>
+<h3 id="go">Go</h3>
+<ul>
+<li>GC算法</li>
+<li>
+<a href="https://segmentfault.com/a/1190000040181868" target="_blank">详解 Go 程序的启动流程，你知道 g0，m0 是什么吗？</a></li>
+<li>
+<a href="https://segmentfault.com/a/1190000040450335" target="_blank">Golang为什么需要内存逃逸，如果全部逃逸，或者全部不逃逸会怎么样</a></li>
+<li>
+<a href="">go怎么做内存分配</a></li>
+<li>
+<a href="">k8s相关原理</a></li>
+<li>
+<a href="https://xiaorui.cc/archives/6535" target="_blank">go1.14基于信号的抢占式调度实现原理</a></li>
+<li>
+<a href="https://learnku.com/articles/41728" target="_blank">GPM原理</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/68792989" target="_blank">深度解密Go语言之context</a></li>
+<li>服务发现 etcd consul zk</li>
+<li>raft paxos 一致性选举</li>
+<li>
+<a href="https://www.modb.pro/db/99717" target="_blank">23道 K8S 面试题</a></li>
+<li>
+<a href="https://xie.infoq.cn/article/ac87ac5f9e8def9f91b817bf9" target="_blank">面试必备 (背)&ndash;Go 语言八股文系列！</a></li>
+<li>
+<a href="https://cloud.tencent.com/developer/article/1700079" target="_blank">你说说互斥锁、自旋锁、读写锁、悲观锁、乐观锁的应用场景</a></li>
+<li>
+<a href="https://segmentfault.com/a/1190000037676163" target="_blank">协程究竟比线程能省多少开销？</a></li>
+<li>
+<a href="https://colobu.com/2017/07/11/dive-into-sync-Map/" target="_blank">Go 1.9 sync.Map揭秘</a></li>
+<li>切片扩容</li>
+</ul>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">33
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> main
+
+<span style="color:#f00">import</span> <span style="color:#87ceeb">&#34;fmt&#34;</span>
+
+<span style="color:#f00">func</span> <span style="color:#ff0">main</span>() {
+	s := []<span style="color:#ee82ee">int</span>{<span style="color:#f60">2</span>, <span style="color:#f60">3</span>, <span style="color:#f60">5</span>, <span style="color:#f60">7</span>, <span style="color:#f60">11</span>, <span style="color:#f60">13</span>}
+	<span style="color:#ff0">printSlice</span>(s) <span style="color:#0f0">// len=6 cap=6 [2, 3, 5, 7, 11, 13]
+</span><span style="color:#0f0"></span>
+	<span style="color:#0f0">// Slice the slice to give it zero length.
+</span><span style="color:#0f0"></span>	s = s[:<span style="color:#f60">0</span>]
+	<span style="color:#ff0">printSlice</span>(s) <span style="color:#0f0">// len=0 cap=6 []
+</span><span style="color:#0f0"></span>
+	<span style="color:#0f0">// Extend its length.
+</span><span style="color:#0f0"></span>	s = s[:<span style="color:#f60">4</span>]
+	<span style="color:#ff0">printSlice</span>(s) <span style="color:#0f0">// len=4 cap=6 [2,3,5,7]
+</span><span style="color:#0f0"></span>
+	<span style="color:#0f0">// Drop its first two values.
+</span><span style="color:#0f0"></span>	s = s[<span style="color:#f60">2</span>:]
+	<span style="color:#ff0">printSlice</span>(s) <span style="color:#0f0">// len=2 cap=4 [5,7]
+</span><span style="color:#0f0"></span>
+	ss := []<span style="color:#ee82ee">int</span>{<span style="color:#f60">2</span>, <span style="color:#f60">3</span>, <span style="color:#f60">5</span>, <span style="color:#f60">7</span>, <span style="color:#f60">11</span>, <span style="color:#f60">13</span>}
+	s = ss[<span style="color:#f60">2</span>:<span style="color:#f60">3</span>]
+	<span style="color:#ff0">printSlice</span>(s) <span style="color:#0f0">// len=1 cap=4 [5]
+</span><span style="color:#0f0"></span>	s[<span style="color:#f60">0</span>] = <span style="color:#f60">20</span>
+	<span style="color:#ff0">printSlice</span>(ss) <span style="color:#0f0">//  len=6 cap=6 [2,3,20,7,11,13]
+</span><span style="color:#0f0"></span>	s = append(s, <span style="color:#f60">15</span>, <span style="color:#f60">17</span>, <span style="color:#f60">19</span>)
+	<span style="color:#ff0">printSlice</span>(s)  <span style="color:#0f0">// len=4 cap=4 [20,15,17,19]
+</span><span style="color:#0f0"></span>	<span style="color:#ff0">printSlice</span>(ss) <span style="color:#0f0">// len=6 cap=6 [2,3,20,15,17,19]
+</span><span style="color:#0f0"></span>}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">printSlice</span>(s []<span style="color:#ee82ee">int</span>) {
+	fmt.<span style="color:#ff0">Printf</span>(<span style="color:#87ceeb">&#34;len=%d cap=%d %v\n&#34;</span>, len(s), cap(s), s)
+}</code></pre></td></tr></table>
+</div>
+</div>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">39
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> main
+
+<span style="color:#f00">import</span> (
+	<span style="color:#87ceeb">&#34;fmt&#34;</span>
+	<span style="color:#87ceeb">&#34;sync&#34;</span>
+)
+
+<span style="color:#f00">func</span> <span style="color:#ff0">m1</span>() {
+	<span style="color:#f00">var</span> a []<span style="color:#ee82ee">int</span>
+	wg := sync.WaitGroup{}
+	<span style="color:#f00">for</span> i := <span style="color:#f60">0</span>; i &lt; <span style="color:#f60">10000</span>; i++ {
+		wg.<span style="color:#ff0">Add</span>(<span style="color:#f60">1</span>)
+		<span style="color:#f00">go</span> <span style="color:#f00">func</span>(i <span style="color:#ee82ee">int</span>) {
+			a = append(a, i)
+			wg.<span style="color:#ff0">Done</span>()
+		}(i)
+	}
+	wg.<span style="color:#ff0">Wait</span>()
+	fmt.<span style="color:#ff0">Println</span>(len(a))
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">m2</span>() {
+	<span style="color:#f00">var</span> a []<span style="color:#ee82ee">int</span>
+	wg := sync.WaitGroup{}
+	<span style="color:#f00">for</span> i := <span style="color:#f60">0</span>; i &lt; <span style="color:#f60">10000</span>; i++ {
+		wg.<span style="color:#ff0">Add</span>(<span style="color:#f60">1</span>)
+		<span style="color:#f00">go</span> <span style="color:#f00">func</span>(i <span style="color:#ee82ee">int</span>, b []<span style="color:#ee82ee">int</span>) {
+			b = append(b, i)
+			wg.<span style="color:#ff0">Done</span>()
+		}(i, a)
+	}
+	wg.<span style="color:#ff0">Wait</span>()
+	fmt.<span style="color:#ff0">Println</span>(len(a))
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">main</span>() {
+	<span style="color:#ff0">m1</span>()
+	<span style="color:#ff0">m2</span>()
+}</code></pre></td></tr></table>
+</div>
+</div>
+<h3 id="网络">网络</h3>
+<ul>
+<li>
+<a href="https://segmentfault.com/a/1190000021815671" target="_blank">说说UDP和TCP的区别及应用场景</a></li>
+<li>
+<a href="https://www.cnblogs.com/yangjianyong-bky/articles/14608585.html" target="_blank">哪5种IO模型？什么是select/poll/epoll？同步异步阻塞非阻塞有啥区别</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/43789231" target="_blank">彻底搞懂HTTPS的加密原理</a></li>
+<li>
+<a href="https://blog.csdn.net/plokmju88/article/details/118688462" target="_blank">HTTP/2.0 原理！与 1.x 相比，到底优化了什么？</a></li>
+<li>
+<a href="https://www.jianshu.com/p/cd70b8e90d00" target="_blank">HTTP 1.0、1.1、2.0、3.0区别</a></li>
+<li>
+<a href="https://www.zhihu.com/question/41609070" target="_blank">既然有 HTTP 请求，为什么还要用 RPC 调用？</a></li>
+</ul>
+<h3 id="微服务">微服务</h3>
+<ul>
+<li>
+<a href="https://www.cnblogs.com/haha12/p/11532910.html" target="_blank">微服务注册中心原理，看这篇就够了！</a></li>
+<li>
+<a href="https://www.bilibili.com/video/BV1Tg411P7EB?p=7&amp;spm_id_from=444.41.top_right_bar_window_history.content.click" target="_blank">Kubernetes (K8S) 3 小时快速上手 + 实践，无废话纯干货</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/130416752" target="_blank">微服务下如何保证事务的一致性</a></li>
+</ul>
+<h3 id="开放题">开放题</h3>
+<ul>
+<li>
+<a href="https://blog.51cto.com/u_15420855/4713743" target="_blank">面试官问：如何设计一个高并发系统？</a></li>
+<li>
+<a href="https://www.cnblogs.com/ZJOE80/p/15763170.html" target="_blank">关于电商平台订单分库分表那些事</a></li>
+<li>ES+HBase的查询方案</li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/477724438" target="_blank">系统设计 | 榜单系统</a></li>
+<li>
+<a href="https://jishuin.proginn.com/p/763bfbd5468b" target="_blank">别瞎搞了！微博、知乎就是这么设计Feed流系统的~</a></li>
+<li>
+<a href="https://utf8.hk/archives/php_redis_weibo_feed.html" target="_blank">微博feed流方案</a></li>
+<li>系统设计，自行数据结构设计一个排名系统，支持查询top 1000和自己的排名</li>
+</ul>
+<h3 id="其他">其他</h3>
+<ul>
+<li>
+<a href="https://blog.csdn.net/wang123456___/article/details/114736344" target="_blank">C语言 strlen(str)和sizeof(arr)的区别</a></li>
+<li>
+<a href="https://zhuanlan.zhihu.com/p/21388517" target="_blank">“字节序”是个什么鬼？</a></li>
+<li>
+<a href="https://segmentfault.com/a/1190000039753805?utm_source=sf-similar-article" target="_blank">面试官：什么是死锁？怎么排查死锁？怎么避免死锁？</a></li>
+<li>
+<a href="https://www.zhihu.com/question/25527028" target="_blank">操作系统调度如何实现？</a></li>
+<li>
+<a href="https://www.cnblogs.com/xuwc/p/9123078.html" target="_blank">高并发系统限流-漏桶算法和令牌桶算法</a></li>
+<li>
+<a href="https://xie.infoq.cn/article/3a980c8f6a5a0a7a26cc3d2e8" target="_blank">僵尸进程和孤儿进程有了解过吗</a></li>
+<li>
+<a href="https://akaedu.github.io/book/ch30s04.html" target="_blank">进程间通信</a></li>
+<li>
+<a href="https://www.cnblogs.com/hjwublog/p/5625275.html" target="_blank">memcached一致性hash算法原理 </a></li>
+<li>
+<a href="https://cloud.tencent.com/developer/article/1768025" target="_blank">线程间到底共享了哪些进程资源</a></li>
+<li>
+<a href="https://luffy997.github.io/2021/07/19/%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2/#%E4%B8%8A%E4%B8%8B%E6%96%87" target="_blank">什么是上下文切换</a></li>
+<li>
+<a href="https://segmentfault.com/a/1190000039774784" target="_blank">从根上理解用户态与内核态</a></li>
+</ul>
+
+        </div>
+
+        <div class="row middle-xs">
+          <div class="col-xs-12">
+            
+          </div>
+        </div>
+        
+          <div class="row">
+            <div class="col-xs-12">
+              
+            </div>
+          </div>
+
+          
+
+
+
+          
+          
+          <div style="height: 50px;"></div>
+          
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+<script>
+  window.addEventListener("load", () => {
+    (function() {
+      
+      var d = document,
+        s = d.createElement("script");
+      s.src = "https://ileopold.disqus.com/embed.js";
+      s.setAttribute("data-timestamp", +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  });
+</script>
+<noscript
+  >Please enable JavaScript to view the
+  <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  ></noscript
+>
+
+          </div>
+          
+        
+
+        <div class="site-footer">
+  <div class="site-footer-item" style="text-align: center;">
+    <a href="https://beian.miit.gov.cn/" target="_blank">京ICP备18045353号-2</a>
+  </div>
+  <br><br>
+</div>
+
+      </div>
+    </div>
+  </article>
+
+  
+<script src="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static/js/lazyload.min.js"></script>
+<script>
+  var lazyImage = new LazyLoad({
+    container: document.getElementById('article')
+  });
+</script>
+
+<script>
+  
+  
+    
+    
+  
+</script>
+
+  
+
+</body>
+
+</html>

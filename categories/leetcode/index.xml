@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Leetcode on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
+    <link>https://www.ileopold.cn/categories/leetcode/</link>
+    <description>Recent content in Leetcode on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 13 Feb 2022 18:45:24 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/leetcode/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Leetcode Courses Problem</title>
+      <link>https://www.ileopold.cn/posts/leetcode-courses/</link>
+      <pubDate>Sun, 13 Feb 2022 18:45:24 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/leetcode-courses/</guid>
+      <description>从有向无环图搜到了课程表的题目，这里记录下这三个题目。测试代码：courses_test.go
+207.课程表 使用DFS查找课程表的依赖关系。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43  // state: 0 means not begin // state: 1 means begin but not finish // state: 2 means finish func canFinishDFS(numCourses int, prerequisites [][]int) bool { var ( stateRec map[int]int edgeRec map[int][]int dfs func(courseID int) bool ) stateRec, edgeRec = make(map[int]int, numCourses), make(map[int][]int) for _, item := range prerequisites { if edgeRec[item[1]] == nil { edgeRec[item[1]] = append([]int{}, item[0]) } else { edgeRec[item[1]] = append(edgeRec[item[1]], item[0]) } } dfs = func(courseID int) bool { stateRec[courseID] = 1 for _, nextCourseID := range edgeRec[courseID] { if stateRec[nextCourseID] == 0 { if dfs(nextCourseID) == false { return false } } if stateRec[nextCourseID] == 1 { return false } } stateRec[courseID] = 2 return true } for i := 0; i &amp;lt; numCourses; i++ { if stateRec[i] == 0 { if dfs(i) == false { return false } } } return true }</description>
+    </item>
+    
+    <item>
+      <title>Ring Buffer 介绍</title>
+      <link>https://www.ileopold.cn/posts/ring-buffer/</link>
+      <pubDate>Sun, 16 Jan 2022 21:58:21 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/ring-buffer/</guid>
+      <description>起源 看Go Channel源码的时候，都有提到 Ring Buffer，同时力扣上也刷到了类似的题目 622. 设计循环队列，这里记录下 Ring Buffer 的调查结果，Golang Channel  也用到了循环队列。
+实现 下面分为普通不加锁的循环队列和无锁的循环队列，代码实现和TestCase都在仓库 ring_buffer。
+不加锁的循环队列 循环队列类似 Producer-Consumer 模式，Tail指针的移动产生数据，Head指针的移动消费数据。 循环队列可以使用取余来获取新的索引，但CPU做位运算性能更高，所以改成Capacity为2的幂次，这样通过和Mask做与操作实现Turn Arround。
+package no_lock // no_lock指不用锁  type RingBuffer struct { Queue []interface{} Head, Tail uint64 Cap, Mask uint64 } func findPowerOfTwo(givenMum uint64) uint64 { givenMum-- givenMum |= givenMum &amp;gt;&amp;gt; 1 givenMum |= givenMum &amp;gt;&amp;gt; 2 givenMum |= givenMum &amp;gt;&amp;gt; 4 givenMum |= givenMum &amp;gt;&amp;gt; 8 givenMum |= givenMum &amp;gt;&amp;gt; 16 givenMum |= givenMum &amp;gt;&amp;gt; 32 givenMum++ return givenMum } func Constructor(k int) RingBuffer { capacity := findPowerOfTwo(uint64(k)) return RingBuffer{ Queue: make([]interface{}, capacity), Head: uint64(0), Tail: uint64(0), Cap: capacity, Mask: capacity - 1, } } func (c *RingBuffer) EnQueue(value interface{}) bool { if c.</description>
+    </item>
+    
+    <item>
+      <title>关于LRU和LFU算法</title>
+      <link>https://www.ileopold.cn/posts/lru-and-lfu/</link>
+      <pubDate>Sun, 09 Jan 2022 14:37:13 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/lru-and-lfu/</guid>
+      <description>源头 力扣有这两个题，146. LRU 缓存 和 460. LFU 缓存，记录下两者的区别和实现。
+区别 首先各自的概念，LRU是最近不使用的淘汰，LFU是最近用的频率少的淘汰。然后下面举个栗子，Capacity=3:
+[1,2,1,2,1,2,1,2,3,4] 如果是LRU，插入4时淘汰的是1，1是最近不使用的。 如果是LFU，插入4时淘汰的是3，最小使用频次是1，频次1里面只有一个3，所以淘汰3。
+实现 LRU 因为要求GET和PUT的时间复杂度都是O(1)，所以GET查询肯定得用map，因为栈和队列没法查询中间元素，单链表删除需要遍历找到前驱节点，为了删除时能在O(1)完成，使用双向链表。
+下面的Golang实现里，双向链表用的官方的标准库 container/list，标准库的Value是个 interface{} 类型，断言会有性能消耗，如果真有需求自己实现LRU，可以自己实现双向链表省去断言的消耗。
+package cache import ( &amp;#34;container/list&amp;#34; &amp;#34;log&amp;#34; ) type Pair struct { Key, Value int } type LRUCache struct { Cap int L *list.List M map[int]*list.Element } func Constructor(capacity int) LRUCache { return LRUCache{ L: list.New(), M: make(map[int]*list.Element, capacity), Cap: capacity, } } func (c *LRUCache) Get(key int) int { if c.</description>
+    </item>
+    
+  </channel>
+</rss>

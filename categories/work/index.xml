@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>work on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
+    <link>https://www.ileopold.cn/categories/work/</link>
+    <description>Recent content in work on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 01 Jul 2022 22:07:24 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/work/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>知识补充区</title>
+      <link>https://www.ileopold.cn/posts/work-learning/</link>
+      <pubDate>Fri, 01 Jul 2022 22:07:24 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/work-learning/</guid>
+      <description>Git  GitHub中origin和upstream的区别 Git commit 使用及规范 How to convert git: urls to http: urls Git通过配置config维护多个账号，区分个人账号和公司账号 git commit Gitmoji  Golang  Go的构建约束 Go Plugin Go基础0x02-go build -tags使用 Gob序列化 ants协程池 正则替换  func replace(text string, replacement map[string]string) string { var leftPad, rightPad = `{{`, `}}` var rgx = regexp.MustCompile(leftPad + &amp;#34;(.*?)&amp;#34; + rightPad) rs := rgx.ReplaceAllFunc([]byte(text), func(bytes []byte) []byte { key := bytes[len(leftPad) : len(bytes)-len(rightPad)] log.</description>
+    </item>
+    
+  </channel>
+</rss>

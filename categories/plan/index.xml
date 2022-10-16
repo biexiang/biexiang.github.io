@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Plan on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
+    <link>https://www.ileopold.cn/categories/plan/</link>
+    <description>Recent content in Plan on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Mon, 03 Jan 2022 21:42:02 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/plan/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>2022 Plan</title>
+      <link>https://www.ileopold.cn/posts/2022-plan/</link>
+      <pubDate>Mon, 03 Jan 2022 21:42:02 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/2022-plan/</guid>
+      <description>年前多立一点flag，万一年终的时候实现了，又可以开心一波了。
+Go源码阅读 从 官方src 里挑选下面几个：
+ channel slice map sort timer sync context bytes bufio fmt log net  参考 database/sql，需要产出相对应的markdown文章，详细调查和并且记录暂时无法理解的部分。
+ 书单    书名 进度 豆瓣 读后感     深入浅出Rust 0% 8.2    代码整洁之道 0% 8.6    也许你该找个人聊聊 0% 9.0    蛤蟆先生去看心理医生 100% 8.5 摘录   非暴力沟通 5% 9.1    亲密关系 0% 9.1     需要产出读后感和个人思考。</description>
+    </item>
+    
+  </channel>
+</rss>

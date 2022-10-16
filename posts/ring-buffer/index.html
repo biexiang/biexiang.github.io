@@ -7,16 +7,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="ileopold" />
-  <meta property="og:url" content="https://www.ileopold.cn/" />
-  <meta content="" name="keywords">
-  <link rel="canonical" href="https://www.ileopold.cn/" />
+  <meta property="og:url" content="https://www.ileopold.cn/posts/ring-buffer/" />
+  <meta content="Golang、LeetCode、力扣、算法、Ring Buffer、环形队列" name="keywords">
+  <link rel="canonical" href="https://www.ileopold.cn/posts/ring-buffer/" />
   <meta name="sogou_site_verification" content="2i7JohrE4G" /><link rel="dns-prefetch" href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static" /><link rel="apple-touch-icon" href="/logo.png" />
   <link rel="icon" href="/logo.png" />
-  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>妈妈说只要名字长就有笨比跟着念-服务端技术分享</title>
-  <meta property="og:title" content="妈妈说只要名字长就有笨比跟着念-服务端技术分享" />
-  <meta property="og:type" content="website" />
-  <meta property="og:description" content="For self tracking and make progress" />
-  <meta name="description" content="For self tracking and make progress" />
+  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>Ring Buffer 介绍</title>
+  <meta property="og:title" content="Ring Buffer 介绍" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="什么是环形队列？怎么用Golang实现一个环形队列？什么是无锁的环形队列？Golang Channel和环形队列有什么关系？" />
+  <meta name="description" content="什么是环形队列？怎么用Golang实现一个环形队列？什么是无锁的环形队列？Golang Channel和环形队列有什么关系？" />
   <meta property="og:locale" content="zh-cn" />
   
     <style>body{font-family:bree serif,sans-serif;-webkit-font-smoothing:antialiased;margin:0 20px}article{max-width:800px;margin-left:auto;margin-right:auto}a{color:#000;text-decoration:none}a:hover{font-weight:600;text-decoration:underline}.post-ads{margin:50px 0}.markdown-body{font-size:18px;max-width:100%}.markdown-body a{text-decoration:underline;text-decoration-color:#000}.markdown-body pre{padding:16px;overflow:auto;border-radius:10px}.markdown-body code{padding:.2em .4em;font-size:85%;background-color:#f6f8fa;border-radius:6px}.markdown-body pre>code{padding:0;font-size:100%;background-color:inherit;border:0}.Chinese .markdown-body{line-height:200%}.site-date-catalog{font-size:2rem}.header-title{font-size:2rem;font-weight:700;margin-top:32px;font-family:bungee shade,sans-serif}.header-title a{text-decoration:none}.header-subtitle{color:#666}.header-items{margin:10px 0}.header-item{margin:0 5px}.header-line{width:100%;border-width:2px;border-color:#482936;border-style:solid none none none}.lang-switch{font-weight:600}#posts-list{min-height:600px}.posts-line{font-size:1.2rem;margin:12px 0}.posts-categories{font-size:.8rem;margin:auto;text-align:center}.posts-category{padding:3px 0;border:#000 2px solid;border-radius:5px}.site-footer{margin-top:50px}.site-footer-item{margin-right:12px}.post-content img{max-width:100%;display:block;margin-right:auto;margin-top:12px}.post-header{margin-bottom:50px}.post-title{font-size:2rem;font-weight:600}.post-tags{display:inline;font-weight:600;padding:2px 5px;margin-right:6px;border:#000 2px solid;border-radius:5px}.post-date{font-weight:800;font-style:italic}.post-author{float:right;font-weight:600}.page-content{min-height:60%}.post-content{margin-bottom:50px}.post-content p{hyphens:auto;line-height:1.8;text-justify:ideographic;margin-bottom:1em}.related-content{border-width:3px;border-style:solid;border-color:#000;padding:0 10px;margin-bottom:50px;margin-top:100px}.related-content li{margin:5px 0}.taxonomy-term{font-size:3rem}.gallery-img{text-align:center}.gallery-img span{text-align:center}.gallery-img-desc{font-size:.8em;font-weight:800}#disqus_thread{position:relative}#disqus_thread:after{content:"";display:block;height:55px;width:100%;position:absolute;bottom:0;background:#fff}@media screen and (max-width:600px){.header-title,.header-subtitle,.header-items{text-align:center}.posts-line{font-size:16px}.markdown-body{font-size:16px}.post-title{font-size:2rem}.post-content p{letter-spacing:.05em}}@media screen and (max-width:48em){.posts-category{display:none}}</style>
@@ -57,10 +57,11 @@
 
 
 <body>
-  <article class="posts">
+  <article class="post 简体中文" id="article">
     <div class="row">
       <div class="col-xs-12">
-        
+        <div class="site-header">
+          
 <header>
   <div class="header-title">
     <a href="/"
@@ -97,401 +98,281 @@
 </div>
 <div class="header-line"></div>
 
-        <div id="posts-list">
-          <section>
-            <h1 class="site-date-catalog">2022</h1>
-
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-08-08 23:03:00 CST">Aug 08</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/go-ast/">Go Ast</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-07-01 22:07:24 CST">Jul 01</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/work-learning/">知识补充区</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/work/"><strong>work</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-06-01 18:07:48 CST">Jun 01</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/camera/">相机记录</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/camera/"><strong>Camera</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-05-28 18:07:41 CST">May 28</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/interview/interview/">面试系列</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/interview/"><strong>Interview</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-            
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-03-05 16:52:36 CST">Mar 05</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-map/">Golang Map 源码分析</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-03-02 23:11:39 CST">Mar 02</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-tricky/">你可能不知道的Golang用法</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-02-23 21:44:07 CST">Feb 23</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-gc/">Golang 垃圾回收</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-02-13 18:45:24 CST">Feb 13</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/leetcode-courses/">Leetcode Courses Problem</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/algorithm/"><strong>Algorithm</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-            
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-30 17:30:52 CST">Jan 30</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-escape-analysis/">Golang 逃逸分析</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-30 17:18:44 CST">Jan 30</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-slice/">关于 Golang Slice，你知道的不多</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-23 16:00:23 CST">Jan 23</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-unsafe-pointer/">Golang unsafe Pointer 怎么用</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-16 22:07:24 CST">Jan 16</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-channel/">Golang Channel 原理</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-16 21:58:21 CST">Jan 16</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/ring-buffer/">Ring Buffer 介绍</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/algorithm/"><strong>Algorithm</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-09 14:37:13 CST">Jan 09</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/lru-and-lfu/">关于LRU和LFU算法</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/algorithm/"><strong>Algorithm</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-04 22:31:49 CST">Jan 04</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/show-video-img/">支持B站视频和图片</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/video/"><strong>Video</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2022-01-03 21:42:02 CST">Jan 03</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/2022-plan/">2022 Plan</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/plan/"><strong>Plan</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-          </section>
-          <section>
-            <h1 class="site-date-catalog">2021</h1>
-
-            
-              
-              <div class="row posts-line">
-                <div class="posts-date col-xs-3 col-sm-2">
-                  <time datetime="2021-12-23 16:19:36 CST">Dec 23</time>
-                </div>
-                <div class="posts-title col-xs-9 col-sm-10">
-                  <div class="row">
-                    <div class="col-xs-11 col-sm-10">
-                      <a href="/posts/golang-database-sql/">Golang database/sql 源码分享</a>
-                    </div>
-                    <div class="col-xs-1 col-sm-2 posts-categories">
-                      
-                      <div class="posts-category">
-                        <a href="/categories/golang/"><strong>Golang</strong></a>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            
-          </section>
-          
         </div>
+        <header class="post-header">
+          <h1 class="post-title">Ring Buffer 介绍</h1>
+          
+          <div class="row post-desc">
+            <div class="col-xs-6">
+              
+              <time class="post-date" datetime="2022-01-16 21:58:21 CST">
+                16 Jan 2022
+              </time>
+              
+            </div>
+            <div class="col-xs-6">
+              
+              <div class="post-author">
+                <a target="_blank" href="http://ileopold.cn/">@ileopold</a>
+              </div>
+              
+            </div>
+          </div>
+          
+        </header>
+
+        <div class="post-content markdown-body">
+          
+          
+    <iframe
+        frameborder="no"
+        border="0"
+        marginwidth="0"
+        marginheight="0"
+        width=60%
+        height=86
+        src="//music.163.com/outchain/player?type=2&id=455420533&auto=1&height=66">
+    </iframe>
+
+<h3 id="起源">起源</h3>
+<p>看Go Channel源码的时候，都有提到 <code>Ring Buffer</code>，同时力扣上也刷到了类似的题目 
+<a href="https://leetcode-cn.com/problems/design-circular-queue/" target="_blank">622. 设计循环队列</a>，这里记录下 Ring Buffer 的调查结果，
+<a href="https://www.ileopold.cn/posts/golang-channel/"> Golang Channel </a> 也用到了循环队列。</p>
+<h3 id="实现">实现</h3>
+<p>下面分为普通不加锁的循环队列和无锁的循环队列，代码实现和TestCase都在仓库 
+<a href="https://github.com/biexiang/code-snippet/tree/main/ring_buffer" target="_blank">ring_buffer</a>。</p>
+<h4 id="不加锁的循环队列">不加锁的循环队列</h4>
+<p>循环队列类似 <code>Producer-Consumer</code> 模式，Tail指针的移动产生数据，Head指针的移动消费数据。
+循环队列可以使用取余来获取新的索引，但CPU做位运算性能更高，所以改成Capacity为2的幂次，这样通过和Mask做与操作实现Turn Arround。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> no_lock
+
+<span style="color:#0f0">// no_lock指不用锁
+</span><span style="color:#0f0"></span>
+<span style="color:#f00">type</span> RingBuffer <span style="color:#f00">struct</span> {
+	Queue      []<span style="color:#f00">interface</span>{}
+	Head, Tail <span style="color:#ee82ee">uint64</span>
+	Cap, Mask  <span style="color:#ee82ee">uint64</span>
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">findPowerOfTwo</span>(givenMum <span style="color:#ee82ee">uint64</span>) <span style="color:#ee82ee">uint64</span> {
+	givenMum--
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">1</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">2</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">4</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">8</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">16</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">32</span>
+	givenMum++
+	<span style="color:#f00">return</span> givenMum
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">Constructor</span>(k <span style="color:#ee82ee">int</span>) RingBuffer {
+	capacity := <span style="color:#ff0">findPowerOfTwo</span>(uint64(k))
+	<span style="color:#f00">return</span> RingBuffer{
+		Queue: make([]<span style="color:#f00">interface</span>{}, capacity),
+		Head:  uint64(<span style="color:#f60">0</span>),
+		Tail:  uint64(<span style="color:#f60">0</span>),
+		Cap:   capacity,
+		Mask:  capacity - <span style="color:#f60">1</span>,
+	}
+}
+
+<span style="color:#f00">func</span> (c *RingBuffer) <span style="color:#ff0">EnQueue</span>(value <span style="color:#f00">interface</span>{}) <span style="color:#ee82ee">bool</span> {
+	<span style="color:#f00">if</span> c.<span style="color:#ff0">IsFull</span>() {
+		<span style="color:#f00">return</span> <span style="color:#f00">false</span>
+	}
+	newTail := (c.Tail + <span style="color:#f60">1</span>) &amp; c.Mask
+	c.Tail = newTail
+	c.Queue[newTail] = value
+	<span style="color:#f00">return</span> <span style="color:#f00">true</span>
+}
+
+<span style="color:#f00">func</span> (c *RingBuffer) <span style="color:#ff0">DeQueue</span>() (value <span style="color:#f00">interface</span>{}, success <span style="color:#ee82ee">bool</span>) {
+	<span style="color:#f00">if</span> c.<span style="color:#ff0">IsEmpty</span>() {
+		<span style="color:#f00">return</span> <span style="color:#f00">nil</span>, <span style="color:#f00">false</span>
+	}
+	newHead := (c.Head + <span style="color:#f60">1</span>) &amp; c.Mask
+	c.Head = newHead
+	<span style="color:#f00">return</span> c.Queue[newHead], <span style="color:#f00">true</span>
+}
+
+<span style="color:#f00">func</span> (c *RingBuffer) <span style="color:#ff0">IsEmpty</span>() <span style="color:#ee82ee">bool</span> {
+	<span style="color:#f00">return</span> c.Head == c.Tail
+}
+
+<span style="color:#f00">func</span> (c *RingBuffer) <span style="color:#ff0">IsFull</span>() <span style="color:#ee82ee">bool</span> {
+	<span style="color:#f00">return</span> c.Tail-c.Head == c.Cap-<span style="color:#f60">1</span> || c.Head-c.Tail == <span style="color:#f60">1</span>
+}
+
+</code></pre></div><h4 id="无锁的循环队列">无锁的循环队列</h4>
+<p>lock-free，是一种底层通过CPU提供的硬件同步原语CAS指令（<code>compare and swap</code> / <code>compare and set</code>）来实现的乐观并发控制算法，因为原子指令本身就是带锁的操作，只是锁的粒度比较小，所以虽然没有显式的调用锁，但是实现了锁的功能。</p>
+<p>Golang里可以通过atomic包来进行CAS原子操作，循环队列里设计到并发读写的就是head、tail和queue这三个参数的操作，这里全部通过atomic包进行读写。这里涉及的unsafe包的使用，可以参考 
+<a href="https://www.ileopold.cn/posts/golang-unsafe-pointer/"> Golang Unsafe Pointer </a>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#f00">package</span> lock_free_1
+
+<span style="color:#f00">import</span> (
+	<span style="color:#87ceeb">&#34;sync/atomic&#34;</span>
+	<span style="color:#87ceeb">&#34;unsafe&#34;</span>
+)
+
+<span style="color:#f00">type</span> RingBuffer <span style="color:#f00">struct</span> {
+	queue      []<span style="color:#f00">interface</span>{}
+	head, tail <span style="color:#ee82ee">uint64</span>
+	cap, mask  <span style="color:#ee82ee">uint64</span>
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">findPowerOfTwo</span>(givenMum <span style="color:#ee82ee">uint64</span>) <span style="color:#ee82ee">uint64</span> {
+	givenMum--
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">1</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">2</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">4</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">8</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">16</span>
+	givenMum |= givenMum &gt;&gt; <span style="color:#f60">32</span>
+	givenMum++
+	<span style="color:#f00">return</span> givenMum
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">Constructor</span>(k <span style="color:#ee82ee">int</span>) RingBuffer {
+	capacity := <span style="color:#ff0">findPowerOfTwo</span>(uint64(k))
+	<span style="color:#f00">return</span> RingBuffer{
+		queue: make([]<span style="color:#f00">interface</span>{}, capacity),
+		head:  uint64(<span style="color:#f60">0</span>),
+		tail:  uint64(<span style="color:#f60">0</span>),
+		cap:   capacity,
+		mask:  capacity - <span style="color:#f60">1</span>,
+	}
+}
+
+<span style="color:#f00">func</span> (c *RingBuffer) <span style="color:#ff0">EnQueue</span>(value <span style="color:#f00">interface</span>{}) <span style="color:#ee82ee">bool</span> {
+	<span style="color:#0f0">// EnQueue only 非nil的值
+</span><span style="color:#0f0"></span>	<span style="color:#f00">if</span> value == <span style="color:#f00">nil</span> {
+		<span style="color:#f00">return</span> <span style="color:#f00">false</span>
+	}
+
+	oldHead := atomic.<span style="color:#ff0">LoadUint64</span>(&amp;c.head)
+	oldTail := atomic.<span style="color:#ff0">LoadUint64</span>(&amp;c.tail)
+	<span style="color:#f00">if</span> <span style="color:#ff0">IsFull</span>(oldHead, oldTail, c.cap) {
+		<span style="color:#f00">return</span> <span style="color:#f00">false</span>
+	}
+
+	newTail := (oldTail + <span style="color:#f60">1</span>) &amp; c.mask
+	<span style="color:#0f0">// 判断newTailData是否为nil
+</span><span style="color:#0f0"></span>	<span style="color:#f00">if</span> newTailData := atomic.<span style="color:#ff0">LoadPointer</span>((*unsafe.Pointer)(unsafe.<span style="color:#ff0">Pointer</span>(&amp;c.queue[newTail]))); newTailData != <span style="color:#f00">nil</span> {
+		<span style="color:#f00">return</span> <span style="color:#f00">false</span>
+	}
+
+	<span style="color:#f00">if</span> !atomic.<span style="color:#ff0">CompareAndSwapUint64</span>(&amp;c.tail, oldTail, newTail) {
+		<span style="color:#f00">return</span> <span style="color:#f00">false</span>
+	}
+
+	atomic.<span style="color:#ff0">StorePointer</span>((*unsafe.Pointer)(unsafe.<span style="color:#ff0">Pointer</span>(&amp;c.queue[newTail])), unsafe.<span style="color:#ff0">Pointer</span>(&amp;value))
+	<span style="color:#f00">return</span> <span style="color:#f00">true</span>
+}
+
+<span style="color:#f00">func</span> (c *RingBuffer) <span style="color:#ff0">DeQueue</span>() (value <span style="color:#f00">interface</span>{}, success <span style="color:#ee82ee">bool</span>) {
+	oldHead := atomic.<span style="color:#ff0">LoadUint64</span>(&amp;c.head)
+	oldTail := atomic.<span style="color:#ff0">LoadUint64</span>(&amp;c.tail)
+	<span style="color:#f00">if</span> <span style="color:#ff0">IsEmpty</span>(oldHead, oldTail) {
+		<span style="color:#f00">return</span> <span style="color:#f00">nil</span>, <span style="color:#f00">false</span>
+	}
+
+	newHead := (oldHead + <span style="color:#f60">1</span>) &amp; c.mask
+	headData := atomic.<span style="color:#ff0">LoadPointer</span>((*unsafe.Pointer)(unsafe.<span style="color:#ff0">Pointer</span>(&amp;c.queue[newHead])))
+	<span style="color:#f00">if</span> headData == <span style="color:#f00">nil</span> {
+		<span style="color:#f00">return</span> <span style="color:#f00">nil</span>, <span style="color:#f00">false</span>
+	}
+
+	<span style="color:#f00">if</span> !atomic.<span style="color:#ff0">CompareAndSwapUint64</span>(&amp;c.head, oldHead, newHead) {
+		<span style="color:#f00">return</span> <span style="color:#f00">nil</span>, <span style="color:#f00">false</span>
+	}
+
+	<span style="color:#0f0">// 原数据置为nil
+</span><span style="color:#0f0"></span>	atomic.<span style="color:#ff0">StorePointer</span>((*unsafe.Pointer)(unsafe.<span style="color:#ff0">Pointer</span>(&amp;c.queue[newHead])), <span style="color:#f00">nil</span>)
+	<span style="color:#f00">return</span> *(*<span style="color:#f00">interface</span>{})(headData), <span style="color:#f00">true</span>
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">IsEmpty</span>(head, tail <span style="color:#ee82ee">uint64</span>) <span style="color:#ee82ee">bool</span> {
+	<span style="color:#f00">return</span> head == tail
+}
+
+<span style="color:#f00">func</span> <span style="color:#ff0">IsFull</span>(head, tail, cap <span style="color:#ee82ee">uint64</span>) <span style="color:#ee82ee">bool</span> {
+	<span style="color:#f00">return</span> tail-head == cap-<span style="color:#f60">1</span> || head-tail == <span style="color:#f60">1</span>
+}
+
+</code></pre></div><p>CAS的 <code>ABA问题</code>，以下面的代码举例，<code>Producer0</code>在CAS判断之前已经拿到了Tail值，这时候被让出了调度权，<code>Producer非0</code> 开始不断的 <code>EnQueue</code>，直到环形队列Turn Arround，碰巧<code>Producer0</code>重新开始调度时Tail值又回到了之前的值，<code>Producer0</code>进行CAS操作成功，以为什么都没发生，然后set了值，这样<code>Producer非0</code>设置的值就被覆盖了。</p>
+<p>维基百科的例子如下：
+<blockquote class="quote">
+        <p>你拿着一个装满钱的手提箱在飞机场，此时过来了一个火辣性感的美女，然后她很暖昧地挑逗着你，并趁你不注意的时候，把用一个一模一样的手提箱和你那装满钱的箱子调了个包，然后就离开了，你看到你的手提箱还在那，于是就提着手提箱去赶飞机去了。</p></blockquote> </p>
+<p>这里解决办法是修改 Tail和Head的赋值逻辑，改成自增，而不是和mask进行与操作，因为字段类型是 <code>uint64</code>，所以前面的ABA问题，<code>Producer0</code> 让出调度权后，队列要 <code>EnQueue</code> 1&laquo;64 - 1 次，可能性极低。具体代码参考 
+<a href="https://github.com/biexiang/code-snippet/blob/main/ring_buffer/lock_free_2/lock_free_2.go" target="_blank">仓库</a>。</p>
+<h3 id="reference">Reference</h3>
+<ul>
+<li>
+<a href="https://www.fournoas.com/posts/lock-free-queue-is-not-lock-free/" target="_blank">无锁队列并非真的无锁</a></li>
+<li>
+<a href="https://coolshell.cn/articles/8239.html" target="_blank">无锁队列的实现</a></li>
+<li>
+<a href="https://lenshood.github.io/2021/04/19/lock-free-ring-buffer/" target="_blank">一个简单的 Lock Free Ring Buffer，有多简单？</a></li>
+</ul>
+
+        </div>
+
+        <div class="row middle-xs">
+          <div class="col-xs-12">
+            
+          </div>
+        </div>
+        
+          <div class="row">
+            <div class="col-xs-12">
+              
+            </div>
+          </div>
+
+          
+
+<div class="related-content">
+  <h3>Related Posts</h3>
+  <ul>
+    
+    <li><a href="/posts/lru-and-lfu/">关于LRU和LFU算法</a></li>
+    
+    <li><a href="/posts/golang-database-sql/">Golang database/sql 源码分享</a></li>
+    
+  </ul>
+</div>
+
+
+
+          
+          
+          <div style="height: 50px;"></div>
+          
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+<script>
+  window.addEventListener("load", () => {
+    (function() {
+      
+      var d = document,
+        s = d.createElement("script");
+      s.src = "https://ileopold.disqus.com/embed.js";
+      s.setAttribute("data-timestamp", +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  });
+</script>
+<noscript
+  >Please enable JavaScript to view the
+  <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  ></noscript
+>
+
+          </div>
+          
+        
 
         <div class="site-footer">
   <div class="site-footer-item" style="text-align: center;">
@@ -505,6 +386,12 @@
   </article>
 
   
+<script src="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static/js/lazyload.min.js"></script>
+<script>
+  var lazyImage = new LazyLoad({
+    container: document.getElementById('article')
+  });
+</script>
 
 <script>
   
@@ -513,6 +400,8 @@
     
   
 </script>
+
+  
 
 </body>
 
