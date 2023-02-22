@@ -7,16 +7,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="ileopold" />
-  <meta property="og:url" content="https://www.ileopold.cn/categories/troubleshooting/" />
-  <meta content="" name="keywords">
-  <link rel="canonical" href="https://www.ileopold.cn/categories/troubleshooting/" />
+  <meta property="og:url" content="https://www.ileopold.cn/posts/redis-rate-limiter/" />
+  <meta content="Golang、Go Runtime Throws Gorountine Stack Dumps" name="keywords">
+  <link rel="canonical" href="https://www.ileopold.cn/posts/redis-rate-limiter/" />
   <meta name="sogou_site_verification" content="2i7JohrE4G" /><link rel="dns-prefetch" href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static" /><link rel="apple-touch-icon" href="/logo.png" />
   <link rel="icon" href="/logo.png" />
-  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>Troubleshooting</title>
-  <meta property="og:title" content="Troubleshooting" />
+  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>Redis分布式限流器</title>
+  <meta property="og:title" content="Redis分布式限流器" />
   <meta property="og:type" content="article" />
-  <meta property="og:description" content="" />
-  <meta name="description" content="" />
+  <meta property="og:description" content="Go Runtime Throws Gorountine Stack Dumps" />
+  <meta name="description" content="Go Runtime Throws Gorountine Stack Dumps" />
   <meta property="og:locale" content="zh-cn" />
   
     <style>body{font-family:bree serif,sans-serif;-webkit-font-smoothing:antialiased;margin:0 20px}article{max-width:800px;margin-left:auto;margin-right:auto}a{color:#000;text-decoration:none}a:hover{font-weight:600;text-decoration:underline}.post-ads{margin:50px 0}.markdown-body{font-size:18px;max-width:100%}.markdown-body a{text-decoration:underline;text-decoration-color:#000}.markdown-body pre{padding:16px;overflow:auto;border-radius:10px}.markdown-body code{padding:.2em .4em;font-size:85%;background-color:#f6f8fa;border-radius:6px}.markdown-body pre>code{padding:0;font-size:100%;background-color:inherit;border:0}.Chinese .markdown-body{line-height:200%}.site-date-catalog{font-size:2rem}.header-title{font-size:2rem;font-weight:700;margin-top:32px;font-family:bungee shade,sans-serif}.header-title a{text-decoration:none}.header-subtitle{color:#666}.header-items{margin:10px 0}.header-item{margin:0 5px}.header-line{width:100%;border-width:2px;border-color:#482936;border-style:solid none none none}.lang-switch{font-weight:600}#posts-list{min-height:600px}.posts-line{font-size:1.2rem;margin:12px 0}.posts-categories{font-size:.8rem;margin:auto;text-align:center}.posts-category{padding:3px 0;border:#000 2px solid;border-radius:5px}.site-footer{margin-top:50px}.site-footer-item{margin-right:12px}.post-content img{max-width:100%;display:block;margin-right:auto;margin-top:12px}.post-header{margin-bottom:50px}.post-title{font-size:2rem;font-weight:600}.post-tags{display:inline;font-weight:600;padding:2px 5px;margin-right:6px;border:#000 2px solid;border-radius:5px}.post-date{font-weight:800;font-style:italic}.post-author{float:right;font-weight:600}.page-content{min-height:60%}.post-content{margin-bottom:50px}.post-content p{hyphens:auto;line-height:1.8;text-justify:ideographic;margin-bottom:1em}.related-content{border-width:3px;border-style:solid;border-color:#000;padding:0 10px;margin-bottom:50px;margin-top:100px}.related-content li{margin:5px 0}.taxonomy-term{font-size:3rem}.gallery-img{text-align:center}.gallery-img span{text-align:center}.gallery-img-desc{font-size:.8em;font-weight:800}#disqus_thread{position:relative}#disqus_thread:after{content:"";display:block;height:55px;width:100%;position:absolute;bottom:0;background:#fff}@media screen and (max-width:600px){.header-title,.header-subtitle,.header-items{text-align:center}.posts-line{font-size:16px}.markdown-body{font-size:16px}.post-title{font-size:2rem}.post-content p{letter-spacing:.05em}}@media screen and (max-width:48em){.posts-category{display:none}}</style>
@@ -57,10 +57,11 @@
 
 
 <body>
-  <article class="posts">
+  <article class="post 简体中文" id="article">
     <div class="row">
       <div class="col-xs-12">
-        
+        <div class="site-header">
+          
 <header>
   <div class="header-title">
     <a href="/"
@@ -97,42 +98,241 @@
 </div>
 <div class="header-line"></div>
 
-
-        <h1 class="taxonomy-term">Troubleshooting</h1>
-        <div id="posts-list">
-          <section>
-            <h1 class="site-date-catalog">2023</h1>
-
-            
-            <div class="row posts-line">
-              <div class="posts-date col-xs-2">
-                <time datetime="2023-02-22 22:48:51 CST">Feb 22</time>
-              </div>
-              <div class="posts-title col-xs-10">
-                <div class="row">
-                  <div class="col-xs-12">
-                    <a href="/posts/redis-rate-limiter/">Redis分布式限流器</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="row posts-line">
-              <div class="posts-date col-xs-2">
-                <time datetime="2023-02-20 21:18:07 CST">Feb 20</time>
-              </div>
-              <div class="posts-title col-xs-10">
-                <div class="row">
-                  <div class="col-xs-12">
-                    <a href="/posts/go-runtime-throws-goruntine-stack/">Go Runtime Throws Gorountine Stack Dumps</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-          </section>
-          
         </div>
+        <header class="post-header">
+          <h1 class="post-title">Redis分布式限流器</h1>
+          
+          <div class="row post-desc">
+            <div class="col-xs-6">
+              
+              <time class="post-date" datetime="2023-02-22 22:48:51 CST">
+                22 Feb 2023
+              </time>
+              
+            </div>
+            <div class="col-xs-6">
+              
+              <div class="post-author">
+                <a target="_blank" href="http://ileopold.cn/">@ileopold</a>
+              </div>
+              
+            </div>
+          </div>
+          
+        </header>
+
+        <div class="post-content markdown-body">
+          
+          
+    <iframe
+        frameborder="no"
+        border="0"
+        marginwidth="0"
+        marginheight="0"
+        width=60%
+        height=86
+        src="//music.163.com/outchain/player?type=2&id=1814784389&auto=1&height=66">
+    </iframe>
+
+<p>压测场景下，需要准确控制endpoint的发压QPS，因为压测机器很多，所以需要一个分布式限流器来对压力进行控制。</p>
+<h2 id="策略上">策略上</h2>
+<h3 id="基于令牌桶">基于令牌桶</h3>
+<p>参考go-zero中的
+<a href="https://github.com/zeromicro/go-zero/blob/master/core/limit/tokenlimit.go" target="_blank">tokenlimit</a>实现，原理即通过eval执行下面的lua脚本，一句话概括就是对于一个key，每次请求获取最近一次变更的时间戳以及剩余的token数，计算时间差按照平均速率能增加多少token，总和token数能不能满足本次的token数需求：</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">26
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go">local rate = <span style="color:#ff0">tonumber</span>(ARGV[<span style="color:#f60">1</span>])
+local capacity = <span style="color:#ff0">tonumber</span>(ARGV[<span style="color:#f60">2</span>])
+local now = <span style="color:#ff0">tonumber</span>(ARGV[<span style="color:#f60">3</span>])   -- current timestamp may need redis.<span style="color:#ff0">call</span>(<span style="color:#87ceeb">&#34;TIME&#34;</span>)
+local requested = <span style="color:#ff0">tonumber</span>(ARGV[<span style="color:#f60">4</span>])
+
+local fill_time = capacity/rate
+local ttl = math.<span style="color:#ff0">floor</span>(fill_time*<span style="color:#f60">2</span>)
+
+local last_tokens = <span style="color:#ff0">tonumber</span>(redis.<span style="color:#ff0">call</span>(<span style="color:#87ceeb">&#34;get&#34;</span>, KEYS[<span style="color:#f60">1</span>]))
+<span style="color:#f00">if</span> last_tokens == <span style="color:#f00">nil</span> then
+    last_tokens = capacity
+end
+local last_refreshed = <span style="color:#ff0">tonumber</span>(redis.<span style="color:#ff0">call</span>(<span style="color:#87ceeb">&#34;get&#34;</span>, KEYS[<span style="color:#f60">2</span>]))
+<span style="color:#f00">if</span> last_refreshed == <span style="color:#f00">nil</span> then
+    last_refreshed = <span style="color:#f60">0</span>
+end
+local delta = math.<span style="color:#ff0">max</span>(<span style="color:#f60">0</span>, now-last_refreshed)
+local filled_tokens = math.<span style="color:#ff0">min</span>(capacity, last_tokens+(delta*rate))
+local allowed = filled_tokens &gt;= requested
+local new_tokens = filled_tokens
+<span style="color:#f00">if</span> allowed then
+    new_tokens = filled_tokens - requested
+end
+redis.<span style="color:#ff0">call</span>(<span style="color:#87ceeb">&#34;setex&#34;</span>, KEYS[<span style="color:#f60">1</span>], ttl, new_tokens)
+redis.<span style="color:#ff0">call</span>(<span style="color:#87ceeb">&#34;setex&#34;</span>, KEYS[<span style="color:#f60">2</span>], ttl, now)
+<span style="color:#f00">return</span> allowed</code></pre></td></tr></table>
+</div>
+</div>
+<p>在这里<code>rate</code>是速率的含义，<code>burst</code>是容量的含义，并且如果redis连接异常，会使用<code>golang.org/x/time/rate</code>的本地限速器进行兜底，只不过如果限速QPS是集群总QPS，以同样的rate降级为本地限速器最终的限速会升级为rate*集群机器数，不太合理。</p>
+<h3 id="基于滑动窗口">基于滑动窗口</h3>
+<p>能实现一样的效果，就是没有tokenlimiter好理解。
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go">local a = KEYS[<span style="color:#f60">1</span>]
+local b = <span style="color:#ff0">tonumber</span>(ARGV[<span style="color:#f60">1</span>])                 -- refill duration
+local c = <span style="color:#ff0">tonumber</span>(ARGV[<span style="color:#f60">2</span>])                 -- current cost duration
+local d = redis.<span style="color:#ff0">call</span>(<span style="color:#87ceeb">&#34;TIME&#34;</span>)
+local e = d[<span style="color:#f60">1</span>] + d[<span style="color:#f60">2</span>] / <span style="color:#f60">1e6</span>                 -- current timestamp
+local f = math.<span style="color:#ff0">ceil</span>(b) + <span style="color:#f60">1</span>                  
+local g = e + b                             -- next window
+local h = <span style="color:#ff0">tonumber</span>(redis.<span style="color:#ff0">call</span>(<span style="color:#87ceeb">&#34;GET&#34;</span>, a))    -- get key window
+<span style="color:#f00">if</span> h == <span style="color:#f00">nil</span> then                            -- key window has expired
+    h = e                                   -- set key window = current timestamp
+end
+h = math.<span style="color:#ff0">max</span>(h, e) + c
+<span style="color:#f00">if</span> h &gt; g then
+    <span style="color:#f00">return</span> (h - g) * <span style="color:#f60">1e6</span>
+end
+redis.<span style="color:#ff0">call</span>(<span style="color:#87ceeb">&#34;SETEX&#34;</span>, a, f, <span style="color:#ee82ee">string</span>.<span style="color:#ff0">format</span>(<span style="color:#87ceeb">&#34;%.6f&#34;</span>, h))
+<span style="color:#f00">return</span> <span style="color:#f60">0</span></code></pre></td></tr></table>
+</div>
+</div></p>
+<h2 id="工程上">工程上</h2>
+<p>go-redis SDK优先使用EvalSha执行脚本，如果加载不到才使用Eval，带宽能节省就节省：
+<div class="highlight"><div style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-go" data-lang="go"><span style="color:#0f0">// Run optimistically uses EVALSHA to run the script. If script does not exist
+</span><span style="color:#0f0">// it is retried using EVAL.
+</span><span style="color:#0f0"></span><span style="color:#f00">func</span> (s *Script) <span style="color:#ff0">Run</span>(c scripter, keys []<span style="color:#ee82ee">string</span>, args ...<span style="color:#f00">interface</span>{}) *Cmd {
+	r := s.<span style="color:#ff0">EvalSha</span>(c, keys, args...)
+	<span style="color:#f00">if</span> err := r.<span style="color:#ff0">Err</span>(); err != <span style="color:#f00">nil</span> &amp;&amp; strings.<span style="color:#ff0">HasPrefix</span>(err.<span style="color:#ff0">Error</span>(), <span style="color:#87ceeb">&#34;NOSCRIPT &#34;</span>) {
+		<span style="color:#f00">return</span> s.<span style="color:#ff0">Eval</span>(c, keys, args...)
+	}
+	<span style="color:#f00">return</span> r
+}</code></pre></td></tr></table>
+</div>
+</div></p>
+<p>既然是高频执行的脚本，通过Evalsha可以避免每次都从文本解析生产function，假设目标实例上以及有了script的缓存，那如何保证相关的key都命中那一台实例呢？
+解决方法就是使用hash tag，我们需要把key中的一部分使用{}包起来，redis将通过{}中间的内容作为计算slot的key，这样保证相关的key都会转到同一个slot中。</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li>
+<a href="https://mytechshares.com/2022/10/07/dive-redis-lua/" target="_blank">浅析 redis lua 实现</a></li>
+</ul>
+
+        </div>
+
+        <div class="row middle-xs">
+          <div class="col-xs-12">
+            
+          </div>
+        </div>
+        
+          <div class="row">
+            <div class="col-xs-12">
+              
+            </div>
+          </div>
+
+          
+
+<div class="related-content">
+  <h3>Related Posts</h3>
+  <ul>
+    
+    <li><a href="/posts/go-runtime-throws-goruntine-stack/">Go Runtime Throws Gorountine Stack Dumps</a></li>
+    
+    <li><a href="/posts/golang-map/">Golang Map 源码分析</a></li>
+    
+    <li><a href="/posts/golang-tricky/">你可能不知道的Golang用法</a></li>
+    
+  </ul>
+</div>
+
+
+
+          
+          
+          <div style="height: 50px;"></div>
+          
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+<script>
+  window.addEventListener("load", () => {
+    (function() {
+      
+      var d = document,
+        s = d.createElement("script");
+      s.src = "https://ileopold.disqus.com/embed.js";
+      s.setAttribute("data-timestamp", +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  });
+</script>
+<noscript
+  >Please enable JavaScript to view the
+  <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  ></noscript
+>
+
+          </div>
+          
+        
 
         <div class="site-footer">
   <div class="site-footer-item" style="text-align: center;">
@@ -160,6 +360,8 @@
     
   
 </script>
+
+  
 
 </body>
 

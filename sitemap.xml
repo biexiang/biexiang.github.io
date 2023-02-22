@@ -3,21 +3,24 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://www.ileopold.cn/categories/</loc>
-    <lastmod>2023-02-20T21:18:07+08:00</lastmod>
-  </url><url>
-    <loc>https://www.ileopold.cn/posts/go-runtime-throws-goruntine-stack/</loc>
-    <lastmod>2023-02-20T21:18:07+08:00</lastmod>
+    <lastmod>2023-02-22T22:48:51+08:00</lastmod>
   </url><url>
     <loc>https://www.ileopold.cn/categories/golang/</loc>
-    <lastmod>2023-02-20T21:18:07+08:00</lastmod>
+    <lastmod>2023-02-22T22:48:51+08:00</lastmod>
   </url><url>
     <loc>https://www.ileopold.cn/posts/</loc>
-    <lastmod>2023-02-20T21:18:07+08:00</lastmod>
+    <lastmod>2023-02-22T22:48:51+08:00</lastmod>
+  </url><url>
+    <loc>https://www.ileopold.cn/posts/redis-rate-limiter/</loc>
+    <lastmod>2023-02-22T22:48:51+08:00</lastmod>
   </url><url>
     <loc>https://www.ileopold.cn/categories/troubleshooting/</loc>
-    <lastmod>2023-02-20T21:18:07+08:00</lastmod>
+    <lastmod>2023-02-22T22:48:51+08:00</lastmod>
   </url><url>
     <loc>https://www.ileopold.cn/</loc>
+    <lastmod>2023-02-22T22:48:51+08:00</lastmod>
+  </url><url>
+    <loc>https://www.ileopold.cn/posts/go-runtime-throws-goruntine-stack/</loc>
     <lastmod>2023-02-20T21:18:07+08:00</lastmod>
   </url><url>
     <loc>https://www.ileopold.cn/categories/work/</loc>
