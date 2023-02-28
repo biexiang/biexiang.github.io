@@ -7,16 +7,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="ileopold" />
-  <meta property="og:url" content="https://www.ileopold.cn/categories/troubleshooting/" />
-  <meta content="" name="keywords">
-  <link rel="canonical" href="https://www.ileopold.cn/categories/troubleshooting/" />
+  <meta property="og:url" content="https://www.ileopold.cn/posts/golang-pprof/" />
+  <meta content="Golang、pprof" name="keywords">
+  <link rel="canonical" href="https://www.ileopold.cn/posts/golang-pprof/" />
   <meta name="sogou_site_verification" content="2i7JohrE4G" /><link rel="dns-prefetch" href="https://cdn.jsdelivr.net/gh/biexiang/headbanger@main/static" /><link rel="apple-touch-icon" href="/logo.png" />
   <link rel="icon" href="/logo.png" />
-  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>Troubleshooting</title>
-  <meta property="og:title" content="Troubleshooting" />
+  <link rel="shortcut" href="/logo.png" /><link rel="alternate" type="application/atom+xml" href="https://www.ileopold.cn/index.xml" title="妈妈说只要名字长就有笨比跟着念-服务端技术分享"><title>Golang PProf工具使用</title>
+  <meta property="og:title" content="Golang PProf工具使用" />
   <meta property="og:type" content="article" />
-  <meta property="og:description" content="" />
-  <meta name="description" content="" />
+  <meta property="og:description" content="通过Golang PProf工具定位问题、优化系统" />
+  <meta name="description" content="通过Golang PProf工具定位问题、优化系统" />
   <meta property="og:locale" content="zh-cn" />
   
     <style>body{font-family:bree serif,sans-serif;-webkit-font-smoothing:antialiased;margin:0 20px}article{max-width:800px;margin-left:auto;margin-right:auto}a{color:#000;text-decoration:none}a:hover{font-weight:600;text-decoration:underline}.post-ads{margin:50px 0}.markdown-body{font-size:18px;max-width:100%}.markdown-body a{text-decoration:underline;text-decoration-color:#000}.markdown-body pre{padding:16px;overflow:auto;border-radius:10px}.markdown-body code{padding:.2em .4em;font-size:85%;background-color:#f6f8fa;border-radius:6px}.markdown-body pre>code{padding:0;font-size:100%;background-color:inherit;border:0}.Chinese .markdown-body{line-height:200%}.site-date-catalog{font-size:2rem}.header-title{font-size:2rem;font-weight:700;margin-top:32px;font-family:bungee shade,sans-serif}.header-title a{text-decoration:none}.header-subtitle{color:#666}.header-items{margin:10px 0}.header-item{margin:0 5px}.header-line{width:100%;border-width:2px;border-color:#482936;border-style:solid none none none}.lang-switch{font-weight:600}#posts-list{min-height:600px}.posts-line{font-size:1.2rem;margin:12px 0}.posts-categories{font-size:.8rem;margin:auto;text-align:center}.posts-category{padding:3px 0;border:#000 2px solid;border-radius:5px}.site-footer{margin-top:50px}.site-footer-item{margin-right:12px}.post-content img{max-width:100%;display:block;margin-right:auto;margin-top:12px}.post-header{margin-bottom:50px}.post-title{font-size:2rem;font-weight:600}.post-tags{display:inline;font-weight:600;padding:2px 5px;margin-right:6px;border:#000 2px solid;border-radius:5px}.post-date{font-weight:800;font-style:italic}.post-author{float:right;font-weight:600}.page-content{min-height:60%}.post-content{margin-bottom:50px}.post-content p{hyphens:auto;line-height:1.8;text-justify:ideographic;margin-bottom:1em}.related-content{border-width:3px;border-style:solid;border-color:#000;padding:0 10px;margin-bottom:50px;margin-top:100px}.related-content li{margin:5px 0}.taxonomy-term{font-size:3rem}.gallery-img{text-align:center}.gallery-img span{text-align:center}.gallery-img-desc{font-size:.8em;font-weight:800}#disqus_thread{position:relative}#disqus_thread:after{content:"";display:block;height:55px;width:100%;position:absolute;bottom:0;background:#fff}@media screen and (max-width:600px){.header-title,.header-subtitle,.header-items{text-align:center}.posts-line{font-size:16px}.markdown-body{font-size:16px}.post-title{font-size:2rem}.post-content p{letter-spacing:.05em}}@media screen and (max-width:48em){.posts-category{display:none}}</style>
@@ -57,10 +57,11 @@
 
 
 <body>
-  <article class="posts">
+  <article class="post 简体中文" id="article">
     <div class="row">
       <div class="col-xs-12">
-        
+        <div class="site-header">
+          
 <header>
   <div class="header-title">
     <a href="/"
@@ -97,55 +98,210 @@
 </div>
 <div class="header-line"></div>
 
-
-        <h1 class="taxonomy-term">Troubleshooting</h1>
-        <div id="posts-list">
-          <section>
-            <h1 class="site-date-catalog">2023</h1>
-
-            
-            <div class="row posts-line">
-              <div class="posts-date col-xs-2">
-                <time datetime="2023-02-27 17:02:32 CST">Feb 27</time>
-              </div>
-              <div class="posts-title col-xs-10">
-                <div class="row">
-                  <div class="col-xs-12">
-                    <a href="/posts/golang-pprof/">Golang PProf工具使用</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="row posts-line">
-              <div class="posts-date col-xs-2">
-                <time datetime="2023-02-22 22:48:51 CST">Feb 22</time>
-              </div>
-              <div class="posts-title col-xs-10">
-                <div class="row">
-                  <div class="col-xs-12">
-                    <a href="/posts/redis-rate-limiter/">Redis分布式限流器</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="row posts-line">
-              <div class="posts-date col-xs-2">
-                <time datetime="2023-02-20 21:18:07 CST">Feb 20</time>
-              </div>
-              <div class="posts-title col-xs-10">
-                <div class="row">
-                  <div class="col-xs-12">
-                    <a href="/posts/go-runtime-throws-goruntine-stack/">Go Runtime Throws Gorountine Stack Dumps</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-          </section>
-          
         </div>
+        <header class="post-header">
+          <h1 class="post-title">Golang PProf工具使用</h1>
+          
+          <div class="row post-desc">
+            <div class="col-xs-6">
+              
+              <time class="post-date" datetime="2023-02-27 17:02:32 CST">
+                27 Feb 2023
+              </time>
+              
+            </div>
+            <div class="col-xs-6">
+              
+              <div class="post-author">
+                <a target="_blank" href="http://ileopold.cn/">@ileopold</a>
+              </div>
+              
+            </div>
+          </div>
+          
+        </header>
+
+        <div class="post-content markdown-body">
+          
+          
+    <iframe
+        frameborder="no"
+        border="0"
+        marginwidth="0"
+        marginheight="0"
+        width=60%
+        height=86
+        src="//music.163.com/outchain/player?type=2&id=422428548&auto=1&height=66">
+    </iframe>
+
+<h2 id="背景">背景</h2>
+<p>工作中经常会遇到一些常见的Go问题，比如锁竞争、内存占用过高、CPU 占用过高、协程泄露、阻塞操作、GC频繁内存回收等，我们可以通过官方的PProf工具进行迅速排查定位问题，最近工作的2家公司线上服务也都集成了PProf采集和分析的WEB UI工具，所以这是一个非常实在的功能。</p>
+<h2 id="使用">使用</h2>
+<p>一般的基本引入包自动init，并且开启http服务就会默认注册debug路由，如下所示：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">import	_ &#34;net/http/pprof&#34; //nolint
+// ...
+_ = http.ListenAndServe(&#34;:8080&#34;, nil)
+</code></pre></div><p>常用的性能分析指标有：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>profile</td>
+<td>CPU占用情况</td>
+</tr>
+<tr>
+<td>heap</td>
+<td>堆上内存的使用情况</td>
+</tr>
+<tr>
+<td>goroutine</td>
+<td>当前所有协程的情况</td>
+</tr>
+<tr>
+<td>allocs</td>
+<td>内存分配情况</td>
+</tr>
+<tr>
+<td>blocks</td>
+<td>阻塞操作情况</td>
+</tr>
+<tr>
+<td>trace</td>
+<td>程序运行跟踪情况</td>
+</tr>
+</tbody>
+</table>
+<p>对于在线采集分析可以用下面的命令：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">// cpu
+go tool pprof  http://localhost:8080/debug/pprof/profile
+
+// 堆内存
+go tool pprof  http://localhost:8080/debug/pprof/heap
+
+// 协程
+go tool pprof  http://localhost:8080/debug/pprof/goroutine
+
+// etc ...
+</code></pre></div><p>命令行模式有top、list、traces、web这几个命令，traces和web都是在浏览器上分析，命令行可以通过top查看占用排行，用list找出具体哪一行代码造成的占用：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#000;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-fallback" data-lang="fallback">➜  play: go tool pprof http://127.0.0.1:8080/debug/pprof/goroutine
+Fetching profile over HTTP from http://127.0.0.1:8080/debug/pprof/goroutine
+Saved profile in /Users/ileopold/pprof/pprof.goroutine.001.pb.gz
+Type: goroutine
+Time: Feb 27, 2023 at 2:34pm (CST)
+Entering interactive mode (type &#34;help&#34; for commands, &#34;o&#34; for options)
+(pprof) top
+Showing nodes accounting for 62, 100% of 62 total
+Showing top 10 nodes out of 93
+      flat  flat%   sum%        cum   cum%
+        60 96.77% 96.77%         60 96.77%  runtime.gopark
+         1  1.61% 98.39%          1  1.61%  runtime.goroutineProfileWithLabels
+         1  1.61%   100%          1  1.61%  runtime.sigNoteSleep
+         0     0%   100%          5  8.06%  bufio.(*Reader).Read
+         0     0%   100%          1  1.61%  bufio.(*Reader).ReadLine
+         0     0%   100%          1  1.61%  bufio.(*Reader).ReadSlice
+         0     0%   100%          1  1.61%  bufio.(*Reader).fill
+         0     0%   100%          4  6.45%  bufio.(*Scanner).Scan
+         0     0%   100%          1  1.61%  database/sql.(*DB).connectionOpener
+(pprof) list runtime.gopark
+Total: 62
+ROUTINE ======================== runtime.gopark in /usr/local/go/src/runtime/proc.go
+        60         60 (flat, cum) 96.77% of Total
+         .          .    358:	gp.waitreason = reason
+         .          .    359:	mp.waittraceev = traceEv
+         .          .    360:	mp.waittraceskip = traceskip
+         .          .    361:	releasem(mp)
+         .          .    362:	// can&#39;t do anything that might move the G between Ms here.
+        60         60    363:	mcall(park_m)
+         .          .    364:}
+         .          .    365:
+         .          .    366:// Puts the current goroutine into a waiting state and unlocks the lock.
+         .          .    367:// The goroutine can be made runnable again by calling goready(gp).
+         .          .    368:func goparkunlock(lock *mutex, reason waitReason, traceEv byte, traceskip int) {
+ROUTINE ======================== runtime.goparkunlock in /usr/local/go/src/runtime/proc.go
+         0          2 (flat, cum)  3.23% of Total
+         .          .    364:}
+         .          .    365:
+         .          .    366:// Puts the current goroutine into a waiting state and unlocks the lock.
+         .          .    367:// The goroutine can be made runnable again by calling goready(gp).
+         .          .    368:func goparkunlock(lock *mutex, reason waitReason, traceEv byte, traceskip int) {
+         .          2    369:	gopark(parkunlock_c, unsafe.Pointer(lock), reason, traceEv, traceskip)
+         .          .    370:}
+         .          .    371:
+         .          .    372:func goready(gp *g, traceskip int) {
+         .          .    373:	systemstack(func() {
+         .          .    374:		ready(gp, traceskip, true)
+(pprof)
+</code></pre></div><p>通过这种手段，只需要在问题发生期间抓包，就能线下分析立即找出问题代码的位置，并且上线修复。</p>
+<h2 id="reference">Reference</h2>
+<p>
+<a href="http://liuqh.icu/2021/11/27/go/package/31-trace/" target="_blank">性能调试利器使用</a>
+
+<a href="https://eddycjy.gitbook.io/golang/di-9-ke-gong-ju/go-tool-trace" target="_blank">Go 大杀器之跟踪剖析 trace</a></p>
+
+        </div>
+
+        <div class="row middle-xs">
+          <div class="col-xs-12">
+            
+          </div>
+        </div>
+        
+          <div class="row">
+            <div class="col-xs-12">
+              
+            </div>
+          </div>
+
+          
+
+<div class="related-content">
+  <h3>Related Posts</h3>
+  <ul>
+    
+    <li><a href="/posts/redis-rate-limiter/">Redis分布式限流器</a></li>
+    
+    <li><a href="/posts/go-runtime-throws-goruntine-stack/">Go Runtime Throws Gorountine Stack Dumps</a></li>
+    
+    <li><a href="/posts/golang-map/">Golang Map 源码分析</a></li>
+    
+  </ul>
+</div>
+
+
+
+          
+          
+          <div style="height: 50px;"></div>
+          
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+<script>
+  window.addEventListener("load", () => {
+    (function() {
+      
+      var d = document,
+        s = d.createElement("script");
+      s.src = "https://ileopold.disqus.com/embed.js";
+      s.setAttribute("data-timestamp", +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  });
+</script>
+<noscript
+  >Please enable JavaScript to view the
+  <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  ></noscript
+>
+
+          </div>
+          
+        
 
         <div class="site-footer">
   <div class="site-footer-item" style="text-align: center;">
@@ -173,6 +329,8 @@
     
   
 </script>
+
+  
 
 </body>
 

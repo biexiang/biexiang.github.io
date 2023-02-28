@@ -6,7 +6,20 @@
     <description>Recent content in Golang on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Wed, 22 Feb 2023 22:48:51 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/golang/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 27 Feb 2023 17:02:32 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/golang/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Golang PProf工具使用</title>
+      <link>https://www.ileopold.cn/posts/golang-pprof/</link>
+      <pubDate>Mon, 27 Feb 2023 17:02:32 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/posts/golang-pprof/</guid>
+      <description>背景 工作中经常会遇到一些常见的Go问题，比如锁竞争、内存占用过高、CPU 占用过高、协程泄露、阻塞操作、GC频繁内存回收等，我们可以通过官方的PProf工具进行迅速排查定位问题，最近工作的2家公司线上服务也都集成了PProf采集和分析的WEB UI工具，所以这是一个非常实在的功能。
+使用 一般的基本引入包自动init，并且开启http服务就会默认注册debug路由，如下所示：
+import	_ &amp;#34;net/http/pprof&amp;#34; //nolint // ... _ = http.ListenAndServe(&amp;#34;:8080&amp;#34;, nil) 常用的性能分析指标有：
+   类型 描述     profile CPU占用情况   heap 堆上内存的使用情况   goroutine 当前所有协程的情况   allocs 内存分配情况   blocks 阻塞操作情况   trace 程序运行跟踪情况    对于在线采集分析可以用下面的命令：
+// cpu go tool pprof http://localhost:8080/debug/pprof/profile // 堆内存 go tool pprof http://localhost:8080/debug/pprof/heap // 协程 go tool pprof http://localhost:8080/debug/pprof/goroutine // etc .</description>
+    </item>
+    
     <item>
       <title>Redis分布式限流器</title>
       <link>https://www.ileopold.cn/posts/redis-rate-limiter/</link>
