@@ -6,22 +6,31 @@
     <description>Recent content in Categories on 妈妈说只要名字长就有笨比跟着念-服务端技术分享</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Tue, 28 Feb 2023 22:17:02 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 12 Mar 2023 23:03:00 +0800</lastBuildDate><atom:link href="https://www.ileopold.cn/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Golang</title>
+      <link>https://www.ileopold.cn/categories/golang/</link>
+      <pubDate>Sun, 12 Mar 2023 23:03:00 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/categories/golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>http.client</title>
+      <link>https://www.ileopold.cn/categories/http.client/</link>
+      <pubDate>Sun, 12 Mar 2023 23:03:00 +0800</pubDate>
+      
+      <guid>https://www.ileopold.cn/categories/http.client/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Design Patterns</title>
       <link>https://www.ileopold.cn/categories/design-patterns/</link>
       <pubDate>Tue, 28 Feb 2023 22:17:02 +0800</pubDate>
       
       <guid>https://www.ileopold.cn/categories/design-patterns/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Golang</title>
-      <link>https://www.ileopold.cn/categories/golang/</link>
-      <pubDate>Tue, 28 Feb 2023 22:17:02 +0800</pubDate>
-      
-      <guid>https://www.ileopold.cn/categories/golang/</guid>
       <description></description>
     </item>
     
