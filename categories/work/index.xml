@@ -13,14 +13,7 @@
       <pubDate>Fri, 01 Jul 2022 22:07:24 +0800</pubDate>
       
       <guid>https://www.ileopold.cn/posts/work-learning/</guid>
-      <description>Git  GitHub中origin和upstream的区别 Git commit 使用及规范 How to convert git: urls to http: urls Git通过配置config维护多个账号，区分个人账号和公司账号 git commit Gitmoji GitHook  Golang   Go的构建约束
-  Go Plugin
-  Go基础0x02-go build -tags使用
-  Gob序列化
-  ants协程池
-  golang在编译时用ldflags设置变量的值
-  正则替换
-  func replace(text string, replacement map[string]string) string { var leftPad, rightPad = `{{`, `}}` var rgx = regexp.</description>
+      <description>Git  GitHub中origin和upstream的区别 Git commit 使用及规范 How to convert git: urls to http: urls Git通过配置config维护多个账号，区分个人账号和公司账号 git commit Gitmoji GitHook  Golang  Go的构建约束 Go Plugin Go基础0x02-go build -tags使用 Gob序列化 ants协程池 golang在编译时用ldflags设置变量的值 dlv调试 Go Generic 反序列化json默认类型  bool, for JSON booleans float64, for JSON numbers string, for JSON strings []interface{}, for JSON arrays map[string]interface{}, for JSON objects nil for JSON null  正则替换  func replace(text string, replacement map[string]string) string { var leftPad, rightPad = `{{`, `}}` var rgx = regexp.</description>
     </item>
     
   </channel>

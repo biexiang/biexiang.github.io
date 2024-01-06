@@ -72,14 +72,7 @@ fatal error: concurrent map read and map write goroutine 391 [running]: runtime.
       <pubDate>Fri, 01 Jul 2022 22:07:24 +0800</pubDate>
       
       <guid>https://www.ileopold.cn/posts/work-learning/</guid>
-      <description>Git  GitHub中origin和upstream的区别 Git commit 使用及规范 How to convert git: urls to http: urls Git通过配置config维护多个账号，区分个人账号和公司账号 git commit Gitmoji GitHook  Golang   Go的构建约束
-  Go Plugin
-  Go基础0x02-go build -tags使用
-  Gob序列化
-  ants协程池
-  golang在编译时用ldflags设置变量的值
-  正则替换
-  func replace(text string, replacement map[string]string) string { var leftPad, rightPad = `{{`, `}}` var rgx = regexp.</description>
+      <description>Git  GitHub中origin和upstream的区别 Git commit 使用及规范 How to convert git: urls to http: urls Git通过配置config维护多个账号，区分个人账号和公司账号 git commit Gitmoji GitHook  Golang  Go的构建约束 Go Plugin Go基础0x02-go build -tags使用 Gob序列化 ants协程池 golang在编译时用ldflags设置变量的值 dlv调试 Go Generic 反序列化json默认类型  bool, for JSON booleans float64, for JSON numbers string, for JSON strings []interface{}, for JSON arrays map[string]interface{}, for JSON objects nil for JSON null  正则替换  func replace(text string, replacement map[string]string) string { var leftPad, rightPad = `{{`, `}}` var rgx = regexp.</description>
     </item>
     
     <item>
@@ -331,8 +324,7 @@ Go源码阅读 从 官方src 里挑选下面几个：
  --It&amp;rsquo;s Okay to Not Be Okay
  小站用于从自身需求出发追踪记录自己的时间都花在哪些地方，量化自己，积累自己，作为自己的人生清单。
  Changelog ✔ 增加网易云音乐 @2022-01-03 ✔ 增加评论 @2022-01-03 ✔ Github Action自动发布 @2022-01-03 ✔ 升级HTTPS @2022-01-04 Use Let&amp;#39;s encrypt ✔ 增加图床 ✘ 增加RSS ✘ 增加bilibili ✘ 增加Web编辑md工作流 ✘ 增加Web小游戏 ✘ 增加Leetcode刷题看板 ✘ 增加douban/collect ✘ 增加Chrome小恐龙游戏自动运行 关于我 package main import &amp;#34;log&amp;#34; func main() { log.Println(&amp;#34;Welcome to my playground...&amp;#34;) } 工作 服务端程序员，主要写Go、PHP，也曾有过其他技术栈的尝试。
-爱好 刷剧、游戏，2022年会增加看书和旅行。
-Find me 全平台都叫 ileopold。</description>
+爱好 刷剧、游戏、健身、出去玩。</description>
     </item>
     
     <item>

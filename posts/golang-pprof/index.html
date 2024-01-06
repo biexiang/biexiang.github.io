@@ -237,6 +237,7 @@ ROUTINE ======================== runtime.goparkunlock in /usr/local/go/src/runti
          .          .    374:		ready(gp, traceskip, true)
 (pprof)
 </code></pre></div><p>通过这种手段，只需要在问题发生期间抓包，就能线下分析立即找出问题代码的位置，并且上线修复。</p>
+<p>如果看不出来问题，还可以抓取正常时期的包以及异常时期的包，通过 -base 指定基准来确定问题代码。</p>
 <h2 id="reference">Reference</h2>
 <p>
 <a href="http://liuqh.icu/2021/11/27/go/package/31-trace/" target="_blank">性能调试利器使用</a>
