@@ -3,21 +3,27 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://www.ileopold.cn/categories/</loc>
-    <lastmod>2023-03-12T23:03:00+08:00</lastmod>
+    <lastmod>2024-01-23T16:00:23+08:00</lastmod>
+  </url><url>
+    <loc>https://www.ileopold.cn/categories/golang/</loc>
+    <lastmod>2024-01-23T16:00:23+08:00</lastmod>
+  </url><url>
+    <loc>https://www.ileopold.cn/posts/goroutine-leak/</loc>
+    <lastmod>2024-01-23T16:00:23+08:00</lastmod>
+  </url><url>
+    <loc>https://www.ileopold.cn/categories/investigation/</loc>
+    <lastmod>2024-01-23T16:00:23+08:00</lastmod>
+  </url><url>
+    <loc>https://www.ileopold.cn/posts/</loc>
+    <lastmod>2024-01-23T16:00:23+08:00</lastmod>
+  </url><url>
+    <loc>https://www.ileopold.cn/</loc>
+    <lastmod>2024-01-23T16:00:23+08:00</lastmod>
   </url><url>
     <loc>https://www.ileopold.cn/posts/go-http-client/</loc>
     <lastmod>2023-03-12T23:03:00+08:00</lastmod>
   </url><url>
-    <loc>https://www.ileopold.cn/categories/golang/</loc>
-    <lastmod>2023-03-12T23:03:00+08:00</lastmod>
-  </url><url>
     <loc>https://www.ileopold.cn/categories/http.client/</loc>
-    <lastmod>2023-03-12T23:03:00+08:00</lastmod>
-  </url><url>
-    <loc>https://www.ileopold.cn/posts/</loc>
-    <lastmod>2023-03-12T23:03:00+08:00</lastmod>
-  </url><url>
-    <loc>https://www.ileopold.cn/</loc>
     <lastmod>2023-03-12T23:03:00+08:00</lastmod>
   </url><url>
     <loc>https://www.ileopold.cn/categories/design-patterns/</loc>
